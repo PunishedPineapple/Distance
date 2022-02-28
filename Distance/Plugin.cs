@@ -145,7 +145,7 @@ namespace ReadyCheckHelper
 			}
 			else if( subCommand.ToLower() == "data" )
 			{
-				mUI.MainWindowVisible = !mUI.MainWindowVisible;
+				mUI.DataWindowVisible = !mUI.DataWindowVisible;
 			}
 			else if( subCommand.ToLower() == "help" || subCommand.ToLower() == "?" )
 			{
