@@ -16,4 +16,6 @@ If you would like to contribute boss aggro range data, please create an issue wi
 ## License
 Code and executable are covered under the [MIT License](../LICENSE).  Final Fantasy XIV (and any associated data used by this plugin) is owned by and copyright Square Enix.
 
+Icon modified from https://thenounproject.com/icon/measure-662431/ by Creaticca.
+
 Text node creation code stolen from [SimpleTweaks](https://github.com/Caraxi/SimpleTweaksPlugin).
