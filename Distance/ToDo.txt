@@ -1,0 +1,1 @@
+﻿Add an option to try to use the target bar text color.
