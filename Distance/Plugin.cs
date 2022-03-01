@@ -18,7 +18,7 @@ using Lumina.Excel.GeneratedSheets;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using CheapLoc;
 
-namespace ReadyCheckHelper
+namespace Distance
 {
 	public class Plugin : IDalamudPlugin
 	{
@@ -51,12 +51,16 @@ namespace ReadyCheckHelper
 			mPluginInterface = pluginInterface;
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 			mConfiguration.Initialize( mPluginInterface );
+			string aggroDistancesFilePath = "";
+			aggroDistancesFilePath = Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" );
+			if( !File.Exists( aggroDistancesFilePath ) ) aggroDistancesFilePath = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "AggroDistances.dat" );
+			BNpcAggroInfo.Init( mDataManager, aggroDistancesFilePath );
 
 			//	Localization and Command Initialization
 			OnLanguageChanged( mPluginInterface.UiLanguage );
 
 			//	UI Initialization
-			mUI = new PluginUI( this, mPluginInterface, mConfiguration, mDataManager, mGameGui, mSigScanner );
+			mUI = new PluginUI( this, mPluginInterface, mConfiguration, mDataManager, mGameGui, mSigScanner, mClientState, mCondition );
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
@@ -89,7 +93,7 @@ namespace ReadyCheckHelper
 
 			if( allowedLang.Contains( langCode ) )
 			{
-				Loc.Setup( File.ReadAllText( Path.Join( mPluginInterface.AssemblyLocation.FullName, $"loc_{langCode}.json" ) ) );
+				Loc.Setup( File.ReadAllText( Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, $"loc_{langCode}.json" ) ) );
 			}
 			else
 			{
@@ -141,9 +145,9 @@ namespace ReadyCheckHelper
 			{
 				mUI.SettingsWindowVisible = !mUI.SettingsWindowVisible;
 			}
-			else if( subCommand.ToLower() == "data" )
+			else if( subCommand.ToLower() == "debug" )
 			{
-				mUI.DataWindowVisible = !mUI.DataWindowVisible;
+				mUI.DebugWindowVisible = !mUI.DebugWindowVisible;
 			}
 			else if( subCommand.ToLower() == "help" || subCommand.ToLower() == "?" )
 			{
@@ -192,11 +196,14 @@ namespace ReadyCheckHelper
 				CurrentDistanceInfo.TargetRadius_Yalms = actualTarget.HitboxRadius;
 				CurrentDistanceInfo.AggroRange_Yalms = 14f;
 
-				//***** TODO *****
-				/*if( mTargetManager.Target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc)
+				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 				{
-					var id = ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)mTargetManager.Target ).NameId;
-				}*/
+					CurrentDistanceInfo.BNpcNameID = ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)actualTarget ).NameId;
+				}
+				else
+				{
+					CurrentDistanceInfo.BNpcNameID = 0;
+				}
 
 				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 				{

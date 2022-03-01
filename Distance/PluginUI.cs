@@ -14,25 +14,28 @@ using Dalamud.Data;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
 using Dalamud.Game;
+using Dalamud.Game.ClientState;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using CheapLoc;
 
 
-namespace ReadyCheckHelper
+namespace Distance
 {
 	// It is good to have this be disposable in general, in case you ever need it
 	// to do any cleanup
 	public class PluginUI : IDisposable
 	{
 		//	Construction
-		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, DataManager dataManager, GameGui gameGui, SigScanner sigScanner )
+		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, DataManager dataManager, GameGui gameGui, SigScanner sigScanner, ClientState clientState, Dalamud.Game.ClientState.Conditions.Condition condition )
 		{
 			mPlugin = plugin;
 			mPluginInterface = pluginInterface;
 			mConfiguration = configuration;
 			mDataManager = dataManager;
 			mGameGui = gameGui;
+			mClientState = clientState;
+			mCondition = condition;
 		}
 
 		//	Destruction
@@ -53,7 +56,8 @@ namespace ReadyCheckHelper
 		{
 			//	Draw the sub-windows.
 			DrawSettingsWindow();
-			DrawDataWindow();
+			DrawDebugWindow();
+			DrawDebugAggroEntitiesWindow();
 
 			//	Draw other UI stuff.
 			DrawOnGameUI();
@@ -123,9 +127,9 @@ namespace ReadyCheckHelper
 			ImGui.End();
 		}
 
-		protected void DrawDataWindow()
+		protected void DrawDebugWindow()
 		{
-			if( !DataWindowVisible )
+			if( !DebugWindowVisible )
 			{
 				return;
 			}
@@ -133,13 +137,29 @@ namespace ReadyCheckHelper
 			//	Draw the window.
 			ImGui.SetNextWindowSize( new Vector2( 1340, 568 ) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver );
 			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
-			if( ImGui.Begin( Loc.Localize( "Window Title: Distance Data", "Distance Data" ) + "###Distance Data", ref mDataWindowVisible ) )
+			if( ImGui.Begin( Loc.Localize( "Window Title: Distance Data", "Distance Data" ) + "###Distance Data", ref mDebugWindowVisible ) )
 			{
+				ImGui.Checkbox( "Show known aggro range data", ref mDebugAggroEntitiesWindowVisible );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
 				ImGui.Text( $"Draw Distance: {mPlugin.CurrentDistanceDrawInfo.ShowDistance}" );
 				ImGui.Text( $"Draw Aggro Distance: {mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance}" );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
 				if( mPlugin.CurrentDistanceInfo != null )
 				{
 					ImGui.Text( $"Target Kind: {mPlugin.CurrentDistanceInfo.TargetKind}" );
+					ImGui.Text( $"BNpcName ID: {mPlugin.CurrentDistanceInfo.BNpcNameID}" );
 					ImGui.Text( $"Player: ({mPlugin.CurrentDistanceInfo.Position.X}, {mPlugin.CurrentDistanceInfo.Position.Y}, {mPlugin.CurrentDistanceInfo.Position.Z})" );
 					ImGui.Text( $"Target: ({mPlugin.CurrentDistanceInfo.TargetPosition.X}, {mPlugin.CurrentDistanceInfo.TargetPosition.Y}, {mPlugin.CurrentDistanceInfo.TargetPosition.Z})" );
 					ImGui.Text( $"Distance (y): {mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms}" );
@@ -150,10 +170,71 @@ namespace ReadyCheckHelper
 				{
 					ImGui.Text( "Distance data is null!" );
 				}
+				if( mPlugin.CurrentDistanceInfo != null )
+				{
+					float? aggroDistance = BNpcAggroInfo.GetAggroRange( mPlugin.CurrentDistanceInfo.BNpcNameID, mClientState.TerritoryType );
+					if( aggroDistance!= null )
+					{
+						ImGui.Text( $"Aggro Distance: {aggroDistance.Value}" );
+					}
+					else
+					{
+						ImGui.Text( "No aggro distance data found." );
+					}
+				}
 			}
 
 			//	We're done.
 			ImGui.End();
+		}
+
+		protected void DrawDebugAggroEntitiesWindow()
+		{
+			if( !DebugAggroEntitiesWindowVisible )
+			{
+				return;
+			}
+
+			//	Draw the window.
+			ImGui.SetNextWindowSize( new Vector2( 1340, 568 ) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver );
+			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
+			if( ImGui.Begin( Loc.Localize( "Window Title: Debug Aggro Entities", "Debug: Known Aggro Distances" ) + "###Debug: Known Aggro Distances", ref mDebugAggroEntitiesWindowVisible ) )
+			{
+				var entries = BNpcAggroInfo.GetAllAggroEntities();
+				if( entries.Count > 0 )
+				{
+					if( ImGui.BeginTable( "###KnownAggroEntitiesTable", 4 ) )
+					{
+						ImGui.TableHeadersRow();
+						ImGui.TableSetColumnIndex( 0 );
+						ImGui.Text( "TerritoryType" );
+						ImGui.TableSetColumnIndex( 1 );
+						ImGui.Text( "BNpcName ID" );
+						ImGui.TableSetColumnIndex( 2 );
+						ImGui.Text( "Aggro Distance (y)" );
+						ImGui.TableSetColumnIndex( 3 );
+						ImGui.Text( "BNpcName Text" );
+
+						foreach( var entry in entries )
+						{
+							ImGui.TableNextRow();
+							ImGui.TableSetColumnIndex( 0 );
+							ImGui.Text( $"{entry.TerritoryType}" );
+							ImGui.TableSetColumnIndex( 1 );
+							ImGui.Text( $"{entry.NameID}" );
+							ImGui.TableSetColumnIndex( 2 );
+							ImGui.Text( $"{entry.AggroDistance_Yalms}" );
+							ImGui.TableSetColumnIndex( 3 );
+							ImGui.Text( $"{entry.EnglishName}" );
+						}
+						ImGui.EndTable();
+					}
+				}
+				else
+				{
+					ImGui.Text( "Aggro entities list is empty." );
+				}
+			}
 		}
 
 		protected void DrawOnGameUI()
@@ -230,7 +311,7 @@ namespace ReadyCheckHelper
 				//	If we have our node, set the colors, size, and text from settings.
 				if( mpDistanceTextNode != null )
 				{
-					bool visible = show;// && mCondition.Cutscene();
+					bool visible = show && mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
 					( (AtkResNode*)mpDistanceTextNode )->ToggleVisibility( visible );
 					if( visible )
 					{
@@ -340,6 +421,8 @@ namespace ReadyCheckHelper
 		protected Configuration mConfiguration;
 		protected DataManager mDataManager;
 		protected GameGui mGameGui;
+		protected Dalamud.Game.ClientState.Conditions.Condition mCondition;
+		protected ClientState mClientState;
 
 		//	Need a real backing field on the following properties for use with ImGui.
 		protected bool mSettingsWindowVisible = false;
@@ -349,11 +432,18 @@ namespace ReadyCheckHelper
 			set { mSettingsWindowVisible = value; }
 		}
 
-		protected bool mDataWindowVisible = false;
-		public bool DataWindowVisible
+		protected bool mDebugWindowVisible = false;
+		public bool DebugWindowVisible
 		{
-			get { return mDataWindowVisible; }
-			set { mDataWindowVisible = value; }
+			get { return mDebugWindowVisible; }
+			set { mDebugWindowVisible = value; }
+		}
+
+		protected bool mDebugAggroEntitiesWindowVisible = false;
+		public bool DebugAggroEntitiesWindowVisible
+		{
+			get { return mDebugAggroEntitiesWindowVisible; }
+			set { mDebugAggroEntitiesWindowVisible = value; }
 		}
 
 		protected static readonly uint mDistanceNodeID = 0x6C78B300;	//YOLO hoping for no collisions.

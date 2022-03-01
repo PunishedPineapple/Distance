@@ -10,6 +10,7 @@ namespace Distance
 	public class DistanceInfo
 	{
 		public Dalamud.Game.ClientState.Objects.Enums.ObjectKind TargetKind { get; set; }
+		public UInt32 BNpcNameID { get; set; }
 		public Vector3 Position { get; set; }
 		public Vector3 TargetPosition { get; set; }
 		public float TargetRadius_Yalms { get; set; }
