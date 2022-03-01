@@ -12,6 +12,5 @@ namespace Distance
 	{
 		public bool ShowDistance { get; set; }
 		public bool ShowAggroDistance { get; set; }
-		public string TargetName { get; set; }
 	}
 }

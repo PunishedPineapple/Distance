@@ -38,6 +38,7 @@ namespace ReadyCheckHelper
 		//	Destruction
 		unsafe public void Dispose()
 		{
+			UpdateDistanceTextNode( "", false );
 			//	We should probably be properly removing the nodes, but by checking for a node with the right id before constructing one, we should only ever leak a single node, which is probably fine.
 			mpDistanceTextNode = null;
 			mpAggroDistanceTextNode = null;
@@ -73,8 +74,23 @@ namespace ReadyCheckHelper
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + "###Show distance to players.", ref mConfiguration.mShowDistanceOnPlayers );
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show distance units.", ref mConfiguration.mShowUnitsOnDistances );
 				ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + "###Distance is to ring.", ref mConfiguration.mDistanceIsToRing );
+				ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Mode Indicator", "Show the distance mode indicator." ) + "###Show distance type marker.", ref mConfiguration.mShowDistanceModeMarker ); 
 				ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
 				ImGui.SliderInt( "##DistancePrecisionSlider", ref mConfiguration.mDecimalPrecision, 0, 3 );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
+				ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (x,y):" ) );
+				ImGui.DragFloat2( "###DistanceTextPositionSlider", ref mConfiguration.mDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
+				ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size" ) );
+				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + "###Distance font heavy.", ref mConfiguration.mDistanceFontHeavy );
+				ImGui.SliderInt( "##DistanceTextFontSizeSlider", ref mConfiguration.mDistanceFontSize, 10, 18 );
+				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + "###DistanceTextColorPicker", ref mConfiguration.mDistanceTextColor, ImGuiColorEditFlags.NoInputs );
+				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + "###DistanceTextEdgeColorPicker", ref mConfiguration.mDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -120,54 +136,57 @@ namespace ReadyCheckHelper
 
 		protected void DrawOnGameUI()
 		{
-			if( mPlugin.CurrentDistanceInfo != null )
+
+			/*string text = "";
+			string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
+			if( mPlugin.CurrentDistanceDrawInfo.TargetName != null )
 			{
-				/*string text = "";
-				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
-				if( mPlugin.CurrentDistanceDrawInfo.TargetName != null )
-				{
-					text += mPlugin.CurrentDistanceDrawInfo.TargetName.ToString();
-				}
+				text += mPlugin.CurrentDistanceDrawInfo.TargetName.ToString();
+			}
 
-				if( mPlugin.CurrentDistanceDrawInfo.ShowDistance )
-				{
-					float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
-					text += $" ({Math.Max( 0, distance ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
-				}
+			if( mPlugin.CurrentDistanceDrawInfo.ShowDistance )
+			{
+				float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
+				text += $" ({Math.Max( 0, distance ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
+			}
 
-				if( mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
-				{
-					text += $" (Aggro in {Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
-				}
+			if( mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
+			{
+				text += $" (Aggro in {Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
+			}
 
-				if( mPlugin.CurrentDistanceDrawInfo.ShowDistance || mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
+			if( mPlugin.CurrentDistanceDrawInfo.ShowDistance || mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
+			{
+				unsafe
 				{
-					unsafe
+					var pTargetBar = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
+					if( (IntPtr)pTargetBar != IntPtr.Zero )
 					{
-						var pTargetBar = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
-						if( (IntPtr)pTargetBar != IntPtr.Zero )
+						var pTargetNameNode = pTargetBar->GetTextNodeById( 16 );
+						if( (IntPtr)pTargetNameNode != IntPtr.Zero )
 						{
-							var pTargetNameNode = pTargetBar->GetTextNodeById( 16 );
-							if( (IntPtr)pTargetNameNode != IntPtr.Zero )
-							{
-								pTargetNameNode->SetText( text );
-							}
+							pTargetNameNode->SetText( text );
 						}
 					}
-				}*/
+				}
+			}*/
 
+			string str = "";
+			if( mPlugin.CurrentDistanceInfo != null )
+			{
 				float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
 				distance = Math.Max( 0, distance );
 				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
-				string distanceTypeSymbol = mConfiguration.DistanceIsToRing ? "R" : "C";	//***** TODO: Make a config option for whether to show distance type symbol. *****
-				string str = $"({distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString} {distanceTypeSymbol})";
-
-				UpdateDistanceTextNode( str );
+				string distanceTypeSymbol = "";
+				if( mConfiguration.ShowDistanceModeMarker ) distanceTypeSymbol = mConfiguration.DistanceIsToRing ? "◯ " : "· ";
+				str = $"{distanceTypeSymbol}{distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
 			}
+
+			UpdateDistanceTextNode( str );
 		}
 
 		//***** TODO: Think about making this function reusable for both text nodes. *****
-		unsafe protected void UpdateDistanceTextNode( string str )
+		unsafe protected void UpdateDistanceTextNode( string str, bool show = true )
 		{
 			var pAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_ScreenText", 1 );
 			if( pAddon != null )
@@ -189,22 +208,25 @@ namespace ReadyCheckHelper
 				//	If we have our node, set the colors, size, and text from settings.
 				if( mpDistanceTextNode != null )
 				{
-					bool visible = mPlugin.CurrentDistanceDrawInfo.ShowDistance;// && mCondition.Cutscene();
+					bool visible = show;// && mCondition.Cutscene();
 					( (AtkResNode*)mpDistanceTextNode )->ToggleVisibility( visible );
 					if( visible )
 					{
 						//***** TODO *****
-						mpDistanceTextNode->TextColor.A = 0xFF;
-						mpDistanceTextNode->TextColor.R = 0xFF;
-						mpDistanceTextNode->TextColor.G = 0xFF;
-						mpDistanceTextNode->TextColor.B = 0xFF;
+						mpDistanceTextNode->AtkResNode.SetPositionShort( (short)mConfiguration.DistanceTextPosition.X, (short)mConfiguration.DistanceTextPosition.Y );
 
-						mpDistanceTextNode->EdgeColor.A = 0xFF;
-						mpDistanceTextNode->EdgeColor.R = 0xF0;
-						mpDistanceTextNode->EdgeColor.G = 0x8E;
-						mpDistanceTextNode->EdgeColor.B = 0x37;
+						mpDistanceTextNode->TextColor.A = (byte)( mConfiguration.mDistanceTextColor.W * 255f );
+						mpDistanceTextNode->TextColor.R = (byte)( mConfiguration.mDistanceTextColor.X * 255f );
+						mpDistanceTextNode->TextColor.G = (byte)( mConfiguration.mDistanceTextColor.Y * 255f );
+						mpDistanceTextNode->TextColor.B = (byte)( mConfiguration.mDistanceTextColor.Z * 255f );
 
-						mpDistanceTextNode->FontSize = 12;
+						mpDistanceTextNode->EdgeColor.A = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f );
+						mpDistanceTextNode->EdgeColor.R = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f );
+						mpDistanceTextNode->EdgeColor.G = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f );
+						mpDistanceTextNode->EdgeColor.B = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f );
+
+						mpDistanceTextNode->FontSize = (byte)mConfiguration.DistanceFontSize;
+						mpDistanceTextNode->AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) );
 						mpDistanceTextNode->LineSpacing = 24;
 						mpDistanceTextNode->CharSpacing = 1;
 
@@ -224,14 +246,14 @@ namespace ReadyCheckHelper
 						mpDistanceTextNode->AtkResNode.Type = NodeType.Text;
 						mpDistanceTextNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
 						mpDistanceTextNode->AtkResNode.DrawFlags = 0;
-						mpDistanceTextNode->AtkResNode.SetPositionShort( 1, 1 );
+						//mpDistanceTextNode->AtkResNode.SetPositionShort( 1, 1 );
 						mpDistanceTextNode->AtkResNode.SetWidth( 200 );
 						mpDistanceTextNode->AtkResNode.SetHeight( 14 );
 
 						//***** TODO: Right-align text *****
 						mpDistanceTextNode->LineSpacing = 24;
-						mpDistanceTextNode->AlignmentFontType = 0x14;
-						mpDistanceTextNode->FontSize = 12;
+						mpDistanceTextNode->AlignmentFontType = (byte)AlignmentType.BottomRight;
+						mpDistanceTextNode->FontSize = (byte)mConfiguration.DistanceFontSize;
 						mpDistanceTextNode->TextFlags = (byte)( TextFlags.Edge );
 						mpDistanceTextNode->TextFlags2 = 0;
 
@@ -261,7 +283,7 @@ namespace ReadyCheckHelper
 							mpDistanceTextNode->AtkResNode.ParentNode = lastNode;
 						}
 
-						mpDistanceTextNode->TextColor.A = 0xFF;
+						/*mpDistanceTextNode->TextColor.A = 0xFF;
 						mpDistanceTextNode->TextColor.R = 0xFF;
 						mpDistanceTextNode->TextColor.G = 0xFF;
 						mpDistanceTextNode->TextColor.B = 0xFF;
@@ -269,7 +291,7 @@ namespace ReadyCheckHelper
 						mpDistanceTextNode->EdgeColor.A = 0xFF;
 						mpDistanceTextNode->EdgeColor.R = 0xF0;
 						mpDistanceTextNode->EdgeColor.G = 0x8E;
-						mpDistanceTextNode->EdgeColor.B = 0x37;
+						mpDistanceTextNode->EdgeColor.B = 0x37;*/
 
 						pAddon->UldManager.UpdateDrawNodeList();
 					}

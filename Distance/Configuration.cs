@@ -2,6 +2,7 @@
 using Dalamud.Plugin;
 using Newtonsoft.Json;
 using System;
+using System.Numerics;
 
 namespace ReadyCheckHelper
 {
@@ -50,11 +51,53 @@ namespace ReadyCheckHelper
 			set { mShowUnitsOnDistances = value; }
 		}
 
+		public bool mShowDistanceModeMarker = true;
+		public bool ShowDistanceModeMarker
+		{
+			get { return mShowDistanceModeMarker; }
+			set { mShowDistanceModeMarker = value; }
+		}
+
 		public int mDecimalPrecision = 2;
 		public int DecimalPrecision
 		{
 			get { return mDecimalPrecision; }
 			set { mDecimalPrecision = value; }
+		}
+
+		public int mDistanceFontSize = 14;
+		public int DistanceFontSize
+		{
+			get { return mDistanceFontSize; }
+			set { mDistanceFontSize = value; }
+		}
+
+		public bool mDistanceFontHeavy = false;
+		public bool DistanceFontHeavy
+		{
+			get { return mDistanceFontHeavy; }
+			set { mDistanceFontHeavy = value; }
+		}
+
+		public Vector2 mDistanceTextPosition = Vector2.One;
+		public Vector2 DistanceTextPosition
+		{
+			get { return mDistanceTextPosition; }
+			set { mDistanceTextPosition = value; }
+		}
+
+		public Vector4 mDistanceTextColor = new Vector4( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
+		public Vector4 DistanceTextColor
+		{
+			get { return mDistanceTextColor; }
+			set { mDistanceTextColor = value; }
+		}
+
+		public Vector4 mDistanceTextEdgeColor = new Vector4( (float)0x63 / 255f, (float)0x4F / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 DistanceTextEdgeColor
+		{
+			get { return mDistanceTextEdgeColor; }
+			set { mDistanceTextEdgeColor = value; }
 		}
 
 		//  Plugin framework and related convenience functions below.

@@ -51,7 +51,6 @@ namespace ReadyCheckHelper
 			mPluginInterface = pluginInterface;
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 			mConfiguration.Initialize( mPluginInterface );
-			//MemoryHandler.Init( mSigScanner );
 
 			//	Localization and Command Initialization
 			OnLanguageChanged( mPluginInterface.UiLanguage );
@@ -74,7 +73,6 @@ namespace ReadyCheckHelper
 		public void Dispose()
 		{
 			mFramework.Update -= OnGameFrameworkUpdate;
-			//MemoryHandler.Uninit();
 			mUI.Dispose();
 			mPluginInterface.UiBuilder.Draw -= DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
@@ -199,9 +197,6 @@ namespace ReadyCheckHelper
 				{
 					var id = ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)mTargetManager.Target ).NameId;
 				}*/
-
-				//***** TODO: This is a hack way of doing it and doesn't always work perfectly; need to actually find what writes to the target bar and hook it. *****
-				CurrentDistanceDrawInfo.TargetName = actualTarget.Name.ToString();
 
 				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 				{
