@@ -1,1 +1,25 @@
-﻿Add an option to try to use the target bar text color.
+﻿Bugs:
+	-¯\_(ツ)_/¯
+
+Priority:
+	-Add an option to try to use the target bar text color.
+		-Is it better to try to find the node by index, or by ID?
+	-Improve aggro data loading.
+	-Implement downloading of aggro data file from Github.
+	-Add config options for aggro distance indicator.
+		-These should include varying color as you get closer (including configurable thresholds).
+
+Cleanup:
+	-Config option strings need to be gone over and made consistent.
+	-Text commands and all strings need to be cleaned up.
+
+Misc:
+	-Text command to cycle/change distance mode.
+	-Translations.
+
+Maybe:
+	-Editor for aggro data?
+	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
+	-Add an ImGui window over the text node and track its position to allow for dragging?
+	-Add an additional distance widget that is offset by a certain amount (and offset configurable for either from ring or center).
+		-Allowing the user to set custom colors for different distance values might be an equivalent or parallel option.
