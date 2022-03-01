@@ -68,6 +68,7 @@ namespace Distance
 			//	Event Subscription
 			mPluginInterface.LanguageChanged += OnLanguageChanged;
 			mFramework.Update += OnGameFrameworkUpdate;
+			mClientState.TerritoryChanged += OnTerritoryChanged;
 
 			//***** TODO: Add the territory changed event, and filter our database to only the applicable entries when we zone. If we key by the bnpc name id, maybe verify that against the sheet, having the actual english name in the database to check when loading. *****
 
@@ -78,6 +79,7 @@ namespace Distance
 		{
 			mFramework.Update -= OnGameFrameworkUpdate;
 			mUI.Dispose();
+			mClientState.TerritoryChanged -= OnTerritoryChanged;
 			mPluginInterface.UiBuilder.Draw -= DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 			mPluginInterface.LanguageChanged -= OnLanguageChanged;
@@ -194,11 +196,13 @@ namespace Distance
 				CurrentDistanceInfo.Position = mClientState.LocalPlayer.Position;
 				CurrentDistanceInfo.TargetPosition = actualTarget.Position;
 				CurrentDistanceInfo.TargetRadius_Yalms = actualTarget.HitboxRadius;
-				CurrentDistanceInfo.AggroRange_Yalms = 14f;
 
+				float? aggroRange = null;
 				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 				{
 					CurrentDistanceInfo.BNpcNameID = ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)actualTarget ).NameId;
+					aggroRange = BNpcAggroInfo.GetAggroRange( CurrentDistanceInfo.BNpcNameID, mClientState.TerritoryType );
+					CurrentDistanceInfo.AggroRange_Yalms = aggroRange ?? 0;
 				}
 				else
 				{
@@ -207,7 +211,7 @@ namespace Distance
 
 				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = mConfiguration.ShowAggroDistance && !mCondition[ConditionFlag.InCombat] /*&& we have valid aggro range data for this target*/;  //***** TODO;
+					CurrentDistanceDrawInfo.ShowAggroDistance = mConfiguration.ShowAggroDistance && aggroRange != null && !mCondition[ConditionFlag.InCombat];
 					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnBattleNpc;
 				}
 				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player )
@@ -257,6 +261,12 @@ namespace Distance
 					CurrentDistanceDrawInfo.ShowDistance = false;
 				}
 			}
+		}
+
+		protected void OnTerritoryChanged( object sender, UInt16 ID )
+		{
+			//	Pre-filter when we enter a zone so that we have a lower chance of stutters once we're actually in.
+			BNpcAggroInfo.FilterAggroEntities( ID );
 		}
 
 		/*protected void PopulateSkeletonData()

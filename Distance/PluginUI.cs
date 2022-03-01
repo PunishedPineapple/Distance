@@ -41,10 +41,9 @@ namespace Distance
 		//	Destruction
 		unsafe public void Dispose()
 		{
-			UpdateDistanceTextNode( "", false );
+			UpdateDistanceTextNode( false );
+			UpdateAggroDistanceTextNode( false );
 			//	We should probably be properly removing the nodes, but by checking for a node with the right id before constructing one, we should only ever leak a single node, which is probably fine.
-			mpDistanceTextNode = null;
-			mpAggroDistanceTextNode = null;
 		}
 
 		public void Initialize()
@@ -239,41 +238,12 @@ namespace Distance
 
 		protected void DrawOnGameUI()
 		{
+			UpdateDistanceTextNode( mPlugin.CurrentDistanceDrawInfo.ShowDistance );
+			UpdateAggroDistanceTextNode( mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance );
+		}
 
-			/*string text = "";
-			string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
-			if( mPlugin.CurrentDistanceDrawInfo.TargetName != null )
-			{
-				text += mPlugin.CurrentDistanceDrawInfo.TargetName.ToString();
-			}
-
-			if( mPlugin.CurrentDistanceDrawInfo.ShowDistance )
-			{
-				float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
-				text += $" ({Math.Max( 0, distance ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
-			}
-
-			if( mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
-			{
-				text += $" (Aggro in {Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms ).ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString})";
-			}
-
-			if( mPlugin.CurrentDistanceDrawInfo.ShowDistance || mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance )
-			{
-				unsafe
-				{
-					var pTargetBar = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
-					if( (IntPtr)pTargetBar != IntPtr.Zero )
-					{
-						var pTargetNameNode = pTargetBar->GetTextNodeById( 16 );
-						if( (IntPtr)pTargetNameNode != IntPtr.Zero )
-						{
-							pTargetNameNode->SetText( text );
-						}
-					}
-				}
-			}*/
-
+		unsafe protected void UpdateDistanceTextNode( bool show )
+		{
 			string str = "";
 			if( mPlugin.CurrentDistanceInfo != null )
 			{
@@ -285,55 +255,100 @@ namespace Distance
 				str = $"{distanceTypeSymbol}{distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
 			}
 
-			UpdateDistanceTextNode( str, mPlugin.CurrentDistanceDrawInfo.ShowDistance );
+			TextNodeDrawData drawData = new TextNodeDrawData()
+			{
+				PositionX = (short)mConfiguration.DistanceTextPosition.X,
+				PositionY = (short)mConfiguration.DistanceTextPosition.Y,
+				TextColorA = (byte)( mConfiguration.mDistanceTextColor.W * 255f ),
+				TextColorR = (byte)( mConfiguration.mDistanceTextColor.X * 255f ),
+				TextColorG = (byte)( mConfiguration.mDistanceTextColor.Y * 255f ),
+				TextColorB = (byte)( mConfiguration.mDistanceTextColor.Z * 255f ),
+				EdgeColorA = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f ),
+				EdgeColorR = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f ),
+				EdgeColorG = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f ),
+				EdgeColorB = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f ),
+				FontSize = (byte)mConfiguration.DistanceFontSize,
+				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) ),
+				LineSpacing = 24,
+				CharSpacing = 1
+			};
+
+			UpdateTextNode( mDistanceNodeID, str, drawData, show );
 		}
 
-		//***** TODO: Think about making this function reusable for both text nodes. *****
-		unsafe protected void UpdateDistanceTextNode( string str, bool show = true )
+		unsafe protected void UpdateAggroDistanceTextNode( bool show = true )
 		{
+			string str = "";
+			if( mPlugin.CurrentDistanceInfo != null )
+			{
+				float distance = Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms );
+				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
+				str = $"Aggro in {distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
+			}
+
+			TextNodeDrawData drawData = new TextNodeDrawData()
+			{
+				PositionX = (short)mConfiguration.DistanceTextPosition.X,
+				PositionY = (short)(mConfiguration.DistanceTextPosition.Y + TextNodeDrawData.Default.LineSpacing ),
+				TextColorA = (byte)( mConfiguration.mDistanceTextColor.W * 255f ),
+				TextColorR = (byte)( mConfiguration.mDistanceTextColor.X * 255f ),
+				TextColorG = (byte)( mConfiguration.mDistanceTextColor.Y * 255f ),
+				TextColorB = (byte)( mConfiguration.mDistanceTextColor.Z * 255f ),
+				EdgeColorA = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f ),
+				EdgeColorR = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f ),
+				EdgeColorG = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f ),
+				EdgeColorB = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f ),
+				FontSize = (byte)mConfiguration.DistanceFontSize,
+				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) ),
+				LineSpacing = 24,
+				CharSpacing = 1
+			};
+
+			UpdateTextNode( mAggroDistanceNodeID, str, drawData, show );
+		}
+
+		unsafe protected void UpdateTextNode( uint nodeID, string str, TextNodeDrawData drawData, bool show = true )
+		{
+			AtkTextNode* pNode = null;
 			var pAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_ScreenText", 1 );
 			if( pAddon != null )
 			{
-				//	If we don't have a pointer to our text node, first see if we can find it by ID.  Doing this allows us to not have to deal with freeing the node resources and removing connections to sibling nodes (we'll still leak, but only once).
-				if( mpDistanceTextNode == null )
+				//	Find our node by ID.  Doing this allows us to not have to deal with freeing the node resources and removing connections to sibling nodes (we'll still leak, but only once).
+				for( var i = 0; i < pAddon->UldManager.NodeListCount; i++ )
 				{
-					for( var i = 0; i < pAddon->UldManager.NodeListCount; i++ )
+					if( pAddon->UldManager.NodeList[i] == null ) continue;
+					if( pAddon->UldManager.NodeList[i]->NodeID == nodeID )
 					{
-						if( pAddon->UldManager.NodeList[i] == null ) continue;
-						if( pAddon->UldManager.NodeList[i]->NodeID == mDistanceNodeID )
-						{
-							mpDistanceTextNode = (AtkTextNode*)pAddon->UldManager.NodeList[i];
-							break;
-						}
+						pNode = (AtkTextNode*)pAddon->UldManager.NodeList[i];
+						break;
 					}
 				}
 
 				//	If we have our node, set the colors, size, and text from settings.
-				if( mpDistanceTextNode != null )
+				if( pNode != null )
 				{
-					bool visible = show && mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
-					( (AtkResNode*)mpDistanceTextNode )->ToggleVisibility( visible );
+					bool visible =  show && !mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
+					( (AtkResNode*)pNode )->ToggleVisibility( visible );
 					if( visible )
 					{
-						//***** TODO *****
-						mpDistanceTextNode->AtkResNode.SetPositionShort( (short)mConfiguration.DistanceTextPosition.X, (short)mConfiguration.DistanceTextPosition.Y );
+						pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
 
-						mpDistanceTextNode->TextColor.A = (byte)( mConfiguration.mDistanceTextColor.W * 255f );
-						mpDistanceTextNode->TextColor.R = (byte)( mConfiguration.mDistanceTextColor.X * 255f );
-						mpDistanceTextNode->TextColor.G = (byte)( mConfiguration.mDistanceTextColor.Y * 255f );
-						mpDistanceTextNode->TextColor.B = (byte)( mConfiguration.mDistanceTextColor.Z * 255f );
+						pNode->TextColor.A = drawData.TextColorA;
+						pNode->TextColor.R = drawData.TextColorR;
+						pNode->TextColor.G = drawData.TextColorG;
+						pNode->TextColor.B = drawData.TextColorB;
 
-						mpDistanceTextNode->EdgeColor.A = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f );
-						mpDistanceTextNode->EdgeColor.R = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f );
-						mpDistanceTextNode->EdgeColor.G = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f );
-						mpDistanceTextNode->EdgeColor.B = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f );
+						pNode->EdgeColor.A = drawData.EdgeColorA;
+						pNode->EdgeColor.R = drawData.EdgeColorR;
+						pNode->EdgeColor.G = drawData.EdgeColorG;
+						pNode->EdgeColor.B = drawData.EdgeColorB;
 
-						mpDistanceTextNode->FontSize = (byte)mConfiguration.DistanceFontSize;
-						mpDistanceTextNode->AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) );
-						mpDistanceTextNode->LineSpacing = 24;
-						mpDistanceTextNode->CharSpacing = 1;
+						pNode->FontSize = drawData.FontSize;
+						pNode->AlignmentFontType = drawData.AlignmentFontType;
+						pNode->LineSpacing = drawData.LineSpacing;
+						pNode->CharSpacing = drawData.CharSpacing;
 
-						mpDistanceTextNode->SetText( str );
+						pNode->SetText( str );
 					}
 				}
 				//	Set up the node if it hasn't been.
@@ -342,30 +357,30 @@ namespace Distance
 					var pNewTextNode = (AtkTextNode*)IMemorySpace.GetUISpace()->Malloc((ulong)sizeof(AtkTextNode), 8);
 					if( pNewTextNode != null )
 					{
-						mpDistanceTextNode = pNewTextNode;
-						IMemorySpace.Memset( mpDistanceTextNode, 0, (ulong)sizeof( AtkTextNode ) );
-						mpDistanceTextNode->Ctor();
+						pNode = pNewTextNode;
+						IMemorySpace.Memset( pNode, 0, (ulong)sizeof( AtkTextNode ) );
+						pNode->Ctor();
 
-						mpDistanceTextNode->AtkResNode.Type = NodeType.Text;
-						mpDistanceTextNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
-						mpDistanceTextNode->AtkResNode.DrawFlags = 0;
-						//mpDistanceTextNode->AtkResNode.SetPositionShort( 1, 1 );
-						mpDistanceTextNode->AtkResNode.SetWidth( 200 );
-						mpDistanceTextNode->AtkResNode.SetHeight( 14 );
+						pNode->AtkResNode.Type = NodeType.Text;
+						pNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
+						pNode->AtkResNode.DrawFlags = 0;
+						pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
+						pNode->AtkResNode.SetWidth( 200 );
+						pNode->AtkResNode.SetHeight( 14 );
 
-						//***** TODO: Right-align text *****
-						mpDistanceTextNode->LineSpacing = 24;
-						mpDistanceTextNode->AlignmentFontType = (byte)AlignmentType.BottomRight;
-						mpDistanceTextNode->FontSize = (byte)mConfiguration.DistanceFontSize;
-						mpDistanceTextNode->TextFlags = (byte)( TextFlags.Edge );
-						mpDistanceTextNode->TextFlags2 = 0;
+						pNode->LineSpacing = drawData.LineSpacing;
+						pNode->CharSpacing = drawData.CharSpacing;
+						pNode->AlignmentFontType = drawData.AlignmentFontType;
+						pNode->FontSize = drawData.FontSize;
+						pNode->TextFlags = (byte)( TextFlags.Edge );
+						pNode->TextFlags2 = 0;
 
-						mpDistanceTextNode->AtkResNode.NodeID = mDistanceNodeID;
+						pNode->AtkResNode.NodeID = nodeID;
 
-						mpDistanceTextNode->AtkResNode.Color.A = 0xFF;
-						mpDistanceTextNode->AtkResNode.Color.R = 0xFF;
-						mpDistanceTextNode->AtkResNode.Color.G = 0xFF;
-						mpDistanceTextNode->AtkResNode.Color.B = 0xFF;
+						pNode->AtkResNode.Color.A = 0xFF;
+						pNode->AtkResNode.Color.R = 0xFF;
+						pNode->AtkResNode.Color.G = 0xFF;
+						pNode->AtkResNode.Color.B = 0xFF;
 
 						var lastNode = pAddon->RootNode;
 						if( lastNode->ChildNode != null )
@@ -376,25 +391,15 @@ namespace Distance
 								lastNode = lastNode->PrevSiblingNode;
 							}
 
-							mpDistanceTextNode->AtkResNode.NextSiblingNode = lastNode;
-							mpDistanceTextNode->AtkResNode.ParentNode = pAddon->RootNode;
-							lastNode->PrevSiblingNode = (AtkResNode*)mpDistanceTextNode;
+							pNode->AtkResNode.NextSiblingNode = lastNode;
+							pNode->AtkResNode.ParentNode = pAddon->RootNode;
+							lastNode->PrevSiblingNode = (AtkResNode*)pNode;
 						}
 						else
 						{
-							lastNode->ChildNode = (AtkResNode*)mpDistanceTextNode;
-							mpDistanceTextNode->AtkResNode.ParentNode = lastNode;
+							lastNode->ChildNode = (AtkResNode*)pNode;
+							pNode->AtkResNode.ParentNode = lastNode;
 						}
-
-						/*mpDistanceTextNode->TextColor.A = 0xFF;
-						mpDistanceTextNode->TextColor.R = 0xFF;
-						mpDistanceTextNode->TextColor.G = 0xFF;
-						mpDistanceTextNode->TextColor.B = 0xFF;
-
-						mpDistanceTextNode->EdgeColor.A = 0xFF;
-						mpDistanceTextNode->EdgeColor.R = 0xF0;
-						mpDistanceTextNode->EdgeColor.G = 0x8E;
-						mpDistanceTextNode->EdgeColor.B = 0x37;*/
 
 						pAddon->UldManager.UpdateDrawNodeList();
 					}
@@ -448,7 +453,5 @@ namespace Distance
 
 		protected static readonly uint mDistanceNodeID = 0x6C78B300;	//YOLO hoping for no collisions.
 		protected static readonly uint mAggroDistanceNodeID = mDistanceNodeID + 1;
-		unsafe protected AtkTextNode* mpDistanceTextNode = null;
-		unsafe protected AtkTextNode* mpAggroDistanceTextNode = null;
 	}
 }

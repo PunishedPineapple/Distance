@@ -12,6 +12,8 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace Distance
 {
+
+	//***** TODO: Can we thread any of this stuff, especially the loading? *****
 	public static class BNpcAggroInfo
 	{
 		public static void Init( DataManager dataManager, string filePath  )
@@ -62,7 +64,7 @@ namespace Distance
 			return new( mFilteredAggroEntities );
 		}
 
-		private static void FilterAggroEntities( UInt32 territoryType, bool forceRefresh = false )
+		public static void FilterAggroEntities( UInt32 territoryType, bool forceRefresh = false )
 		{
 			//	If we already did this territory, skip doing the work.
 			if( territoryType == mCurrentFilteredTerritoryType && !forceRefresh ) return;
