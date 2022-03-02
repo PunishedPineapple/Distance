@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Distance
 {
-	public class BNpcAggroInfoFile
+	internal class BNpcAggroInfoFile
 	{
 		public bool ReadFromFile( string filePath )
 		{
@@ -78,18 +78,23 @@ namespace Distance
 
 		public string GetFileVersionAsString()
 		{
-			if( FileVersion == 0 )
+			return GetFileVersionAsString( FileVersion );
+		}
+
+		public static string GetFileVersionAsString( UInt64 version )
+		{
+			if( version == 0 )
 			{
-				return "Version Unknown";
+				return "Unknown Version";
 			}
-			else if( FileVersion < 1000_00_00_0000_0000_000 ||
-					 FileVersion > 9999_99_99_9999_9999_999 )
+			else if( version < 1000_00_00_0000_0000_000 ||
+					 version > 9999_99_99_9999_9999_999 )
 			{
-				return "Version data is invalid";
+				return "Invalid Version Format";
 			}
 			else
 			{
-				string str = FileVersion.ToString();
+				string str = version.ToString();
 				str = str.Insert( 16, "-" );
 				str = str.Insert( 12, "." );
 				str = str.Insert( 8, "." );

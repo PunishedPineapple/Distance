@@ -13,7 +13,7 @@ using Lumina.Excel.GeneratedSheets;
 namespace Distance
 {
 	//***** TODO: Can we thread the file loading? *****
-	public static class BNpcAggroInfo
+	internal static class BNpcAggroInfo
 	{
 		public static void Init( DataManager dataManager, string filePath  )
 		{
@@ -123,25 +123,7 @@ namespace Distance
 
 		public static string GetCurrentFileVersionAsString()
 		{
-			if( GetCurrentFileVersion() == 0 )
-			{
-				return "Version Unknown";
-			}
-			else if( GetCurrentFileVersion() < 1000_00_00_0000_0000_000 ||
-					 GetCurrentFileVersion() > 9999_99_99_9999_9999_999 )
-			{
-				return "Version data is invalid";
-			}
-			else
-			{
-				string str = GetCurrentFileVersion().ToString();
-				str = str.Insert( 16, "-" );
-				str = str.Insert( 12, "." );
-				str = str.Insert( 8, "." );
-				str = str.Insert( 6, "." );
-				str = str.Insert( 4, "." );
-				return str;
-			}
+			return BNpcAggroInfoFile.GetFileVersionAsString( GetCurrentFileVersion() );
 		}
 
 		private static readonly List<BNpcAggroEntity> mKnownAggroEntities = new List<BNpcAggroEntity>();

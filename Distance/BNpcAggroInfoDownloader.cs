@@ -142,10 +142,11 @@ namespace Distance
 			LocalHttpClient.CancelPendingRequests();
 		}
 
-		//	Ya we're only supposed to have one httpclient instance per program, but I don't see how that's possible for a plugin.
-		private static readonly HttpClient LocalHttpClient= new();
+		private static readonly HttpClient LocalHttpClient = new();
+
 		public static DownloadStatus CurrentDownloadStatus { get; private set; } = DownloadStatus.None;
-		internal enum DownloadStatus
+
+		public enum DownloadStatus
 		{
 			None,
 			Downloading,
