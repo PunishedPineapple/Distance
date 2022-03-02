@@ -52,7 +52,8 @@ namespace Distance
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 			mConfiguration.Initialize( mPluginInterface );
 
-			Task.Run( () =>
+			//	Aggro distance data loading
+			Task.Run( async () =>
 			{
 				//	We can have the aggro distances data that got shipped with the plugin, or one that got downloaded.  Load in both and see which has the higher version to decide which to actually use.
 				string aggroDistancesFilePath_Assembly = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "AggroDistances.dat" );
@@ -60,12 +61,19 @@ namespace Distance
 				BNpcAggroInfoFile aggroFile_Assembly = new();
 				BNpcAggroInfoFile aggroFile_Config = new();
 				aggroFile_Assembly.ReadFromFile( aggroDistancesFilePath_Assembly );
-				var fileToUse = aggroFile_Assembly;
 				if( File.Exists( aggroDistancesFilePath_Config ) )
 				{
 					aggroFile_Config.ReadFromFile( aggroDistancesFilePath_Config );
-					fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
 				}
+
+				//	Auto-updating (if desired)
+				if( mConfiguration.AutoUpdateAggroData )
+				{
+					var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
+					aggroFile_Config = downloadedFile ?? aggroFile_Config;
+				}
+				
+				var fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
 				BNpcAggroInfo.Init( mDataManager, fileToUse );
 			} );
 

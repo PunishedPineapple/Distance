@@ -21,7 +21,7 @@ namespace Distance
 			FileLoaded = false;
 			mAggroInfoList.Clear();
 
-			string[] lines = data.Split( "\r\n", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
+			string[] lines = data.Split( new[]{"\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
 
 			for( int i = 0; i < lines.Length; ++i )
 			{
@@ -74,6 +74,29 @@ namespace Distance
 		{
 			get { return mFileVersion; }
 			protected set { mFileVersion = value; }
+		}
+
+		public string GetFileVersionAsString()
+		{
+			if( FileVersion == 0 )
+			{
+				return "Version Unknown";
+			}
+			else if( FileVersion < 1000_00_00_0000_0000_000 ||
+					 FileVersion > 9999_99_99_9999_9999_999 )
+			{
+				return "Version data is invalid";
+			}
+			else
+			{
+				string str = FileVersion.ToString();
+				str = str.Insert( 16, "-" );
+				str = str.Insert( 12, "." );
+				str = str.Insert( 8, "." );
+				str = str.Insert( 6, "." );
+				str = str.Insert( 4, "." );
+				return str;
+			}
 		}
 	}
 }

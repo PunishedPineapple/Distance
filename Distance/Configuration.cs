@@ -135,6 +135,13 @@ namespace Distance
 			set { mDistanceFontHeavy = value; }
 		}
 
+		public bool mAutoUpdateAggroData = false;
+		public bool AutoUpdateAggroData
+		{
+			get { return mAutoUpdateAggroData; }
+			set { mAutoUpdateAggroData = value; }
+		}
+
 		public Vector2 mDistanceTextPosition = Vector2.One;
 		public Vector2 DistanceTextPosition
 		{

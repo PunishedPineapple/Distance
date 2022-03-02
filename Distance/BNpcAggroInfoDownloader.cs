@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 
-using Dalamud.Data;
 using Dalamud.Logging;
 using CheapLoc;
 
@@ -13,55 +12,70 @@ namespace Distance
 {
 	internal static class BNpcAggroInfoDownloader
 	{
-		public static void DownloadUpdatedAggroData( DataManager dataManager, string filePath )
+		public static async Task<BNpcAggroInfoFile> DownloadUpdatedAggroDataAsync( string filePath )
 		{
 			//	Don't do anything if we're already running the task.
-			if( CurrentDownloadStatus == DownloadStatus.Downloading ) return;
+			if( CurrentDownloadStatus == DownloadStatus.Downloading ) return null;
 
-			string url = "https://punishedpineapple.github.io/DalamudPlugins/Distance/Support/AggroDistances.dat";
-			Task.Run( async () =>
+			BNpcAggroInfoFile downloadedDataFile = new();
+
+			//string url = "https://punishedpineapple.github.io/DalamudPlugins/Distance/Support/AggroDistances.dat";
+			string url = "https://raw.githubusercontent.com/PunishedPineapple/PunishedPineapple.github.io/master/DalamudPlugins/Distance/Support/AggroDistances.dat";
+			await Task.Run( async () =>
 			{
 				DownloadStatus status = DownloadStatus.Downloading;
 				CurrentDownloadStatus = status;
 				try
 				{
-					string responseBody = await LocalHttpClient.GetStringAsync( url );   //***** TODO: Should probably have a cancellation token set up for when disposing. *****
+					string responseBody = await LocalHttpClient.GetStringAsync( url );
 
-					BNpcAggroInfoFile downloadedDataFile = new();
 					if( downloadedDataFile.ReadFromString( responseBody ) )
 					{
+						PluginLog.LogInformation( $"Downloaded BNpc aggro range data version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
 						if( downloadedDataFile.FileVersion > BNpcAggroInfo.GetCurrentFileVersion() )
 						{
-							BNpcAggroInfo.Init( dataManager, downloadedDataFile );
 							status = DownloadStatus.FailedFileWrite;
 							downloadedDataFile.WriteFile( filePath );
+							PluginLog.LogInformation( $"Wrote BNpc aggro range data to disk: Version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
 							status = DownloadStatus.Completed;
 						}
 						else
 						{
 							status = DownloadStatus.OutOfDateFile;
+							downloadedDataFile = null;
 						}
 					}
 					else
 					{
 						status = DownloadStatus.FailedFileLoad;
+						downloadedDataFile = null;
 					}
 				}
 				catch( HttpRequestException e )
 				{
 					PluginLog.LogWarning( $"Exception occurred while trying to update aggro distance data: {e}" );
 					status = DownloadStatus.FailedDownload;
+					downloadedDataFile = null;
 				}
 				catch( TaskCanceledException )
 				{
 					PluginLog.LogInformation( "Aggro distance data update http request was canceled." );
 					status = DownloadStatus.Canceled;
+					downloadedDataFile = null;
+				}
+				catch( Exception e )
+				{
+					PluginLog.LogWarning( $"Unkown exception occurred while trying to update aggro distance data: {e}" );
+					status = DownloadStatus.FailedDownload;
+					downloadedDataFile = null;
 				}
 				finally
 				{
 					CurrentDownloadStatus = status;
 				}
 			} );
+
+			return downloadedDataFile;
 		}
 
 		public static string GetDownloadStatusMessage( DownloadStatus status )

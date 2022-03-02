@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Linq;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 
 using ImGuiNET;
 using ImGuiScene;
@@ -86,7 +87,7 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Distance Widget Filters", "Distance Widget Filters" ) + "###Distance Widget Filters." ) )
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Distance Widget Filters", "Distance Widget Filters" ) + "###Distance Widget Filters Header." ) )
 				{
 					ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + "###Show distance to players.", ref mConfiguration.mShowDistanceOnPlayers );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + "###Show distance to BattleNpc.", ref mConfiguration.mShowDistanceOnBattleNpc );
@@ -99,7 +100,7 @@ namespace Distance
 					ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Housing", "Show the distance to housing items." ) + "###Show distance to housing.", ref mConfiguration.mShowDistanceOnHousing );
 				}
 
-				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Distance Widget Appearance", "Distance Widget Appearance" ) + "###Distance Widget Appearance." ) )
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Distance Widget Appearance", "Distance Widget Appearance" ) + "###Distance Widget Appearance Header." ) )
 				{
 					ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (x,y):" ) );
 					ImGui.DragFloat2( "###DistanceTextPositionSlider", ref mConfiguration.mDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
@@ -116,13 +117,21 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Update Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
 				{
-					BNpcAggroInfoDownloader.DownloadUpdatedAggroData( mDataManager, Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
-				}
-				if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
-				{
-					ImGui.Text( BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage() );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Auto Update Aggro Data", "Try to automatically fetch the most recent aggro distance data on startup." ) + "###Auto Update Aggro Data.", ref mConfiguration.mAutoUpdateAggroData );
+					if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
+					{
+						Task.Run( async () =>
+						{
+							var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
+							if( downloadedFile != null ) BNpcAggroInfo.Init( mDataManager, downloadedFile );
+						} );
+					}
+					if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
+					{
+						ImGui.Text( $"Status of most recent update attempt: {BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
+					}
 				}
 
 				ImGui.Spacing();
@@ -140,7 +149,6 @@ namespace Distance
 				{
 					mConfiguration.Save();
 					SettingsWindowVisible = false;
-					BNpcAggroInfoDownloader.TryResetStatusMessage();
 				}
 			}
 
