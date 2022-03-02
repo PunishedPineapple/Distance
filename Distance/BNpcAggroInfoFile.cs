@@ -26,7 +26,10 @@ namespace Distance
 			for( int i = 0; i < lines.Length; ++i )
 			{
 				string[] tokens = lines[i].Split( '=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
-				if( tokens.Length == 2 && tokens[0].ToLowerInvariant() == "version" && UInt64.TryParse( tokens[1], out mFileVersion ) ) continue;
+				//	The first line will be the version of the data, which is formatted as "Version = 2022.01.25.0000.0000-000", where the
+				//	decimal-separated digits are the gamever, and the final three numbers are the revision of our data for that gamever.  The
+				//	following lines should all be data entries.
+				if( tokens.Length == 2 && tokens[0].ToLowerInvariant() == "version" && UInt64.TryParse( tokens[1].Replace( ".", "" ).Replace( "-", "" ), out mFileVersion ) ) continue;
 				else if( tokens.Length != 4 ) throw new InvalidDataException( $"Line {i} contained an unexpected number of entries." );
 
 				if( !UInt32.TryParse( tokens[0], out UInt32 territoryType ) ) throw new InvalidDataException( $"Unparsable TerritoryType at line {i}" );

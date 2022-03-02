@@ -46,6 +46,7 @@ namespace Distance
 				mKnownAggroEntities.Clear();
 				mKnownAggroEntities.InsertRange( 0, file.GetEntries() );
 				mLoadedInfoFile = file;
+				PluginLog.LogInformation( $"Loaded BNpc aggro range data version {GetCurrentFileVersionAsString()} ({GetCurrentFileVersion()})" );
 
 				//	Verify entries against the english name in the sheet as a sanity check.  Remove those that no longer match, or have invalid TerritoryType.
 				ExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType> territorySheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>();
@@ -118,6 +119,29 @@ namespace Distance
 		public static UInt64 GetCurrentFileVersion()
 		{
 			return mLoadedInfoFile?.FileVersion ?? 0;
+		}
+
+		public static string GetCurrentFileVersionAsString()
+		{
+			if( GetCurrentFileVersion() == 0 )
+			{
+				return "Version Unknown";
+			}
+			else if( GetCurrentFileVersion() < 1000_00_00_0000_0000_000 ||
+					 GetCurrentFileVersion() > 9999_99_99_9999_9999_999 )
+			{
+				return "Version data is invalid";
+			}
+			else
+			{
+				string str = GetCurrentFileVersion().ToString();
+				str = str.Insert( 16, "-" );
+				str = str.Insert( 12, "." );
+				str = str.Insert( 8, "." );
+				str = str.Insert( 6, "." );
+				str = str.Insert( 4, "." );
+				return str;
+			}
 		}
 
 		private static readonly List<BNpcAggroEntity> mKnownAggroEntities = new List<BNpcAggroEntity>();
