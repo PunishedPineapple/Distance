@@ -116,10 +116,31 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				if( ImGui.Button( Loc.Localize( "Button: Save and Close", "Save and Close" ) + "###Save and Close" ) )
+				if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
+				{
+					BNpcAggroInfoDownloader.DownloadUpdatedAggroData( mDataManager, Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
+				}
+				if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
+				{
+					ImGui.Text( BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage() );
+				}
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
+				if( ImGui.Button( Loc.Localize( "Button: Save", "Save" ) + "###Save Button" ) )
+				{
+					mConfiguration.Save();
+				}
+				ImGui.SameLine();
+				if( ImGui.Button( Loc.Localize( "Button: Save and Close", "Save and Close" ) + "###Save and Close Button" ) )
 				{
 					mConfiguration.Save();
 					SettingsWindowVisible = false;
+					BNpcAggroInfoDownloader.TryResetStatusMessage();
 				}
 			}
 
@@ -136,7 +157,7 @@ namespace Distance
 			//	Draw the window.
 			ImGui.SetNextWindowSize( new Vector2( 1340, 568 ) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver );
 			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
-			if( ImGui.Begin( Loc.Localize( "Window Title: Distance Data", "Distance Data" ) + "###Distance Data", ref mDebugWindowVisible ) )
+			if( ImGui.Begin( Loc.Localize( "Window Title: Debug Data", "Debug Data" ) + "###Debug Data", ref mDebugWindowVisible ) )
 			{
 				ImGui.Checkbox( "Show known aggro range data", ref mDebugAggroEntitiesWindowVisible );
 

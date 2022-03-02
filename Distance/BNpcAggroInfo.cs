@@ -12,71 +12,95 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace Distance
 {
-
-	//***** TODO: Can we thread any of this stuff, especially the loading? *****
+	//***** TODO: Can we thread the file loading? *****
 	public static class BNpcAggroInfo
 	{
 		public static void Init( DataManager dataManager, string filePath  )
 		{
-			//	Start fresh.
-			mKnownAggroEntities.Clear();
-
-			//Read in the file.
-			var file = new BNpcAggroInfoFile();
-			try
+			Task.Run( () =>
 			{
-				PluginLog.LogDebug( $"Trying to read aggro info file at {filePath}" );
-				if( file.ReadFile( filePath ) )
+				//	Read in the file.
+				var file = new BNpcAggroInfoFile();
+				try
 				{
-					mKnownAggroEntities.InsertRange( 0, file.GetEntries() );
-				}
-			}
-			catch( Exception e )
-			{
-				PluginLog.LogWarning( $"Unable to read BNpc aggro file: {e}" );
-			}
-
-			//	Verify entries against the english name in the sheet as a sanity check.  Remove those that no longer match, or have invalid TerritoryType.
-			ExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType> territorySheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>();
-			ExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName>( Dalamud.ClientLanguage.English );
-			for( int i = mKnownAggroEntities.Count - 1; i >= 0; i-- )
-			{
-				if( mKnownAggroEntities[i].NameID > 0 && mKnownAggroEntities[i].NameID < BNpcNameSheet.RowCount )
-				{
-					if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ).Singular, StringComparison.InvariantCultureIgnoreCase ) ||
-						mKnownAggroEntities[i].TerritoryType == 0 ||
-						mKnownAggroEntities[i].TerritoryType > territorySheet.RowCount )
+					PluginLog.LogDebug( $"Trying to read aggro info file at {filePath}" );
+					if( file.ReadFromFile( filePath ) )
 					{
-						mKnownAggroEntities.RemoveAt( i );
+						Init( dataManager, file );
+					}
+				}
+				catch( Exception e )
+				{
+					PluginLog.LogWarning( $"Unable to read BNpc aggro file: {e}" );
+
+				}
+			} );
+		}
+
+		public static void Init( DataManager dataManager, BNpcAggroInfoFile file )
+		{
+			if( !file.FileLoaded ) return;
+
+			lock( mLockObj )
+			{
+				mKnownAggroEntities.Clear();
+				mKnownAggroEntities.InsertRange( 0, file.GetEntries() );
+				mLoadedInfoFile = file;
+
+				//	Verify entries against the english name in the sheet as a sanity check.  Remove those that no longer match, or have invalid TerritoryType.
+				ExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType> territorySheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>();
+				ExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName>( Dalamud.ClientLanguage.English );
+				for( int i = mKnownAggroEntities.Count - 1; i >= 0; i-- )
+				{
+					if( mKnownAggroEntities[i].NameID > 0 && mKnownAggroEntities[i].NameID < BNpcNameSheet.RowCount )
+					{
+						if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ).Singular, StringComparison.InvariantCultureIgnoreCase ) ||
+							mKnownAggroEntities[i].TerritoryType == 0 ||
+							mKnownAggroEntities[i].TerritoryType > territorySheet.RowCount )
+						{
+							mKnownAggroEntities.RemoveAt( i );
+						}
 					}
 				}
 			}
+
+			FilterAggroEntities( mCurrentFilteredTerritoryType, true );
 		}
 
 		public static List<BNpcAggroEntity> GetAllAggroEntities()
 		{
-			return new( mKnownAggroEntities );
+			lock( mLockObj )
+			{
+				return new( mKnownAggroEntities );
+			}
 		}
 
 		public static List<BNpcAggroEntity> GetFilteredAggroEntities( UInt32 territoryType, bool forceRefresh = false )
 		{
 			FilterAggroEntities( territoryType, forceRefresh );
-			return new( mFilteredAggroEntities );
+
+			lock( mLockObj )
+			{
+				return new( mFilteredAggroEntities );
+			}
 		}
 
 		public static void FilterAggroEntities( UInt32 territoryType, bool forceRefresh = false )
 		{
-			//	If we already did this territory, skip doing the work.
-			if( territoryType == mCurrentFilteredTerritoryType && !forceRefresh ) return;
-
-			mCurrentFilteredTerritoryType = 0;
-			mFilteredAggroEntities.Clear();
-
-			var filteredEntries = mKnownAggroEntities.Where( x => x.TerritoryType == territoryType );
-			if( filteredEntries.Count() > 0 )
+			lock( mLockObj )
 			{
-				mFilteredAggroEntities.InsertRange( 0, filteredEntries );
-				mCurrentFilteredTerritoryType = territoryType;
+				//	If we already did this territory, skip doing the work.
+				if( territoryType == mCurrentFilteredTerritoryType && !forceRefresh ) return;
+
+				mCurrentFilteredTerritoryType = 0;
+				mFilteredAggroEntities.Clear();
+
+				var filteredEntries = mKnownAggroEntities.Where( x => x.TerritoryType == territoryType );
+				if( filteredEntries.Count() > 0 )
+				{
+					mFilteredAggroEntities.InsertRange( 0, filteredEntries );
+					mCurrentFilteredTerritoryType = territoryType;
+				}
 			}
 		}
 
@@ -84,12 +108,24 @@ namespace Distance
 		{
 			FilterAggroEntities( territoryType );
 
-			int index = mFilteredAggroEntities.FindIndex( x => x.NameID == BNpcNameID  );
-			return index >= 0 ? mFilteredAggroEntities[index].AggroDistance_Yalms : null;
+			lock( mLockObj )
+			{
+				int index = mFilteredAggroEntities.FindIndex( x => x.NameID == BNpcNameID  );
+				return index >= 0 ? mFilteredAggroEntities[index].AggroDistance_Yalms : null;
+			}
+		}
+
+		public static UInt64 GetCurrentFileVersion()
+		{
+			return mLoadedInfoFile?.FileVersion ?? 0;
 		}
 
 		private static readonly List<BNpcAggroEntity> mKnownAggroEntities = new List<BNpcAggroEntity>();
 		private static readonly List<BNpcAggroEntity> mFilteredAggroEntities = new List<BNpcAggroEntity>();
 		private static UInt32 mCurrentFilteredTerritoryType = 0;
+
+		private static BNpcAggroInfoFile mLoadedInfoFile = null;
+
+		private static readonly Object mLockObj = new Object();
 	}
 }

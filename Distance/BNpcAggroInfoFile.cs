@@ -7,20 +7,27 @@ using System.IO;
 
 namespace Distance
 {
-	internal class BNpcAggroInfoFile
+	public class BNpcAggroInfoFile
 	{
-		public bool ReadFile( string filePath )
+		public bool ReadFromFile( string filePath )
 		{
 			if( !File.Exists( filePath ) ) return false;
-			string[] lines = File.ReadAllLines( filePath );
+			string fileText = File.ReadAllText( filePath );
+			return ReadFromString( fileText );
+		}
 
+		public bool ReadFromString( string data )
+		{
+			FileLoaded = false;
 			mAggroInfoList.Clear();
+
+			string[] lines = data.Split( "\r\n", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
 
 			for( int i = 0; i < lines.Length; ++i )
 			{
-				string[] tokens = lines[i].Split( '=' );
-				if( tokens.Length != 4 ) throw new InvalidDataException( $"Line {i} contained an unexpected number of entries." );
-				for( int j = 0; j < tokens.Length; ++j ) tokens[j] = tokens[j].Trim();
+				string[] tokens = lines[i].Split( '=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
+				if( tokens.Length == 2 && tokens[0].ToLowerInvariant() == "version" && UInt64.TryParse( tokens[1], out mFileVersion ) ) continue;
+				else if( tokens.Length != 4 ) throw new InvalidDataException( $"Line {i} contained an unexpected number of entries." );
 
 				if( !UInt32.TryParse( tokens[0], out UInt32 territoryType ) ) throw new InvalidDataException( $"Unparsable TerritoryType at line {i}" );
 				if( !UInt32.TryParse( tokens[1], out UInt32 BNpcNameID ) ) throw new InvalidDataException( $"Unparsable BNpcNameID at line {i}" );
@@ -35,7 +42,20 @@ namespace Distance
 				} );
 			}
 
+			FileLoaded = true;
 			return true;
+		}
+
+		public void WriteFile( string filePath )
+		{
+			List<string> lines = new();
+			lines.Add( $"Version = {FileVersion}" );
+			foreach( var entry in mAggroInfoList)
+			{
+				lines.Add( $"{entry.TerritoryType}={entry.NameID}={entry.AggroDistance_Yalms}={entry.EnglishName}" );
+			}
+
+			File.WriteAllLines( filePath, lines );
 		}
 
 		public List<BNpcAggroEntity> GetEntries()
@@ -43,6 +63,14 @@ namespace Distance
 			return new( mAggroInfoList );
 		}
 
+		public bool FileLoaded { get; protected set; } = false;
 		protected readonly List<BNpcAggroEntity> mAggroInfoList = new();
+
+		protected UInt64 mFileVersion = 0;
+		public UInt64 FileVersion
+		{
+			get { return mFileVersion; }
+			protected set { mFileVersion = value; }
+		}
 	}
 }

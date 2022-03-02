@@ -23,3 +23,4 @@ Maybe:
 	-Add an ImGui window over the text node and track its position to allow for dragging?
 	-Add an additional distance widget that is offset by a certain amount (and offset configurable for either from ring or center).
 		-Allowing the user to set custom colors for different distance values might be an equivalent or parallel option.
+	-Add distances for aggro'd enemies to nameplates?

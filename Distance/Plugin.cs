@@ -51,10 +51,23 @@ namespace Distance
 			mPluginInterface = pluginInterface;
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 			mConfiguration.Initialize( mPluginInterface );
-			string aggroDistancesFilePath = "";
-			aggroDistancesFilePath = Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" );
-			if( !File.Exists( aggroDistancesFilePath ) ) aggroDistancesFilePath = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "AggroDistances.dat" );
-			BNpcAggroInfo.Init( mDataManager, aggroDistancesFilePath );
+
+			Task.Run( () =>
+			{
+				//	We can have the aggro distances data that got shipped with the plugin, or one that got downloaded.  Load in both and see which has the higher version to decide which to actually use.
+				string aggroDistancesFilePath_Assembly = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "AggroDistances.dat" );
+				string aggroDistancesFilePath_Config = Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" );
+				BNpcAggroInfoFile aggroFile_Assembly = new();
+				BNpcAggroInfoFile aggroFile_Config = new();
+				aggroFile_Assembly.ReadFromFile( aggroDistancesFilePath_Assembly );
+				var fileToUse = aggroFile_Assembly;
+				if( File.Exists( aggroDistancesFilePath_Config ) )
+				{
+					aggroFile_Config.ReadFromFile( aggroDistancesFilePath_Config );
+					fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
+				}
+				BNpcAggroInfo.Init( mDataManager, fileToUse );
+			} );
 
 			//	Localization and Command Initialization
 			OnLanguageChanged( mPluginInterface.UiLanguage );
@@ -69,9 +82,6 @@ namespace Distance
 			mPluginInterface.LanguageChanged += OnLanguageChanged;
 			mFramework.Update += OnGameFrameworkUpdate;
 			mClientState.TerritoryChanged += OnTerritoryChanged;
-
-			//***** TODO: Add the territory changed event, and filter our database to only the applicable entries when we zone. If we key by the bnpc name id, maybe verify that against the sheet, having the actual english name in the database to check when loading. *****
-
 		}
 
 		//	Cleanup
@@ -84,6 +94,8 @@ namespace Distance
 			mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 			mPluginInterface.LanguageChanged -= OnLanguageChanged;
 			mCommandManager.RemoveHandler( mTextCommandName );
+
+			BNpcAggroInfoDownloader.CancelAllDownloads();
 		}
 
 		protected void OnLanguageChanged( string langCode )
@@ -268,14 +280,7 @@ namespace Distance
 			//	Pre-filter when we enter a zone so that we have a lower chance of stutters once we're actually in.
 			BNpcAggroInfo.FilterAggroEntities( ID );
 		}
-
-		/*protected void PopulateSkeletonData()
-		{
-			ExcelSheet<ModelSkeleton> contentFinderSheet = mDataManager.GetExcelSheet<ModelSkeleton>();
-			foreach( var entry in contentFinderSheet )
-			{
-			}
-		}*/
+		
 
 		protected void DrawUI()
 		{
@@ -286,6 +291,7 @@ namespace Distance
 		{
 			mUI.SettingsWindowVisible = true;
 		}
+
 
 		public string Name => "Distance";
 		protected const string mTextCommandName = "/pdistance";
