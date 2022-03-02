@@ -102,13 +102,36 @@ namespace Distance
 
 				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Distance Widget Appearance", "Distance Widget Appearance" ) + "###Distance Widget Appearance Header." ) )
 				{
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (x,y):" ) );
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (X,Y):" ) );
 					ImGui.DragFloat2( "###DistanceTextPositionSlider", ref mConfiguration.mDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size" ) );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + "###Distance font heavy.", ref mConfiguration.mDistanceFontHeavy );
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
 					ImGui.SliderInt( "##DistanceTextFontSizeSlider", ref mConfiguration.mDistanceFontSize, 6, 36 );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + "###DistanceTextColorPicker", ref mConfiguration.mDistanceTextColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + "###DistanceTextEdgeColorPicker", ref mConfiguration.mDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+				}
+
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Appearance", "Aggro Widget Appearance" ) + "###Aggro Widget Appearance Header." ) )
+				{
+					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Position", "Position of the aggro widget (X,Y):" ) );
+					ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.mAggroDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget" ) + "###Aggro Distance font heavy.", ref mConfiguration.mAggroDistanceFontHeavy );
+					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Font Size", "Aggro widget font size:" ) );
+					ImGui.SliderInt( "##AggroDistanceTextFontSizeSlider", ref mConfiguration.mAggroDistanceFontSize, 6, 36 );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color", "Aggro widget text color" ) + "###AggroDistanceTextColorPicker", ref mConfiguration.mAggroDistanceTextColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color", "Aggro widget text glow color" ) + "###AggroDistanceTextEdgeColorPicker", ref mConfiguration.mAggroDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Caution", "Aggro widget text color (caution range)" ) + "###AggroDistanceCautionTextColorPicker", ref mConfiguration.mAggroDistanceCautionTextColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Caution", "Aggro widget text glow color (caution range)" ) + "###AggroDistanceCautionTextEdgeColorPicker", ref mConfiguration.mAggroDistanceCautionTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Warning", "Aggro widget text color (warning range)" ) + "###AggroDistanceWarningTextColorPicker", ref mConfiguration.mAggroDistanceWarningTextColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Warning", "Aggro widget text glow color (warning range)" ) + "###AggroDistanceWarningTextEdgeColorPicker", ref mConfiguration.mAggroDistanceWarningTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+
+					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range (y):" ) );
+					ImGui.SliderInt( "##AggroDistanceCautionRangeSlider", ref mConfiguration.mAggroCautionDistance_Yalms, 0, 30 );
+
+					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
+					ImGui.SliderInt( "##AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
 				}
 
 				ImGui.Spacing();
@@ -316,27 +339,40 @@ namespace Distance
 		unsafe protected void UpdateAggroDistanceTextNode( bool show = true )
 		{
 			string str = "";
+			Vector4 color = mConfiguration.mAggroDistanceTextColor;
+			Vector4 edgeColor = mConfiguration.mAggroDistanceTextEdgeColor;
 			if( mPlugin.CurrentDistanceInfo != null )
 			{
 				float distance = Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms );
 				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
 				str = $"Aggro in {distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
+
+				if( distance < mConfiguration.AggroWarningDistance_Yalms)
+				{
+					color = mConfiguration.AggroDistanceWarningTextColor;
+					edgeColor = mConfiguration.AggroDistanceWarningTextEdgeColor;
+				}
+				else if( distance < mConfiguration.AggroCautionDistance_Yalms )
+				{
+					color = mConfiguration.AggroDistanceCautionTextColor;
+					edgeColor = mConfiguration.AggroDistanceCautionTextEdgeColor;
+				}
 			}
 
 			TextNodeDrawData drawData = new TextNodeDrawData()
 			{
-				PositionX = (short)mConfiguration.DistanceTextPosition.X,
-				PositionY = (short)(mConfiguration.DistanceTextPosition.Y + TextNodeDrawData.Default.LineSpacing ),
-				TextColorA = (byte)( mConfiguration.mDistanceTextColor.W * 255f ),
-				TextColorR = (byte)( mConfiguration.mDistanceTextColor.X * 255f ),
-				TextColorG = (byte)( mConfiguration.mDistanceTextColor.Y * 255f ),
-				TextColorB = (byte)( mConfiguration.mDistanceTextColor.Z * 255f ),
-				EdgeColorA = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f ),
-				EdgeColorR = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f ),
-				EdgeColorG = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f ),
-				EdgeColorB = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f ),
-				FontSize = (byte)mConfiguration.DistanceFontSize,
-				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) ),
+				PositionX = (short)mConfiguration.AggroDistanceTextPosition.X,
+				PositionY = (short)mConfiguration.AggroDistanceTextPosition.Y,
+				TextColorA = (byte)( color.W * 255f ),
+				TextColorR = (byte)( color.X * 255f ),
+				TextColorG = (byte)( color.Y * 255f ),
+				TextColorB = (byte)( color.Z * 255f ),
+				EdgeColorA = (byte)( edgeColor.W * 255f ),
+				EdgeColorR = (byte)( edgeColor.X * 255f ),
+				EdgeColorG = (byte)( edgeColor.Y * 255f ),
+				EdgeColorB = (byte)( edgeColor.Z * 255f ),
+				FontSize = (byte)mConfiguration.AggroDistanceFontSize,
+				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mAggroDistanceFontHeavy ? 0x10 : 0 ) ),
 				LineSpacing = 24,
 				CharSpacing = 1
 			};
