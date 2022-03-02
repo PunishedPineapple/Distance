@@ -12,7 +12,6 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace Distance
 {
-	//***** TODO: Can we thread the file loading? *****
 	internal static class BNpcAggroInfo
 	{
 		public static void Init( DataManager dataManager, string filePath  )
@@ -32,7 +31,6 @@ namespace Distance
 				catch( Exception e )
 				{
 					PluginLog.LogWarning( $"Unable to read BNpc aggro file: {e}" );
-
 				}
 			} );
 		}
