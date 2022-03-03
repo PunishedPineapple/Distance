@@ -70,7 +70,7 @@ namespace Distance
 				return;
 			}
 
-			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Ready Check Helper Settings" ) + "###Ready Check Helper Settings", ref mSettingsWindowVisible,
+			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", ref mSettingsWindowVisible,
 				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse ) )
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
@@ -107,6 +107,8 @@ namespace Distance
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + "###Distance font heavy.", ref mConfiguration.mDistanceFontHeavy );
 					ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
 					ImGui.SliderInt( "##DistanceTextFontSizeSlider", ref mConfiguration.mDistanceFontSize, 6, 36 );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color" ) + "###Distance Text Use Target Bar Color.", ref mConfiguration.mDistanceTextTrackTargetBarColor );
+					ImGuiHelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + "###DistanceTextColorPicker", ref mConfiguration.mDistanceTextColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + "###DistanceTextEdgeColorPicker", ref mConfiguration.mDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 				}
@@ -200,6 +202,14 @@ namespace Distance
 
 				ImGui.Text( $"Draw Distance: {mPlugin.CurrentDistanceDrawInfo.ShowDistance}" );
 				ImGui.Text( $"Draw Aggro Distance: {mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance}" );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
+				ImGui.Text( $"TerritoryType: {mClientState.TerritoryType}" );
 
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -305,6 +315,9 @@ namespace Distance
 		unsafe protected void UpdateDistanceTextNode( bool show )
 		{
 			string str = "";
+			Vector4 textColorToUse = mConfiguration.DistanceTextColor;
+			Vector4 edgeColorToUse = mConfiguration.DistanceTextEdgeColor;
+
 			if( mPlugin.CurrentDistanceInfo != null )
 			{
 				float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
@@ -315,20 +328,57 @@ namespace Distance
 				str = $"{distanceTypeSymbol}{distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
 			}
 
+			if( mConfiguration.mDistanceTextTrackTargetBarColor )
+			{
+				AtkUnitBase* pTargetAddonToUse = null;
+				UInt16 targetBarNameNodeIndex = 0;
+				var pTargetAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
+				var pTargetAddonSplit = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
+				if( pTargetAddon != null && pTargetAddon->IsVisible )
+				{
+					pTargetAddonToUse = pTargetAddon;
+					targetBarNameNodeIndex = 39;
+				}
+				else if( pTargetAddonSplit != null && pTargetAddonSplit->IsVisible )
+				{
+					pTargetAddonToUse = pTargetAddonSplit;
+					targetBarNameNodeIndex = 8;
+				}
+
+				if( pTargetAddonToUse != null )
+				{
+					var pTargetNameNode = pTargetAddonToUse->UldManager.NodeListSize > targetBarNameNodeIndex ? pTargetAddonToUse->UldManager.NodeList[targetBarNameNodeIndex] : null;
+					if( pTargetNameNode != null && pTargetNameNode->GetAsAtkTextNode() != null )
+					{
+						var pTargetNameTextNode = pTargetNameNode->GetAsAtkTextNode();
+
+						textColorToUse.W = (float)pTargetNameTextNode->TextColor.A / 255f;
+						textColorToUse.X = (float)pTargetNameTextNode->TextColor.R / 255f;
+						textColorToUse.Y = (float)pTargetNameTextNode->TextColor.G / 255f;
+						textColorToUse.Z = (float)pTargetNameTextNode->TextColor.B / 255f;
+
+						edgeColorToUse.W = (float)pTargetNameTextNode->EdgeColor.A / 255f;
+						edgeColorToUse.X = (float)pTargetNameTextNode->EdgeColor.R / 255f;
+						edgeColorToUse.Y = (float)pTargetNameTextNode->EdgeColor.G / 255f;
+						edgeColorToUse.Z = (float)pTargetNameTextNode->EdgeColor.B / 255f;
+					}
+				}
+			}
+
 			TextNodeDrawData drawData = new TextNodeDrawData()
 			{
 				PositionX = (short)mConfiguration.DistanceTextPosition.X,
 				PositionY = (short)mConfiguration.DistanceTextPosition.Y,
-				TextColorA = (byte)( mConfiguration.mDistanceTextColor.W * 255f ),
-				TextColorR = (byte)( mConfiguration.mDistanceTextColor.X * 255f ),
-				TextColorG = (byte)( mConfiguration.mDistanceTextColor.Y * 255f ),
-				TextColorB = (byte)( mConfiguration.mDistanceTextColor.Z * 255f ),
-				EdgeColorA = (byte)( mConfiguration.mDistanceTextEdgeColor.W * 255f ),
-				EdgeColorR = (byte)( mConfiguration.mDistanceTextEdgeColor.X * 255f ),
-				EdgeColorG = (byte)( mConfiguration.mDistanceTextEdgeColor.Y * 255f ),
-				EdgeColorB = (byte)( mConfiguration.mDistanceTextEdgeColor.Z * 255f ),
+				TextColorA = (byte)( textColorToUse.W * 255f ),
+				TextColorR = (byte)( textColorToUse.X * 255f ),
+				TextColorG = (byte)( textColorToUse.Y * 255f ),
+				TextColorB = (byte)( textColorToUse.Z * 255f ),
+				EdgeColorA = (byte)( edgeColorToUse.W * 255f ),
+				EdgeColorR = (byte)( edgeColorToUse.X * 255f ),
+				EdgeColorG = (byte)( edgeColorToUse.Y * 255f ),
+				EdgeColorB = (byte)( edgeColorToUse.Z * 255f ),
 				FontSize = (byte)mConfiguration.DistanceFontSize,
-				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mDistanceFontHeavy ? 0x10 : 0 ) ),
+				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.DistanceFontHeavy ? 0x10 : 0 ) ),
 				LineSpacing = 24,
 				CharSpacing = 1
 			};
@@ -372,7 +422,7 @@ namespace Distance
 				EdgeColorG = (byte)( edgeColor.Y * 255f ),
 				EdgeColorB = (byte)( edgeColor.Z * 255f ),
 				FontSize = (byte)mConfiguration.AggroDistanceFontSize,
-				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.mAggroDistanceFontHeavy ? 0x10 : 0 ) ),
+				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.AggroDistanceFontHeavy ? 0x10 : 0 ) ),
 				LineSpacing = 24,
 				CharSpacing = 1
 			};

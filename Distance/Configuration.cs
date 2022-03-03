@@ -163,6 +163,13 @@ namespace Distance
 			set { mDistanceTextEdgeColor = value; }
 		}
 
+		public bool mDistanceTextTrackTargetBarColor = false;
+		public bool DistanceTextTrackTargetBarColor
+		{
+			get { return mDistanceTextTrackTargetBarColor; }
+			set { mDistanceTextTrackTargetBarColor = value; }
+		}
+
 		public int mAggroDistanceFontSize = 16;
 		public int AggroDistanceFontSize
 		{
