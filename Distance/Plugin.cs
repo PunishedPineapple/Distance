@@ -129,7 +129,7 @@ namespace Distance
 			}
 			mCommandManager.AddHandler( mTextCommandName, new CommandInfo( ProcessTextCommand )
 			{
-				HelpMessage = String.Format( Loc.Localize( "Plugin Text Command Description", "Use {0} to open the the configuration window." ), "\"/pready config\"" )
+				HelpMessage = String.Format( Loc.Localize( "Plugin Text Command Description", "Use {0} for a listing of available text commands." ), "\"/pdistance help\"" )
 			} );
 		}
 
@@ -167,6 +167,10 @@ namespace Distance
 			{
 				mUI.SettingsWindowVisible = !mUI.SettingsWindowVisible;
 			}
+			else if( subCommand.ToLower() == "distancemode" )
+			{
+				commandResponse = ProcessTextCommand_DistanceMode( subCommandArgs );
+			}
 			else if( subCommand.ToLower() == "debug" )
 			{
 				mUI.DebugWindowVisible = !mUI.DebugWindowVisible;
@@ -188,15 +192,28 @@ namespace Distance
 			}
 		}
 
+		protected string ProcessTextCommand_DistanceMode( string args )
+		{
+				 if( args.Trim().Equals( "center", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = false;
+			else if( args.Trim().Equals( "ring", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = true;
+			else																					mConfiguration.DistanceIsToRing = !mConfiguration.DistanceIsToRing;
+
+			return String.Format( Loc.Localize( "Text Command Response: Distancemode", "Distance mode set to {0}" ), mConfiguration.DistanceIsToRing ? "\"ring\"" : "\"center\"" );
+		}
+
 		protected string ProcessTextCommand_Help( string args )
 		{
 			if( args.ToLower() == "config" )
 			{
-				return Loc.Localize( "Config Subcommand Help Message", "Opens the settings window." );
+				return Loc.Localize( "Help Message: Config Subcommand", "Opens the settings window." );
+			}
+			if( args.ToLower() == "distancemode" )
+			{
+				return String.Format( Loc.Localize( "Help Message: Distancemode Subcommand", "Changes the mode of the distance indicator.  Valid arguments are are {0} and {1}.  If no arguments are supplied, this will cycle between modes." ), "\"center\"", "\"ring\"" );
 			}
 			else
 			{
-				return String.Format( Loc.Localize( "Basic Help Message", "This plugin works automatically; however, some text commands are supported.  Valid subcommands are {0}, {1}, and {2}.  Use \"{3} <subcommand>\" for more information on each subcommand." ), "\"config\"", "\"results\"", "\"clear\"", "/pready help" );
+				return String.Format( Loc.Localize( "Help Message: Basic", "Valid subcommands are {0} and {1}.  Use \"{2} <subcommand>\" for more information on each subcommand." ), "\"config\"", "\"distancemode\"", "/pdistance help" );
 			}
 		}
 
