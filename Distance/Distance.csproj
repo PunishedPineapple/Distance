@@ -2,14 +2,14 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<Platforms>AnyCPU</Platforms>
-		<Version>0.9.1.0</Version>
+		<Version>0.9.2.0</Version>
 		<Authors>PunishedPineapple</Authors>
 		<Product />
 		<Copyright>Copyright © PunishedPineapple 2022</Copyright>
 		<PackageProjectUrl>https://github.com/PunishedPineapple/Distance</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/PunishedPineapple/Distance</RepositoryUrl>
-		<AssemblyVersion>0.9.1.0</AssemblyVersion>
-		<FileVersion>0.9.1.0</FileVersion>
+		<AssemblyVersion>0.9.2.0</AssemblyVersion>
+		<FileVersion>0.9.2.0</FileVersion>
 	</PropertyGroup>
 
 
