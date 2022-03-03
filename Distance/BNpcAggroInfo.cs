@@ -51,14 +51,20 @@ namespace Distance
 				ExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.BNpcName>( Dalamud.ClientLanguage.English );
 				for( int i = mKnownAggroEntities.Count - 1; i >= 0; i-- )
 				{
-					if( mKnownAggroEntities[i].NameID > 0 && mKnownAggroEntities[i].NameID < BNpcNameSheet.RowCount )
+					if( mKnownAggroEntities[i].TerritoryType < 1 || territorySheet.GetRow( mKnownAggroEntities[i].TerritoryType ) == null )
 					{
-						if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ).Singular, StringComparison.InvariantCultureIgnoreCase ) ||
-							mKnownAggroEntities[i].TerritoryType == 0 ||
-							mKnownAggroEntities[i].TerritoryType > territorySheet.RowCount )
-						{
-							mKnownAggroEntities.RemoveAt( i );
-						}
+						PluginLog.LogDebug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						mKnownAggroEntities.RemoveAt( i );
+					}
+					else if( mKnownAggroEntities[i].NameID < 1 || BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ) == null )
+					{
+						PluginLog.LogDebug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						mKnownAggroEntities.RemoveAt( i );
+					}
+					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
+					{
+						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						mKnownAggroEntities.RemoveAt( i );
 					}
 				}
 			}
