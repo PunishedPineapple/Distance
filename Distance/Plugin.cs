@@ -219,85 +219,7 @@ namespace Distance
 
 		public void OnGameFrameworkUpdate( Framework framework )
 		{
-			var actualTarget = mTargetManager.SoftTarget ?? mTargetManager.Target;
-			if( mClientState.LocalPlayer == null || actualTarget == null )
-			{
-				CurrentDistanceInfo = null;
-				CurrentDistanceDrawInfo.ShowAggroDistance = false;
-				CurrentDistanceDrawInfo.ShowDistance = false;
-			}
-			else
-			{
-				CurrentDistanceInfo ??= new Distance.DistanceInfo();
-				CurrentDistanceInfo.TargetKind = actualTarget.ObjectKind;
-				CurrentDistanceInfo.Position = mClientState.LocalPlayer.Position;
-				CurrentDistanceInfo.TargetPosition = actualTarget.Position;
-				CurrentDistanceInfo.TargetRadius_Yalms = actualTarget.HitboxRadius;
-
-				float? aggroRange = null;
-				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
-				{
-					CurrentDistanceInfo.BNpcNameID = ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)actualTarget ).NameId;
-					aggroRange = BNpcAggroInfo.GetAggroRange( CurrentDistanceInfo.BNpcNameID, mClientState.TerritoryType );
-					CurrentDistanceInfo.AggroRange_Yalms = aggroRange ?? 0;
-				}
-				else
-				{
-					CurrentDistanceInfo.BNpcNameID = 0;
-				}
-
-				if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = mConfiguration.ShowAggroDistance && aggroRange != null && !mCondition[ConditionFlag.InCombat];
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnBattleNpc;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnPlayers && actualTarget.ObjectId != mClientState.LocalPlayer.ObjectId;
-				}
-				
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnEventNpc;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnTreasure;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnAetheryte;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnGatheringNode;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnEventObj;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnCompanion;
-				}
-				else if( actualTarget.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing )
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = mConfiguration.ShowDistanceOnHousing;
-				}
-				else
-				{
-					CurrentDistanceDrawInfo.ShowAggroDistance = false;
-					CurrentDistanceDrawInfo.ShowDistance = false;
-				}
-			}
+			UpdateTargetDistanceData();
 		}
 
 		protected void OnTerritoryChanged( object sender, UInt16 ID )
@@ -305,7 +227,168 @@ namespace Distance
 			//	Pre-filter when we enter a zone so that we have a lower chance of stutters once we're actually in.
 			BNpcAggroInfo.FilterAggroEntities( ID );
 		}
-		
+
+		public DistanceInfo GetDistanceInfo( TargetType targetType, bool targetAlsoMeansSoftTarget )
+		{
+			if( targetType == TargetType.Target && targetAlsoMeansSoftTarget && mCurrentDistanceInfoArray[(int)TargetType.SoftTarget].IsValid )
+			{
+				targetType = TargetType.SoftTarget;
+			}
+
+			return mCurrentDistanceInfoArray[(int)targetType];
+		}
+
+		public bool ShouldDrawAggroDistanceInfo()
+		{
+			return	mConfiguration.ShowAggroDistance &&
+					GetDistanceInfo( TargetType.Target, true ).IsValid &&
+					GetDistanceInfo( TargetType.Target, true ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
+					GetDistanceInfo( TargetType.Target, true ).HasAggroRangeData &&
+					!mCondition[ConditionFlag.InCombat];
+		}
+
+		public bool ShouldDrawDistanceInfo( TargetType targetType, bool targetAlsoMeansSoftTarget = false )
+		{
+			if( targetType == TargetType.Target && targetAlsoMeansSoftTarget && mCurrentDistanceInfoArray[(int)TargetType.SoftTarget].IsValid )
+			{
+				targetType = TargetType.SoftTarget;
+			}
+
+			if( !mCurrentDistanceInfoArray[(int)targetType].IsValid ) return false;
+
+			bool show = false;
+
+			switch( mCurrentDistanceInfoArray[(int)targetType].TargetKind )
+			{
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc:
+					show = mConfiguration.ShowDistanceOnBattleNpc;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player:
+					show = mConfiguration.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc:
+					show = mConfiguration.ShowDistanceOnEventNpc;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure:
+					show = mConfiguration.ShowDistanceOnTreasure;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte:
+					show = mConfiguration.ShowDistanceOnAetheryte;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint:
+					show = mConfiguration.ShowDistanceOnGatheringNode;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj:
+					show = mConfiguration.ShowDistanceOnEventObj;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion:
+					show = mConfiguration.ShowDistanceOnCompanion;
+					break;
+
+				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing:
+					show = mConfiguration.ShowDistanceOnHousing;
+					break;
+
+				default:
+					show = false;
+					break;
+			}
+
+			return show;
+		}
+
+		protected void UpdateTargetDistanceData()
+		{
+			Dalamud.Game.ClientState.Objects.Types.GameObject target = null;
+			int i;
+
+			target = mTargetManager.Target;
+			i = (int)TargetType.Target;
+			if( target != null )
+			{
+				mCurrentDistanceInfoArray[i].IsValid = true;
+				mCurrentDistanceInfoArray[i].TargetKind = target.ObjectKind;
+				mCurrentDistanceInfoArray[i].ObjectID = target.ObjectId;
+				mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
+				mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
+				mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
+				mCurrentDistanceInfoArray[i].BNpcNameID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
+				float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcNameID, mClientState.TerritoryType );
+				mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
+				mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
+			}
+			else
+			{
+				mCurrentDistanceInfoArray[i].Invalidate();
+			}
+
+			target = mTargetManager.SoftTarget;
+			i = (int)TargetType.SoftTarget;
+			if( target != null )
+			{
+				mCurrentDistanceInfoArray[i].IsValid = true;
+				mCurrentDistanceInfoArray[i].TargetKind = target.ObjectKind;
+				mCurrentDistanceInfoArray[i].ObjectID = target.ObjectId;
+				mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
+				mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
+				mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
+				mCurrentDistanceInfoArray[i].BNpcNameID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
+				float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcNameID, mClientState.TerritoryType );
+				mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
+				mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
+			}
+			else
+			{
+				mCurrentDistanceInfoArray[i].Invalidate();
+			}
+
+			target = mTargetManager.FocusTarget;
+			i = (int)TargetType.FocusTarget;
+			if( target != null )
+			{
+				mCurrentDistanceInfoArray[i].IsValid = true;
+				mCurrentDistanceInfoArray[i].TargetKind = target.ObjectKind;
+				mCurrentDistanceInfoArray[i].ObjectID = target.ObjectId;
+				mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
+				mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
+				mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
+				mCurrentDistanceInfoArray[i].BNpcNameID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
+				float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcNameID, mClientState.TerritoryType );
+				mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
+				mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
+			}
+			else
+			{
+				mCurrentDistanceInfoArray[i].Invalidate();
+			}
+
+			target = mTargetManager.MouseOverTarget;
+			i = (int)TargetType.MouseOverTarget;
+			if( target != null )
+			{
+				mCurrentDistanceInfoArray[i].IsValid = true;
+				mCurrentDistanceInfoArray[i].TargetKind = target.ObjectKind;
+				mCurrentDistanceInfoArray[i].ObjectID = target.ObjectId;
+				mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
+				mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
+				mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
+				mCurrentDistanceInfoArray[i].BNpcNameID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
+				float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcNameID, mClientState.TerritoryType );
+				mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
+				mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
+			}
+			else
+			{
+				mCurrentDistanceInfoArray[i].Invalidate();
+			}
+		}
 
 		protected void DrawUI()
 		{
@@ -317,13 +400,10 @@ namespace Distance
 			mUI.SettingsWindowVisible = true;
 		}
 
-
 		public string Name => "Distance";
 		protected const string mTextCommandName = "/pdistance";
 
-		public Distance.DistanceInfo CurrentDistanceInfo { get; protected set; } = null;
-		public readonly Distance.DistanceDrawInfo CurrentDistanceDrawInfo = new Distance.DistanceDrawInfo();
-
+		protected readonly DistanceInfo[] mCurrentDistanceInfoArray = new DistanceInfo[Enum.GetNames(typeof(TargetType)).Length];
 		protected DalamudPluginInterface mPluginInterface;
 		protected Framework mFramework;
 		protected ClientState mClientState;
@@ -336,5 +416,13 @@ namespace Distance
 		protected DataManager mDataManager;
 		protected Configuration mConfiguration;
 		protected PluginUI mUI;
+
+		public enum TargetType : int
+		{
+			Target,
+			SoftTarget,
+			FocusTarget,
+			MouseOverTarget
+		}
 	}
 }

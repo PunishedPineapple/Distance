@@ -42,14 +42,13 @@ namespace Distance
 		//	Destruction
 		unsafe public void Dispose()
 		{
-			UpdateDistanceTextNode( false );
-			UpdateAggroDistanceTextNode( false );
+			UpdateDistanceTextNode( new DistanceInfo(), false );
+			UpdateAggroDistanceTextNode( new DistanceInfo(), false );
 			//	We should probably be properly removing the nodes, but by checking for a node with the right id before constructing one, we should only ever leak a single node, which is probably fine.
 		}
 
 		public void Initialize()
 		{
-			//Load Skeleton sheet?  Put in own class probably
 		}
 
 		public void Draw()
@@ -200,8 +199,11 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				ImGui.Text( $"Draw Distance: {mPlugin.CurrentDistanceDrawInfo.ShowDistance}" );
-				ImGui.Text( $"Draw Aggro Distance: {mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance}" );
+				ImGui.Text( $"Draw Aggro Distance: {mPlugin.ShouldDrawAggroDistanceInfo()}" );
+				ImGui.Text( $"Draw Distance Target: {mPlugin.ShouldDrawDistanceInfo( Plugin.TargetType.Target )}" );
+				ImGui.Text( $"Draw Distance Soft Target: {mPlugin.ShouldDrawDistanceInfo( Plugin.TargetType.SoftTarget )}" );
+				ImGui.Text( $"Draw Distance Focus Target: {mPlugin.ShouldDrawDistanceInfo( Plugin.TargetType.FocusTarget )}" );
+				ImGui.Text( $"Draw Distance MO Target: {mPlugin.ShouldDrawDistanceInfo( Plugin.TargetType.MouseOverTarget )}" );
 
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -217,32 +219,25 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				if( mPlugin.CurrentDistanceInfo != null )
-				{
-					ImGui.Text( $"Target Kind: {mPlugin.CurrentDistanceInfo.TargetKind}" );
-					ImGui.Text( $"BNpcName ID: {mPlugin.CurrentDistanceInfo.BNpcNameID}" );
-					ImGui.Text( $"Player: ({mPlugin.CurrentDistanceInfo.Position.X}, {mPlugin.CurrentDistanceInfo.Position.Y}, {mPlugin.CurrentDistanceInfo.Position.Z})" );
-					ImGui.Text( $"Target: ({mPlugin.CurrentDistanceInfo.TargetPosition.X}, {mPlugin.CurrentDistanceInfo.TargetPosition.Y}, {mPlugin.CurrentDistanceInfo.TargetPosition.Z})" );
-					ImGui.Text( $"Distance (y): {mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms}" );
-					ImGui.Text( $"Distance from Ring (y): {mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms}" );
-					ImGui.Text( $"Distance from Aggro (y): {mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms}" );
-				}
-				else
-				{
-					ImGui.Text( "Distance data is null!" );
-				}
-				if( mPlugin.CurrentDistanceInfo != null )
-				{
-					float? aggroDistance = BNpcAggroInfo.GetAggroRange( mPlugin.CurrentDistanceInfo.BNpcNameID, mClientState.TerritoryType );
-					if( aggroDistance!= null )
-					{
-						ImGui.Text( $"Aggro Distance: {aggroDistance.Value}" );
-					}
-					else
-					{
-						ImGui.Text( "No aggro distance data found." );
-					}
-				}
+				ImGui.Text( $"Target Distance Data:" );
+				ImGui.Indent();
+				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.Target, false ).ToString()}" );
+				ImGui.Unindent();
+
+				ImGui.Text( $"Soft Target Distance Data:" );
+				ImGui.Indent();
+				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.SoftTarget, false ).ToString()}" );
+				ImGui.Unindent();
+
+				ImGui.Text( $"Focus Target Distance Data:" );
+				ImGui.Indent();
+				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.FocusTarget, false ).ToString()}" );
+				ImGui.Unindent();
+
+				ImGui.Text( $"MO Target Distance Data:" );
+				ImGui.Indent();
+				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.MouseOverTarget, false ).ToString()}" );
+				ImGui.Unindent();
 			}
 
 			//	We're done.
@@ -308,19 +303,19 @@ namespace Distance
 
 		protected void DrawOnGameUI()
 		{
-			UpdateDistanceTextNode( mPlugin.CurrentDistanceDrawInfo.ShowDistance );
-			UpdateAggroDistanceTextNode( mPlugin.CurrentDistanceDrawInfo.ShowAggroDistance );
+			UpdateDistanceTextNode( mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true ), mPlugin.ShouldDrawDistanceInfo( Plugin.TargetType.Target, true ) );
+			UpdateAggroDistanceTextNode( mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true ), mPlugin.ShouldDrawAggroDistanceInfo() );
 		}
 
-		unsafe protected void UpdateDistanceTextNode( bool show )
+		unsafe protected void UpdateDistanceTextNode( DistanceInfo distanceInfo, bool show )
 		{
 			string str = "";
 			Vector4 textColorToUse = mConfiguration.DistanceTextColor;
 			Vector4 edgeColorToUse = mConfiguration.DistanceTextEdgeColor;
 
-			if( mPlugin.CurrentDistanceInfo != null )
+			if( distanceInfo.IsValid )
 			{
-				float distance = mConfiguration.DistanceIsToRing ? mPlugin.CurrentDistanceInfo.DistanceFromTargetRing_Yalms : mPlugin.CurrentDistanceInfo.DistanceFromTarget_Yalms;
+				float distance = mConfiguration.DistanceIsToRing ? distanceInfo.DistanceFromTargetRing_Yalms : distanceInfo.DistanceFromTarget_Yalms;
 				distance = Math.Max( 0, distance );
 				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
 				string distanceTypeSymbol = "";
@@ -386,14 +381,14 @@ namespace Distance
 			UpdateTextNode( mDistanceNodeID, str, drawData, show );
 		}
 
-		unsafe protected void UpdateAggroDistanceTextNode( bool show = true )
+		unsafe protected void UpdateAggroDistanceTextNode( DistanceInfo distanceInfo, bool show )
 		{
 			string str = "";
 			Vector4 color = mConfiguration.mAggroDistanceTextColor;
 			Vector4 edgeColor = mConfiguration.mAggroDistanceTextEdgeColor;
-			if( mPlugin.CurrentDistanceInfo != null )
+			if( distanceInfo.IsValid )
 			{
-				float distance = Math.Max( 0, mPlugin.CurrentDistanceInfo.DistanceFromTargetAggro_Yalms );
+				float distance = Math.Max( 0, distanceInfo.DistanceFromTargetAggro_Yalms );
 				string unitString = mConfiguration.ShowUnitsOnDistances ? "y" : "";
 				str = $"Aggro in {distance.ToString( $"F{mConfiguration.DecimalPrecision}" )}{unitString}";
 
@@ -574,7 +569,8 @@ namespace Distance
 			set { mDebugAggroEntitiesWindowVisible = value; }
 		}
 
-		protected static readonly uint mDistanceNodeID = 0x6C78B300;	//YOLO hoping for no collisions.
-		protected static readonly uint mAggroDistanceNodeID = mDistanceNodeID + 1;
+		protected static readonly uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.
+		protected static readonly uint mAggroDistanceNodeID = mDistanceNodeIDBase - 1;
+		protected static readonly uint mDistanceNodeID = mDistanceNodeIDBase;
 	}
 }
