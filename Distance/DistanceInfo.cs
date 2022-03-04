@@ -58,7 +58,7 @@ namespace Distance
 		{
 			get
 			{
-				return DistanceFromTarget_Yalms - AggroRange_Yalms;
+				return DistanceFromTargetRing_Yalms - AggroRange_Yalms;
 			}
 			private set
 			{
