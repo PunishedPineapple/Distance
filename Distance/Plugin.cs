@@ -265,7 +265,7 @@ namespace Distance
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player:
-					show = mConfiguration.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
+					show = mConfiguration.ShowDistanceOnPlayers && mClientState.LocalPlayer != null && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc:
@@ -306,6 +306,16 @@ namespace Distance
 
 		protected void UpdateTargetDistanceData()
 		{
+			if( mClientState.LocalPlayer == null)
+			{
+				foreach( var info in mCurrentDistanceInfoArray )
+				{
+					info.Invalidate();
+				}
+
+				return;
+			}
+
 			Dalamud.Game.ClientState.Objects.Types.GameObject target = null;
 			int i;
 
