@@ -49,7 +49,12 @@ namespace Distance
 
 			//	Configuration
 			mPluginInterface = pluginInterface;
-			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration;
+			if( mConfiguration == null )
+			{
+				mConfiguration = new Configuration();
+				mConfiguration.DistanceWidgetConfigs.Add( new() );
+			}
 			mConfiguration.Initialize( mPluginInterface );
 
 			//	Aggro distance data loading

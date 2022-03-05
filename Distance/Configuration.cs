@@ -140,10 +140,7 @@ namespace Distance
 			mPluginInterface.SavePluginConfig( this );
 		}
 
-		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new List<DistanceWidgetConfig>()
-		{
-			new DistanceWidgetConfig()
-		};
+		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new List<DistanceWidgetConfig>();
 
 		[NonSerialized]
 		protected DalamudPluginInterface mPluginInterface;
