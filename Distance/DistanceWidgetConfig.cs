@@ -30,6 +30,13 @@ namespace Distance
 			set { mTargetIncludesSoftTarget = value; }
 		}
 
+		public bool mMouseoverTargetFollowsMouse = false;
+		public bool MouseoverTargetFollowsMouse
+		{
+			get { return mMouseoverTargetFollowsMouse; }
+			set { mMouseoverTargetFollowsMouse = value; }
+		}
+
 		public bool mDistanceIsToRing = true;
 		public bool DistanceIsToRing
 		{

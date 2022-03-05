@@ -106,6 +106,7 @@ namespace Distance
 
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
 						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
+						ImGuiHelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
 						ImGui.SliderInt( "##AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
 					}
 
@@ -182,8 +183,14 @@ namespace Distance
 
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Appearance", "Appearance" ) + $"###Distance Widget Appearance Header {i}." ) )
 						{
+							Vector2 sliderLimits = new( config.MouseoverTargetFollowsMouse ? -300 : 0, config.MouseoverTargetFollowsMouse ? 300 : Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (X,Y):" ) );
-							ImGui.DragFloat2( $"###DistanceTextPositionSlider {i}", ref config.mTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
+							ImGui.DragFloat2( $"###DistanceTextPositionSlider {i}", ref config.mTextPosition, 1f, sliderLimits.X, sliderLimits.Y, "%g" );
+							if( config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget )
+							{
+								ImGui.Checkbox( Loc.Localize( "Config Option: Mouseover Widget Follows Mouse", "Widget follows the cursor" ) + $"###Mouseover Target Follow Mouse {i}.", ref config.mMouseoverTargetFollowsMouse );
+								ImGuiHelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location." ) );
+							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
 							ImGui.SliderInt( $"##DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
@@ -406,10 +413,16 @@ namespace Distance
 				}
 			}
 
+			Vector2 mouseoverOffset = new()
+			{
+				X = config.MouseoverTargetFollowsMouse && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget ? ImGui.GetMousePos().X : 0,
+				Y = config.MouseoverTargetFollowsMouse && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget ? ImGui.GetMousePos().Y : 0
+			};
+
 			TextNodeDrawData drawData = new TextNodeDrawData()
 			{
-				PositionX = (short)config.TextPosition.X,
-				PositionY = (short)config.TextPosition.Y,
+				PositionX = (short)( config.TextPosition.X + mouseoverOffset.X ),
+				PositionY = (short)( config.TextPosition.Y + mouseoverOffset.Y ),
 				TextColorA = (byte)( textColorToUse.W * 255f ),
 				TextColorR = (byte)( textColorToUse.X * 255f ),
 				TextColorG = (byte)( textColorToUse.Y * 255f ),
