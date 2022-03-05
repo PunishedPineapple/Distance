@@ -194,11 +194,15 @@ namespace Distance
 
 		protected string ProcessTextCommand_DistanceMode( string args )
 		{
+			//***** TODO: Needs to take a distance widget index argument now too. *****
+			return "";
+			/*
 				 if( args.Trim().Equals( "center", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = false;
 			else if( args.Trim().Equals( "ring", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = true;
 			else																					mConfiguration.DistanceIsToRing = !mConfiguration.DistanceIsToRing;
-
+			
 			return String.Format( Loc.Localize( "Text Command Response: Distancemode", "Distance mode set to {0}" ), mConfiguration.DistanceIsToRing ? "\"ring\"" : "\"center\"" );
+			*/
 		}
 
 		protected string ProcessTextCommand_Help( string args )
@@ -247,9 +251,11 @@ namespace Distance
 					!mCondition[ConditionFlag.InCombat];
 		}
 
-		public bool ShouldDrawDistanceInfo( TargetType targetType, bool targetAlsoMeansSoftTarget = false )
+		//	It's tempting to put this into the config filters class, but we rely on a few things that won't know about, so just keeping it here to avoid having to pass in even more stuff.
+		public bool ShouldDrawDistanceInfo( DistanceWidgetConfig config )
 		{
-			if( targetType == TargetType.Target && targetAlsoMeansSoftTarget && mCurrentDistanceInfoArray[(int)TargetType.SoftTarget].IsValid )
+			TargetType targetType = config.ApplicableTargetType;
+			if( targetType == TargetType.Target && config.TargetIncludesSoftTarget && mCurrentDistanceInfoArray[(int)TargetType.SoftTarget].IsValid )
 			{
 				targetType = TargetType.SoftTarget;
 			}
@@ -261,39 +267,39 @@ namespace Distance
 			switch( mCurrentDistanceInfoArray[(int)targetType].TargetKind )
 			{
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc:
-					show = mConfiguration.ShowDistanceOnBattleNpc;
+					show = config.Filters.ShowDistanceOnBattleNpc;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player:
-					show = mConfiguration.ShowDistanceOnPlayers && mClientState.LocalPlayer != null && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
+					show = config.Filters.ShowDistanceOnPlayers && mClientState.LocalPlayer != null && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc:
-					show = mConfiguration.ShowDistanceOnEventNpc;
+					show = config.Filters.ShowDistanceOnEventNpc;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure:
-					show = mConfiguration.ShowDistanceOnTreasure;
+					show = config.Filters.ShowDistanceOnTreasure;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte:
-					show = mConfiguration.ShowDistanceOnAetheryte;
+					show = config.Filters.ShowDistanceOnAetheryte;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint:
-					show = mConfiguration.ShowDistanceOnGatheringNode;
+					show = config.Filters.ShowDistanceOnGatheringNode;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj:
-					show = mConfiguration.ShowDistanceOnEventObj;
+					show = config.Filters.ShowDistanceOnEventObj;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion:
-					show = mConfiguration.ShowDistanceOnCompanion;
+					show = config.Filters.ShowDistanceOnCompanion;
 					break;
 
 				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing:
-					show = mConfiguration.ShowDistanceOnHousing;
+					show = config.Filters.ShowDistanceOnHousing;
 					break;
 
 				default:
@@ -433,6 +439,23 @@ namespace Distance
 			SoftTarget,
 			FocusTarget,
 			MouseOverTarget
+		}
+
+		public static string GetLocalizedTargetTypeEnumString( TargetType targetType )
+		{
+			switch( targetType )
+			{
+				case TargetType.Target:
+					return Loc.Localize( "Terminology: Target Type - Target", "Target" );
+				case TargetType.SoftTarget:
+					return Loc.Localize( "Terminology: Target Type - Soft Target", "Soft Target" );
+				case TargetType.FocusTarget:
+					return Loc.Localize( "Terminology: Target Type - Focus Target", "Focus Target" );
+				case TargetType.MouseOverTarget:
+					return Loc.Localize( "Terminology: Target Type - Mouseover Target", "Mouseover Target" );
+				default:
+					return "You should never see this!";
+			}
 		}
 	}
 }
