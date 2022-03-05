@@ -1,26 +1,21 @@
 ﻿Bugs:
-	-Unknown
+	-ImGui cursor position seems to lag the game's cursor position, making a mouseover widget get wiggly sometimes.
 
 Priority:
 	-Maybe add option to use caution/warning aggro colors as a gradient rather than just step color changes.
 	-Rate limit download attempts.
 	-Config option to ignore soft target for aggro info.
+	-Add text alignment options.
 
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
 
 Misc:
 	-Translations.
-	-Add widget for focus target and mouseover target probably.
-		-May as well just go all the way and do what's discussed below.
 
 Maybe:
 	-Editor for aggro data?
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 	-Add an ImGui window over the text node and track its position to allow for dragging?
-	-Add an additional distance widget that is offset by a certain amount (and offset configurable for either from ring or center).
-		-Maybe allow an arbitrary number of these.
-		-Let them use any arbitrary target type (target, soft, focus, mouseover) per-widget
-		-Allowing the user to set custom colors for different distance values might be an equivalent or parallel option.
-		-To do this, best to set up a widget config class that we can just drop into a list, maybe port over main distance widget to use this.  Aggro probably needs to be kept separate due to specialization.
+	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
