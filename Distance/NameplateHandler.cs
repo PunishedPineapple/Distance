@@ -58,19 +58,19 @@ namespace Distance
 			var pFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
 			if( pFramework == null )
 			{
-				InvalidateAllNameplateData();
+				InvalidateAllNameplateDistanceData();
 				return;
 			}
 			var pUIModule = pFramework->GetUiModule();
 			if( pUIModule == null )
 			{
-				InvalidateAllNameplateData();
+				InvalidateAllNameplateDistanceData();
 				return;
 			}
 			var pUI3DModule = pUIModule->GetUI3DModule();
 			if( pUI3DModule == null )
 			{
-				InvalidateAllNameplateData();
+				InvalidateAllNameplateDistanceData();
 				return;
 			}
 
@@ -84,12 +84,7 @@ namespace Distance
 					pObjectInfo->NamePlateIndex < mNameplateDistanceInfoArray.Length )
 				{
 					var pObject = pObjectInfo->GameObject;
-					if( pObject == null )
-					{
-						InvalidateAllNameplateData();
-						continue;
-					}
-					else
+					if( pObject != null )
 					{
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].IsValid = true;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetKind = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind;
@@ -101,6 +96,10 @@ namespace Distance
 						float? aggroRange = BNpcAggroInfo.GetAggroRange( mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcNameID, mClientState.TerritoryType );
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = aggroRange.HasValue;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = aggroRange ?? 0;
+					}
+					else
+					{
+						mNameplateDistanceInfoArray[i].Invalidate();
 					}
 				}
 				else if( i >= 0 && i < mNameplateDistanceInfoArray.Length )
@@ -116,7 +115,7 @@ namespace Distance
 			}
 		}
 
-		private static void InvalidateAllNameplateData()
+		private static void InvalidateAllNameplateDistanceData()
 		{
 			foreach( var entry in mNameplateDistanceInfoArray )
 			{
@@ -141,7 +140,7 @@ namespace Distance
 
 		private static AtkComponentBase* GetNameplateNode( int i )
 		{
-			if( i < AddonNamePlate.NumNamePlateObjects && 
+			if( i < AddonNamePlate.NumNamePlateObjects &&
 				mpNameplateAddon != null &&
 				mpNameplateAddon->NamePlateObjectArray[i].RootNode != null )
 			{
