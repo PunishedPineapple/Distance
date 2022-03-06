@@ -86,6 +86,13 @@ namespace Distance
 			set { mFontHeavy = value; }
 		}
 
+		public int mFontAlignment = 8;
+		public int FontAlignment
+		{
+			get { return mFontAlignment; }
+			set { mFontAlignment = value; }
+		}
+
 		public Vector4 mTextColor = new Vector4( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
 		public Vector4 TextColor
 		{

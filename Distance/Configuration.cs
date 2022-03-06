@@ -66,6 +66,13 @@ namespace Distance
 			set { mAggroDistanceFontHeavy = value; }
 		}
 
+		public int mAggroDistanceFontAlignment = 7;
+		public int AggroDistanceFontAlignment
+		{
+			get { return mAggroDistanceFontAlignment; }
+			set { mAggroDistanceFontAlignment = value; }
+		}
+
 		public Vector2 mAggroDistanceTextPosition = new( 1f, 24f );
 		public Vector2 AggroDistanceTextPosition
 		{
