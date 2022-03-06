@@ -131,6 +131,9 @@ namespace Distance
 					}
 				}
 
+				ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses" ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
+				ImGuiHelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
+
 				ImGui.Spacing();
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -147,16 +150,23 @@ namespace Distance
 				{
 					var config = mConfiguration.DistanceWidgetConfigs[i];
 					var filters = config.Filters;
-					if( ImGui.CollapsingHeader( String.Format( Loc.Localize( "Config Section Header: Distance Widget", "Distance Widget" ), i ) + $"###Distance Widget Header {i}." ) )
+					string name = config.mWidgetName.Length > 0 ? config.mWidgetName : Plugin.GetLocalizedTargetTypeEnumString( config.ApplicableTargetType );
+					if( ImGui.CollapsingHeader( String.Format( Loc.Localize( "Config Section Header: Distance Widget", "Distance Widget ({0})" ), name ) + $"###Distance Widget Header {i}." ) )
 					{
+						ImGui.Text( Loc.Localize( "Config Option: Widget Name", "Widget Name:" ) );
+						ImGui.SameLine();
+						ImGui.InputTextWithHint( $"###WidgetNameInputBox {i}", Plugin.GetLocalizedTargetTypeEnumString( config.ApplicableTargetType ), ref config.mWidgetName, 50 );
+						ImGuiHelpMarker( Loc.Localize( "Help: Widget Name", "This is used to give a customized name to this widget for use with certain text commands.  If you leave it blank, the type of target for this widget will be used in the header above, but it will not have a name for use in text commands." )  );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Widget Enabled", "Enabled" ) + $"###Widget Enabled Checkbox {i}.", ref config.mEnabled );
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Rules", "Distance Rules" ) + $"###Distance Widget Rules Header {i}." ) )
 						{
+							ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
+							ImGuiHelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
 							string str =	$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.Target )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.SoftTarget )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.FocusTarget )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.MouseOverTarget )}";
 							ImGui.Combo( $"###DistanceTypeDropdown {i}", ref config.mApplicableTargetType, str );
-							ImGuiHelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
 							if( config.ApplicableTargetType == Plugin.TargetType.Target )
 							{
 								ImGui.Indent();

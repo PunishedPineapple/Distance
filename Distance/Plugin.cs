@@ -46,7 +46,7 @@ namespace Distance
 			mDataManager		= dataManager;
 
 			//	Initialization
-			NameplateHandler.Init( mSigScanner, mClientState, mCondition );
+			//NameplateHandler.Init( mSigScanner, mClientState, mCondition );
 
 			//	Configuration
 			mPluginInterface = pluginInterface;
@@ -175,9 +175,17 @@ namespace Distance
 			{
 				mUI.SettingsWindowVisible = !mUI.SettingsWindowVisible;
 			}
-			else if( subCommand.ToLower() == "distancemode" )
+			else if( subCommand.ToLower() == "enable" )
 			{
-				commandResponse = ProcessTextCommand_DistanceMode( subCommandArgs );
+				commandResponse = ProcessTextCommand_Enable( subCommandArgs );
+			}
+			else if( subCommand.ToLower() == "disable" )
+			{
+				commandResponse = ProcessTextCommand_Disable( subCommandArgs );
+			}
+			else if( subCommand.ToLower() == "toggle" )
+			{
+				commandResponse = ProcessTextCommand_Toggle( subCommandArgs );
 			}
 			else if( subCommand.ToLower() == "debug" )
 			{
@@ -200,17 +208,95 @@ namespace Distance
 			}
 		}
 
-		protected string ProcessTextCommand_DistanceMode( string args )
+		protected string ProcessTextCommand_Enable( string args )
 		{
-			//***** TODO: Needs to take a distance widget index argument now too. *****
-			return "";
-			/*
-				 if( args.Trim().Equals( "center", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = false;
-			else if( args.Trim().Equals( "ring", StringComparison.InvariantCultureIgnoreCase ) )	mConfiguration.DistanceIsToRing = true;
-			else																					mConfiguration.DistanceIsToRing = !mConfiguration.DistanceIsToRing;
-			
-			return String.Format( Loc.Localize( "Text Command Response: Distancemode", "Distance mode set to {0}" ), mConfiguration.DistanceIsToRing ? "\"ring\"" : "\"center\"" );
-			*/
+			if( args.Trim().Length == 0 ) return Loc.Localize( "Text Command Response: No Widget Name Provided", "No widget name was specified!" );
+
+			var configs = mConfiguration.DistanceWidgetConfigs.FindAll( x => { return x.WidgetName == args.Trim(); });
+			foreach( var config in configs )
+			{
+				config.Enabled = true;
+			}
+
+			string retString = "";
+
+			if( configs.Count == 0 )
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Enable - None Found", "No widget(s) named \"{0}\" could be found." ), args.Trim() );
+			}
+			else if( configs.Count == 1 )
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Enable - One Found", "The widget named \"{0}\" was enabled." ), args.Trim() );
+			}
+			else
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Enable - Multiple Found", "All {0} widgets named \"{1}\" were enabled." ), configs.Count, args.Trim() );
+			}
+
+			return retString;
+		}
+
+		protected string ProcessTextCommand_Disable( string args )
+		{
+			if( args.Trim().Length == 0 ) return Loc.Localize( "Text Command Response: No Widget Name Provided", "No widget name was specified!" );
+
+			var configs = mConfiguration.DistanceWidgetConfigs.FindAll( x => { return x.WidgetName == args.Trim(); });
+			foreach( var config in configs )
+			{
+				config.Enabled = false;
+			}
+
+			string retString = "";
+
+			if( configs.Count == 0 )
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Disable - None Found", "No widget(s) named \"{0}\" could be found." ), args.Trim() );
+			}
+			else if( configs.Count == 1 )
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Disable - One Found", "The widget named \"{0}\" was disabled." ), args.Trim() );
+			}
+			else
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Disable - Multiple Found", "All {0} widgets named \"{1}\" were disabled." ), configs.Count, args.Trim() );
+			}
+
+			return retString;
+		}
+
+		protected string ProcessTextCommand_Toggle( string args )
+		{
+			if( args.Trim().Length == 0 ) return Loc.Localize( "Text Command Response: No Widget Name Provided", "No widget name was specified!" );
+
+			var configs = mConfiguration.DistanceWidgetConfigs.FindAll( x => { return x.WidgetName == args.Trim(); });
+			foreach( var config in configs )
+			{
+				config.Enabled = !config.Enabled;
+			}
+
+			string retString = "";
+
+			if( configs.Count == 0 )
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Toggle - None Found", "No widget(s) named \"{0}\" could be found." ), args.Trim() );
+			}
+			else if( configs.Count == 1 )
+			{
+				if( configs[0].Enabled )
+				{
+					retString = String.Format( Loc.Localize( "Text Command Response: Toggle - One Found (enabled)", "The widget named \"{0}\" was enabled." ), args.Trim() );
+				}
+				else
+				{
+					retString = String.Format( Loc.Localize( "Text Command Response: Toggle - One Found (disabled)", "The widget named \"{0}\" was disabled." ), args.Trim() );
+				}
+			}
+			else
+			{
+				retString = String.Format( Loc.Localize( "Text Command Response: Toggle - Multiple Found", "All {0} widgets named \"{1}\" were toggled." ), configs.Count, args.Trim() );
+			}
+
+			return retString;
 		}
 
 		protected string ProcessTextCommand_Help( string args )
@@ -219,13 +305,21 @@ namespace Distance
 			{
 				return Loc.Localize( "Help Message: Config Subcommand", "Opens the settings window." );
 			}
-			if( args.ToLower() == "distancemode" )
+			if( args.ToLower() == "enable" )
 			{
-				return String.Format( Loc.Localize( "Help Message: Distancemode Subcommand", "Changes the mode of the distance indicator.  Valid arguments are are {0} and {1}.  If no arguments are supplied, this will cycle between modes." ), "\"center\"", "\"ring\"" );
+				return String.Format( Loc.Localize( "Help Message: Enable Subcommand", "Enables the specified distance widget.  Usage: \"{0} <widget name>\"" ), "/pdistance enable" );
+			}
+			if( args.ToLower() == "disable" )
+			{
+				return String.Format( Loc.Localize( "Help Message: Disable Subcommand", "Disables the specified distance widget.  Usage: \"{0} <widget name>\"" ), "/pdistance disable" );
+			}
+			if( args.ToLower() == "toggle" )
+			{
+				return String.Format( Loc.Localize( "Help Message: Toggle Subcommand", "Toggles the specified distance widget on or off.  Usage: \"{0} <widget name>\"" ), "/pdistance toggle" );
 			}
 			else
 			{
-				return String.Format( Loc.Localize( "Help Message: Basic", "Valid subcommands are {0} and {1}.  Use \"{2} <subcommand>\" for more information on each subcommand." ), "\"config\"", "\"distancemode\"", "/pdistance help" );
+				return String.Format( Loc.Localize( "Help Message: Basic", "Valid subcommands are {0}, {1}, {2}, and {3}.  Use \"{4} <subcommand>\" for more information on each subcommand." ), "\"config\"", "\"enable\"", "\"disable\"", "\"toggle\"", "/pdistance help" );
 			}
 		}
 
@@ -269,6 +363,7 @@ namespace Distance
 				targetType = TargetType.SoftTarget;
 			}
 
+			if( !config.Enabled ) return false;
 			if( !mCurrentDistanceInfoArray[(int)targetType].IsValid ) return false;
 
 			bool show = false;

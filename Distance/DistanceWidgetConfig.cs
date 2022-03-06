@@ -9,6 +9,20 @@ namespace Distance
 {
 	public class DistanceWidgetConfig
 	{
+		public string mWidgetName = "";
+		public string WidgetName
+		{
+			get { return mWidgetName; }
+			set { mWidgetName = value; }
+		}
+
+		public bool mEnabled = true;
+		public bool Enabled
+		{
+			get { return mEnabled; }
+			set { mEnabled = value; }
+		}
+
 		public Vector2 mTextPosition = Vector2.One;
 		public Vector2 TextPosition
 		{
