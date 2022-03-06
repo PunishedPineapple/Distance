@@ -5,7 +5,6 @@ Priority:
 	-Maybe add option to use caution/warning aggro colors as a gradient rather than just step color changes.
 	-Rate limit download attempts.
 	-Config option to ignore soft target for aggro info.
-	-Add text alignment options.
 
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
@@ -19,3 +18,5 @@ Maybe:
 	-Add an ImGui window over the text node and track its position to allow for dragging?
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
+	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
+	-Provide IPC for others to get aggro data.  Might be useful for the plugin that lets you put rings around stuff?
