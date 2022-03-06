@@ -62,6 +62,7 @@ namespace Distance
 			DrawSettingsWindow();
 			DrawDebugWindow();
 			DrawDebugAggroEntitiesWindow();
+			DrawDebugNameplateInfoWindow();
 
 			//	Draw other UI stuff.
 			DrawOnGameUI();
@@ -75,7 +76,7 @@ namespace Distance
 			}
 
 			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", ref mSettingsWindowVisible,
-				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse ) )
+				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse /*| ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse*/ ) )
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
 				ImGuiHelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
@@ -88,7 +89,9 @@ namespace Distance
 						ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.mAggroDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
 						ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget" ) + "###Aggro Distance font heavy.", ref mConfiguration.mAggroDistanceFontHeavy );
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Font Size", "Aggro widget font size:" ) );
-						ImGui.SliderInt( "##AggroDistanceTextFontSizeSlider", ref mConfiguration.mAggroDistanceFontSize, 6, 36 );
+						ImGui.SliderInt( "###AggroDistanceTextFontSizeSlider", ref mConfiguration.mAggroDistanceFontSize, 6, 36 );
+						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Alignment", "Text alignment:" ) );
+						ImGui.SliderInt( "###AggroDistanceTextFontAlignmentSlider", ref mConfiguration.mAggroDistanceFontAlignment, 6, 8, "" );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color", "Aggro widget text color" ) + "###AggroDistanceTextColorPicker", ref mConfiguration.mAggroDistanceTextColor, ImGuiColorEditFlags.NoInputs );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color", "Aggro widget text glow color" ) + "###AggroDistanceTextEdgeColorPicker", ref mConfiguration.mAggroDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 
@@ -99,15 +102,15 @@ namespace Distance
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Warning", "Aggro widget text glow color (warning range)" ) + "###AggroDistanceWarningTextEdgeColorPicker", ref mConfiguration.mAggroDistanceWarningTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range (y):" ) );
-						ImGui.SliderInt( "##AggroDistanceCautionRangeSlider", ref mConfiguration.mAggroCautionDistance_Yalms, 0, 30 );
+						ImGui.SliderInt( "###AggroDistanceCautionRangeSlider", ref mConfiguration.mAggroCautionDistance_Yalms, 0, 30 );
 
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
-						ImGui.SliderInt( "##AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
+						ImGui.SliderInt( "###AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
 
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
 						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
 						ImGuiHelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
-						ImGui.SliderInt( "##AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
+						ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
 					}
 
 					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
@@ -123,7 +126,7 @@ namespace Distance
 						}
 						if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
 						{
-							ImGui.Text( $"Status of most recent update attempt: {BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
+							ImGui.Text( Loc.Localize( "Config Text: Download Status Indicator", $"Status of most recent update attempt:" ) + $"\r\n{BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
 						}
 					}
 				}
@@ -139,6 +142,7 @@ namespace Distance
 					mConfiguration.DistanceWidgetConfigs.Add( new() );
 				}
 
+				int widgetIndexToDelete = -1;
 				for( int i = 0; i < mConfiguration.DistanceWidgetConfigs.Count; ++i )
 				{
 					var config = mConfiguration.DistanceWidgetConfigs[i];
@@ -149,9 +153,9 @@ namespace Distance
 						{
 							string str =	$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.Target )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.SoftTarget )}\0" +
-											$"{ Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.FocusTarget )}\0" +
-											$"{ Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.MouseOverTarget )}";
-							ImGui.Combo( "###DistanceTypeDropdown", ref config.mApplicableTargetType, str );
+											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.FocusTarget )}\0" +
+											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.MouseOverTarget )}";
+							ImGui.Combo( $"###DistanceTypeDropdown {i}", ref config.mApplicableTargetType, str );
 							ImGuiHelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
 							if( config.ApplicableTargetType == Plugin.TargetType.Target )
 							{
@@ -169,7 +173,7 @@ namespace Distance
 
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Filters", "Target Filters" ) + $"###Distance Widget Filters Header {i}." ) )
 						{
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players .", ref filters.mShowDistanceOnPlayers );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players {i}.", ref filters.mShowDistanceOnPlayers );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + $"###Show distance to BattleNpc {i}.", ref filters.mShowDistanceOnBattleNpc );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventNpc", "Show the distance to non-combatant NPCs." ) + $"###Show distance to EventNpc {i}.", ref filters.mShowDistanceOnEventNpc );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Treasure", "Show the distance to treasure chests." ) + $"###Show distance to treasure {i}.", ref filters.mShowDistanceOnTreasure );
@@ -193,7 +197,9 @@ namespace Distance
 							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
-							ImGui.SliderInt( $"##DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
+							ImGui.SliderInt( $"###DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
+							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "" );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color" ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
 							ImGuiHelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
@@ -201,16 +207,21 @@ namespace Distance
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units {i}.", ref config.mShowUnits );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Mode Indicator", "Show the distance mode indicator." ) + $"###Show distance type marker {i}.", ref config.mShowDistanceModeMarker );
 							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
-							ImGui.SliderInt( $"##DistancePrecisionSlider {i}", ref config.mDecimalPrecision, 0, 3 );
+							ImGui.SliderInt( $"###DistancePrecisionSlider {i}", ref config.mDecimalPrecision, 0, 3 );
 							ImGui.TreePop();
 						}
 
+						//***** TODO: Maybe add a confirm delete button. *****
 						if( ImGui.Button( Loc.Localize( "Button: Delete Distance Widget", "Delete Widget" ) + $"###Delete Widget Button {i}." ) )
 						{
-							UpdateDistanceTextNode( (uint)i, new(), new(), false );
-							mConfiguration.DistanceWidgetConfigs.RemoveAt( i );
+							widgetIndexToDelete = i;
 						}
 					}
+				}
+				if( widgetIndexToDelete > -1 && widgetIndexToDelete < mConfiguration.DistanceWidgetConfigs.Count )
+				{
+					UpdateDistanceTextNode( (uint)widgetIndexToDelete, new(), new(), false );
+					mConfiguration.DistanceWidgetConfigs.RemoveAt( widgetIndexToDelete );
 				}
 
 				ImGui.Spacing();
@@ -246,6 +257,14 @@ namespace Distance
 			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
 			if( ImGui.Begin( Loc.Localize( "Window Title: Debug Data", "Debug Data" ) + "###Debug Data", ref mDebugWindowVisible ) )
 			{
+				if( ImGui.Button( "Export Localizable Strings" ) )
+				{
+					string pwd = Directory.GetCurrentDirectory();
+					Directory.SetCurrentDirectory( mPluginInterface.AssemblyLocation.DirectoryName );
+					Loc.ExportLocalizable();
+					Directory.SetCurrentDirectory( pwd );
+				}
+				ImGui.Checkbox( "Show nameplate data", ref mDebugNameplateInfoWindowVisible );
 				ImGui.Checkbox( "Show known aggro range data", ref mDebugAggroEntitiesWindowVisible );
 
 				ImGui.Spacing();
@@ -344,6 +363,33 @@ namespace Distance
 			}
 		}
 
+		protected void DrawDebugNameplateInfoWindow()
+		{
+			if( !DebugNameplateInfoWindowVisible )
+			{
+				return;
+			}
+
+			//	Draw the window.
+			ImGui.SetNextWindowSize( new Vector2( 1340, 568 ) * ImGui.GetIO().FontGlobalScale, ImGuiCond.FirstUseEver );
+			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
+			if( ImGui.Begin( Loc.Localize( "Window Title: Nameplate Info", "Debug: Nameplate Distance Info" ) + "###Debug: Nameplate Info Window", ref mDebugNameplateInfoWindowVisible ) )
+			{
+				for( int i = 0; i < NameplateHandler.mNameplateDistanceInfoArray.Length; ++i )
+				{
+					ImGui.Text( $"{i}:" );
+					ImGui.Text( NameplateHandler.mNameplateDistanceInfoArray[i].ToString() );
+
+					ImGui.Spacing();
+					ImGui.Spacing();
+					ImGui.Spacing();
+					ImGui.Spacing();
+					ImGui.Spacing();
+					ImGui.Spacing();
+				}
+			}
+		}
+
 		protected void DrawOnGameUI()
 		{
 			//	Draw the aggro widget.
@@ -356,6 +402,34 @@ namespace Distance
 										mPlugin.GetDistanceInfo( mConfiguration.DistanceWidgetConfigs[i].ApplicableTargetType, mConfiguration.DistanceWidgetConfigs[i].TargetIncludesSoftTarget ),
 										mConfiguration.DistanceWidgetConfigs[i],
 										mPlugin.ShouldDrawDistanceInfo( mConfiguration.DistanceWidgetConfigs[i] ) );
+			}
+
+			UpdateNameplateDistanceTextNodes();
+		}
+
+		protected void UpdateNameplateDistanceTextNodes()
+		{
+			TextNodeDrawData drawData = new TextNodeDrawData()
+			{
+				PositionX = (short)35,
+				PositionY = (short)76,
+				TextColorA = (byte)( 1 * 255f ),
+				TextColorR = (byte)( 1 * 255f ),
+				TextColorG = (byte)( 1 * 255f ),
+				TextColorB = (byte)( 1 * 255f ),
+				EdgeColorA = (byte)( 1 * 255f ),
+				EdgeColorR = (byte)( 1 * 255f ),
+				EdgeColorG = (byte)( 1 * 255f ),
+				EdgeColorB = (byte)( 1 * 255f ),
+				FontSize = (byte)12,
+				AlignmentFontType = (byte)( 7 | 0 ),
+				LineSpacing = 24,
+				CharSpacing = 1
+			};
+
+			for( int i = 0; i < NameplateHandler.mNameplateDistanceInfoArray.Length; ++i )
+			{
+				NameplateHandler.UpdateNameplateDistanceTextNode( i, $"{NameplateHandler.mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
 			}
 		}
 
@@ -413,11 +487,19 @@ namespace Distance
 				}
 			}
 
-			Vector2 mouseoverOffset = new()
+			Vector2 mouseoverOffset = Vector2.Zero;
+			if( config.MouseoverTargetFollowsMouse && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget )
 			{
-				X = config.MouseoverTargetFollowsMouse && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget ? ImGui.GetMousePos().X : 0,
-				Y = config.MouseoverTargetFollowsMouse && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget ? ImGui.GetMousePos().Y : 0
+				mouseoverOffset = ImGui.GetMousePos();
 			};
+
+			//	Testing distance value on actor; doesn't work very well.  Better off just getting nameplate distances working and make it an option to only put on mouseover target.
+			/*Vector2 screenPos = new();
+			bool posIsValid = mGameGui.WorldToScreen( distanceInfo.TargetPosition, out screenPos );
+			if( posIsValid )
+			{
+				mouseoverOffset = screenPos;
+			};*/
 
 			TextNodeDrawData drawData = new TextNodeDrawData()
 			{
@@ -432,7 +514,7 @@ namespace Distance
 				EdgeColorG = (byte)( edgeColorToUse.Y * 255f ),
 				EdgeColorB = (byte)( edgeColorToUse.Z * 255f ),
 				FontSize = (byte)config.FontSize,
-				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( config.FontHeavy ? 0x10 : 0 ) ),
+				AlignmentFontType = (byte)( config.FontAlignment | ( config.FontHeavy ? 0x10 : 0 ) ),
 				LineSpacing = 24,
 				CharSpacing = 1
 			};
@@ -476,7 +558,7 @@ namespace Distance
 				EdgeColorG = (byte)( edgeColor.Y * 255f ),
 				EdgeColorB = (byte)( edgeColor.Z * 255f ),
 				FontSize = (byte)mConfiguration.AggroDistanceFontSize,
-				AlignmentFontType = (byte)( (int)AlignmentType.BottomRight | ( mConfiguration.AggroDistanceFontHeavy ? 0x10 : 0 ) ),
+				AlignmentFontType = (byte)( mConfiguration.AggroDistanceFontAlignment | ( mConfiguration.AggroDistanceFontHeavy ? 0x10 : 0 ) ),
 				LineSpacing = 24,
 				CharSpacing = 1
 			};
@@ -626,6 +708,13 @@ namespace Distance
 		{
 			get { return mDebugAggroEntitiesWindowVisible; }
 			set { mDebugAggroEntitiesWindowVisible = value; }
+		}
+
+		protected bool mDebugNameplateInfoWindowVisible = false;
+		public bool DebugNameplateInfoWindowVisible
+		{
+			get { return mDebugNameplateInfoWindowVisible; }
+			set { mDebugNameplateInfoWindowVisible = value; }
 		}
 
 		protected static readonly uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.

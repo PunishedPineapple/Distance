@@ -13,9 +13,7 @@ using Dalamud.Game.Gui;
 using Dalamud.Game;
 using Dalamud.Data;
 using Dalamud.Logging;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+
 using CheapLoc;
 
 namespace Distance
@@ -46,6 +44,9 @@ namespace Distance
 			mGameGui			= gameGui;
 			mSigScanner			= sigScanner;
 			mDataManager		= dataManager;
+
+			//	Initialization
+			NameplateHandler.Init( mSigScanner, mClientState, mCondition );
 
 			//	Configuration
 			mPluginInterface = pluginInterface;
@@ -109,6 +110,8 @@ namespace Distance
 			mCommandManager.RemoveHandler( mTextCommandName );
 
 			BNpcAggroInfoDownloader.CancelAllDownloads();
+
+			NameplateHandler.Uninit();
 		}
 
 		protected void OnLanguageChanged( string langCode )
@@ -229,6 +232,7 @@ namespace Distance
 		public void OnGameFrameworkUpdate( Framework framework )
 		{
 			UpdateTargetDistanceData();
+			NameplateHandler.UpdateNameplateEntityDistanceData();
 		}
 
 		protected void OnTerritoryChanged( object sender, UInt16 ID )
