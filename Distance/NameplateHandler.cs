@@ -55,6 +55,11 @@ namespace Distance
 
 		unsafe public static void UpdateNameplateEntityDistanceData()
 		{
+			if( mClientState == null )
+			{
+				InvalidateAllNameplateDistanceData();
+				return;
+			}
 			var pFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
 			if( pFramework == null )
 			{
@@ -136,6 +141,38 @@ namespace Distance
 			}
 
 			mNameplateDrawHook.Original( pThis );
+		}
+
+		public static TextNodeDrawData? GetNameplateNodeDrawData( int i )
+		{
+			var pNameplateNode = GetNameplateNode( i );
+			if( pNameplateNode == null ) return null;
+
+			int nameplateTextNodeIndex = 9;
+			var pTargetNameNode = pNameplateNode->UldManager.NodeListSize > nameplateTextNodeIndex ? pNameplateNode->UldManager.NodeList[nameplateTextNodeIndex] : null;
+			if( pTargetNameNode != null && pTargetNameNode->GetAsAtkTextNode() != null )
+			{
+				var pTargetNameTextNode = pTargetNameNode->GetAsAtkTextNode();
+				return new TextNodeDrawData()
+				{
+					TextColorA = ((AtkTextNode*)pTargetNameTextNode)->TextColor.A,
+					TextColorR = ((AtkTextNode*)pTargetNameTextNode)->TextColor.R,
+					TextColorG = ((AtkTextNode*)pTargetNameTextNode)->TextColor.G,
+					TextColorB = ((AtkTextNode*)pTargetNameTextNode)->TextColor.B,
+					EdgeColorA = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.A,
+					EdgeColorR = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.R,
+					EdgeColorG = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.G,
+					EdgeColorB = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.B,
+					FontSize = ((AtkTextNode*)pTargetNameTextNode)->FontSize,
+					AlignmentFontType = ((AtkTextNode*)pTargetNameTextNode)->AlignmentFontType,
+					LineSpacing = ((AtkTextNode*)pTargetNameTextNode)->LineSpacing,
+					CharSpacing = ((AtkTextNode*)pTargetNameTextNode)->CharSpacing
+				};
+			}
+			else
+			{
+				return null;
+			}
 		}
 
 		private static AtkComponentBase* GetNameplateNode( int i )
