@@ -527,7 +527,7 @@ namespace Distance
 										mPlugin.ShouldDrawDistanceInfo( mConfiguration.DistanceWidgetConfigs[i] ) );
 			}
 
-			UpdateNameplateDistanceTextNodes();
+			//UpdateNameplateDistanceTextNodes();
 		}
 
 		protected void UpdateNameplateDistanceTextNodes()
@@ -586,7 +586,13 @@ namespace Distance
 				UInt16 targetBarNameNodeIndex = 0;
 				var pTargetAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
 				var pTargetAddonSplit = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
-				if( pTargetAddon != null && pTargetAddon->IsVisible )
+				var pFocusTargetAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_FocusTargetInfo", 1 );
+				if( config.ApplicableTargetType == Plugin.TargetType.FocusTarget && pFocusTargetAddon != null && pFocusTargetAddon->IsVisible )
+				{
+					pTargetAddonToUse = pFocusTargetAddon;
+					targetBarNameNodeIndex = 10;
+				}
+				else if( pTargetAddon != null && pTargetAddon->IsVisible )
 				{
 					pTargetAddonToUse = pTargetAddon;
 					targetBarNameNodeIndex = 39;
