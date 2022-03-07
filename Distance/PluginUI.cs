@@ -65,6 +65,7 @@ namespace Distance
 			DrawDebugNameplateInfoWindow();
 
 			//	Draw other UI stuff.
+			DrawOverlay();
 			DrawOnGameUI();
 		}
 
@@ -83,7 +84,7 @@ namespace Distance
 
 				if( mConfiguration.ShowAggroDistance )
 				{
-					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Appearance", "Aggro Widget Appearance" ) + "###Aggro Widget Appearance Header." ) )
+					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Settings", "Aggro Widget Settings" ) + "###Aggro Widget Settings Header." ) )
 					{
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Position", "Position of the aggro widget (X,Y):" ) );
 						ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.mAggroDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
@@ -111,6 +112,13 @@ namespace Distance
 						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
 						ImGuiHelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
 						ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
+
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range" ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
+						if( mConfiguration.DrawAggroArc )
+						{
+							ImGui.Text( Loc.Localize( "Config Option: Aggro Arc Length", "Length of the aggro arc (deg):" ) );
+							ImGui.SliderInt( "###AggroArcLengthSlider", ref mConfiguration.mAggroArcLength_Deg, 0, 15 );
+						}
 					}
 
 					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
@@ -131,8 +139,20 @@ namespace Distance
 					}
 				}
 
-				ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses" ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
-				ImGuiHelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Miscellaneous", "Miscellaneous Options" ) + "###Misc. Options Header." ) )
+				{
+
+					ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses" ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
+					ImGuiHelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
+				}
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
+				ImGui.Separator();
 
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -400,6 +420,99 @@ namespace Distance
 			}
 		}
 
+		protected void DrawAggroDistanceArc()
+		{
+			var distanceInfo = mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true );
+			float lineLength = distanceInfo.DistanceFromTarget_Yalms;
+			float distance_Norm = ( distanceInfo.AggroRange_Yalms + distanceInfo.TargetRadius_Yalms ) / lineLength;
+			if( distance_Norm >= 0 )
+			{
+				//	Get the point at the aggro distance between the player and the target.
+				Vector3 worldCoords = new Vector3()
+				{
+					X = distance_Norm * ( distanceInfo.PlayerPosition.X - distanceInfo.TargetPosition.X ) + distanceInfo.TargetPosition.X,
+					Y = distance_Norm * ( distanceInfo.PlayerPosition.Y - distanceInfo.TargetPosition.Y ) + distanceInfo.TargetPosition.Y,
+					Z = distance_Norm * ( distanceInfo.PlayerPosition.Z - distanceInfo.TargetPosition.Z ) + distanceInfo.TargetPosition.Z
+				};
+
+				//	Compute some points that are on an arc intersecting that point.
+				Vector3 translatedPlayerPos = distanceInfo.PlayerPosition - distanceInfo.TargetPosition;
+				double halfArcLength_Rad = mConfiguration.AggroArcLength_Deg / 2f * Math.PI / 180f;
+				double angle_Rad = Math.Atan2( translatedPlayerPos.Z, translatedPlayerPos.X );
+				Vector3 arcPos1 = new Vector3()
+				{
+					X = (float)Math.Cos( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
+					Z = (float)Math.Sin( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
+					Y = worldCoords.Y
+				};
+				Vector3 arcPos2 = new Vector3()
+				{
+					X = (float)Math.Cos( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
+					Z = (float)Math.Sin( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
+					Y = worldCoords.Y
+				};
+
+				Vector4 color = mConfiguration.AggroDistanceTextColor;
+				Vector4 edgeColor = mConfiguration.AggroDistanceTextEdgeColor;
+				if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
+				{
+					color = mConfiguration.AggroDistanceWarningTextColor;
+					edgeColor = mConfiguration.AggroDistanceWarningTextEdgeColor;
+				}
+				else if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroCautionDistance_Yalms )
+				{
+					color = mConfiguration.AggroDistanceCautionTextColor;
+					edgeColor = mConfiguration.AggroDistanceCautionTextEdgeColor;
+				}
+
+				uint colorForImgui =    (uint)( color.X * 255f ) << 0 |
+												(uint)( color.Y * 255f ) << 8 |
+												(uint)( color.Z * 255f ) << 16 |
+												(uint)( color.W * 255f ) << 24;
+				uint edgeColorForImgui =(uint)( edgeColor.X * 255f ) << 0 |
+												(uint)( edgeColor.Y * 255f ) << 8 |
+												(uint)( edgeColor.Z * 255f ) << 16 |
+												(uint)( edgeColor.W * 255f ) << 24;
+
+				Vector2 screenPos = new Vector2();
+				Vector2 screenPos1 = new Vector2();
+				Vector2 screenPos2 = new Vector2();
+				bool isScreenPosValid = true;
+				isScreenPosValid &= mGameGui.WorldToScreen( worldCoords, out screenPos );
+				isScreenPosValid &= mGameGui.WorldToScreen( arcPos1, out screenPos1 );
+				isScreenPosValid &= mGameGui.WorldToScreen( arcPos2, out screenPos2 );
+
+				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColorForImgui, 36, 5 );
+				ImGui.GetWindowDrawList().AddBezierQuadratic( screenPos1, screenPos, screenPos2, edgeColorForImgui, 5 );
+				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, colorForImgui, 36, 3 );
+				ImGui.GetWindowDrawList().AddBezierQuadratic( screenPos1, screenPos, screenPos2, colorForImgui, 3 );
+			}
+		}
+
+		protected void DrawOverlay()
+		{
+			const ImGuiWindowFlags flags =  ImGuiWindowFlags.NoDecoration |
+											ImGuiWindowFlags.NoSavedSettings |
+											ImGuiWindowFlags.NoMove |
+											ImGuiWindowFlags.NoMouseInputs |
+											ImGuiWindowFlags.NoFocusOnAppearing |
+											ImGuiWindowFlags.NoBackground |
+											ImGuiWindowFlags.NoNav;
+
+			ImGuiHelpers.ForceNextWindowMainViewport();
+			ImGui.SetNextWindowPos( ImGui.GetMainViewport().Pos );
+			ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
+			if( ImGui.Begin( "##AggroDistanceIndicatorWindow", flags ) )
+			{
+				if( mConfiguration.DrawAggroArc && mPlugin.ShouldDrawAggroDistanceInfo() )
+				{
+					DrawAggroDistanceArc();
+				}
+			}
+
+			ImGui.End();
+		}
+
 		protected void DrawOnGameUI()
 		{
 			//	Draw the aggro widget.
@@ -419,26 +532,33 @@ namespace Distance
 
 		protected void UpdateNameplateDistanceTextNodes()
 		{
-			TextNodeDrawData drawData = new TextNodeDrawData()
-			{
-				PositionX = (short)35,
-				PositionY = (short)76,
-				TextColorA = (byte)( 1 * 255f ),
-				TextColorR = (byte)( 1 * 255f ),
-				TextColorG = (byte)( 1 * 255f ),
-				TextColorB = (byte)( 1 * 255f ),
-				EdgeColorA = (byte)( 1 * 255f ),
-				EdgeColorR = (byte)( 1 * 255f ),
-				EdgeColorG = (byte)( 1 * 255f ),
-				EdgeColorB = (byte)( 1 * 255f ),
-				FontSize = (byte)12,
-				AlignmentFontType = (byte)( 7 | 0 ),
-				LineSpacing = 24,
-				CharSpacing = 1
-			};
-
 			for( int i = 0; i < NameplateHandler.mNameplateDistanceInfoArray.Length; ++i )
 			{
+				TextNodeDrawData drawData = NameplateHandler.GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
+				{
+					PositionX = (short)35,
+					PositionY = (short)76,
+					TextColorA = (byte)( 1 * 255f ),
+					TextColorR = (byte)( 1 * 255f ),
+					TextColorG = (byte)( 1 * 255f ),
+					TextColorB = (byte)( 1 * 255f ),
+					EdgeColorA = (byte)( 1 * 255f ),
+					EdgeColorR = (byte)( 1 * 255f ),
+					EdgeColorG = (byte)( 1 * 255f ),
+					EdgeColorB = (byte)( 1 * 255f ),
+					FontSize = (byte)12,
+					AlignmentFontType = (byte)( 7 | 0 ),
+					LineSpacing = 24,
+					CharSpacing = 1
+				};
+
+				drawData.PositionX = (short)35;
+				drawData.PositionY = (short)76;
+				drawData.FontSize = (byte)12;
+				drawData.AlignmentFontType = (byte)( 7 | 0 );
+				drawData.LineSpacing = 24;
+				drawData.CharSpacing = 1;
+
 				NameplateHandler.UpdateNameplateDistanceTextNode( i, $"{NameplateHandler.mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
 			}
 		}

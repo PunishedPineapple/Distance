@@ -136,6 +136,20 @@ namespace Distance
 			set { mAggroWarningDistance_Yalms = value; }
 		}
 
+		public bool mDrawAggroArc = false;
+		public bool DrawAggroArc
+		{
+			get { return mDrawAggroArc; }
+			set { mDrawAggroArc = value; }
+		}
+
+		public int mAggroArcLength_Deg = 8;
+		public int AggroArcLength_Deg
+		{
+			get { return mAggroArcLength_Deg; }
+			set { mAggroArcLength_Deg = value; }
+		}
+
 		//  Plugin framework and related convenience functions below.
 		public void Initialize( DalamudPluginInterface pluginInterface )
 		{
