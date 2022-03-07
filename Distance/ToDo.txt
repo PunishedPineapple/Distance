@@ -1,22 +1,39 @@
 ﻿Bugs:
 	-ImGui cursor position seems to lag the game's cursor position, making a mouseover widget get wiggly sometimes.
+	-Aggro arc isn't perfect as length gets longer due to it being a b-curve.  Fix this, even though it's a pretty small discrepancy at configurable arc lengths.
+
 
 Priority:
-	-Maybe add option to use caution/warning aggro colors as a gradient rather than just step color changes.
 	-Rate limit download attempts.
-	-Config option to ignore soft target for aggro info.
+
 
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
+	
 
 Misc:
 	-Translations.
 
+
 Maybe:
-	-Editor for aggro data?
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
-	-Add an ImGui window over the text node and track its position to allow for dragging?
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
+		-This is relatively difficult.  Rough support was added, but disabled in the plugin constructor because it was buggy.
+			-Distances didn't always correlate at the same index of nameplate addon node, and nameplate game object.
+			-The added nodes caused crashes when hovering in the addon inspector.
+			-Not sure how to add in-game occlusion to the new nodes like the extant nameplate nodes have.
 	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
-	-Provide IPC for others to get aggro data.  Might be useful for the plugin that lets you put rings around stuff?
+		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
+	-Provide IPC for others to get aggro data?
+	-Option to lock aggro widget to the screen-space projection of the aggro point?
+	-Config option to ignore soft target for aggro info.
+
+
+Rejected:
+	-Editor for aggro data?
+		-Not worth the effort; just use a spreadsheet.
+	-Add an ImGui window over the text node and track its position to allow for dragging?
+		-Not worth the effort for a very minor convenience that will rarely be used.
+	-Maybe add option to use caution/warning aggro colors as a gradient rather than just step color changes.
+		-Probably more work than it's worth, and starting to get into real feature bloat.
