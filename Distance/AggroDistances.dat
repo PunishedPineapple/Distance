@@ -1,24 +1,109 @@
-Version = 2022.01.25.0000.0000-003
+Version = 2022.01.25.0000.0000-004
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+0=0=9999=-----
+193=3192=14=Imdugud
+194=3197=14=Kaliya
+195=3204=14=Phoenix
+196=3210=14=Bahamut Prime
 202=1185=9=Ifrit
+241=1459=15=ADS
+241=1466=14=Caduceus
+242=1471=10=Monitoring Node
+242=1472=10=Defense Node
+242=1473=10=Disposal Node
+242=1459=10=ADS
+242=1470=10=Sanitary Node
+242=1469=10=Attack Node
+242=1468=10=Quarantine Node
+244=1474=18=Clockwork Bug
 245=1482=30=Twintania
+355=2609=14=Rafflesia
+356=2610=14=Melusine
+357=2611=8=The Avatar
+358=2612=14=Nael deus Darnus
 368=2162=5=Dhorme Chimera
+380=2609=14=Rafflesia
+381=2610=14=Melusine
+382=2611=8=The Avatar
+383=2612=14=Nael deus Darnus
+432=3660=8=Ravana
+437=3632=14=King Thordan
+446=3660=8=Ravana
+448=3632=14=King Thordan
+451=3765=14=Living Liquid
+517=4776=7=Sephirot
+523=4707=14=Onslaughter
+524=4776=7=Sephirot
+531=3376=14=Quickthinx Allthoughts
+532=4707=14=Onslaughter
+559=3458=14=Nidhogg
+566=3458=14=Nidhogg
+576=5199=10=Sophia
+577=5199=10=Sophia
+583=5193=14=Alexander Prime
+585=5180=14=Lamebrix Strikebocks
+586=5186=14=Cruise Chaser
+587=5193=14=Alexander Prime
+637=5567=0=Zurvan
+638=5567=0=Zurvan
 674=6221=14=Susano
 677=6221=14=Susano
 679=5640=-21=Shinryu
+691=5629=14=Alte Roite
+692=5631=14=Catastrophe
+693=5633=14=Halicarnassus
+694=6052=14=Exdeath
+695=5629=14=Alte Roite
+696=5631=14=Catastrophe
+697=5633=14=Halicarnassus
+698=6052=14=Exdeath
+698=0=9999=-----
 719=6386=7=Dreaming Kshatriya
 720=6386=7=Dreaming Kshatriya
 730=5640=-21=Shinryu
 746=7092=7=Byakko
+748=7127=14=Phantom Train
+750=7107=14=Guardian
+751=7131=14=Kefka
+752=7127=14=Phantom Train
+754=7107=14=Guardian
+755=7131=14=Kefka
+755=0=9999=-----
 758=7092=7=Byakko
 761=7221=14=Rathalos
 762=7221=14=Rathalos
 778=7225=14=Tsukuyomi
 779=7225=14=Tsukuyomi
+798=7691=14=Chaos
+799=7641=14=Midgardsormr
+800=7695=7=Omega
+801=7633=14=Omega-M
+802=7691=14=Chaos
+803=7641=14=Midgardsormr
+804=7695=7=Omega
+805=7633=14=Omega-M
+805=0=9999=-----
 806=7570=10=Yojimbo
 810=7702=7=Suzaku
 811=7702=7=Suzaku
 824=7922=7=Seiryu
 825=7922=7=Seiryu
+845=8361=14=Titania
+846=8353=10=Innocence
+847=8352=12=Hades
+848=8353=10=Innocence
 849=8345=10=Eden Prime
 850=8382=8=Voidwalker
 851=8486=9=Leviathan
@@ -27,6 +112,10 @@ Version = 2022.01.25.0000.0000-003
 854=8382=8=Voidwalker
 855=8486=9=Leviathan
 856=8350=14=Titan
+858=8361=14=Titania
+885=8352=12=Hades
+897=9250=9=The Ruby Weapon
+897=0=9999=-----
 902=9281=9=Ramuh
 903=9287=14=Garuda
 904=9298=9=The Idol of Darkness
@@ -35,6 +124,16 @@ Version = 2022.01.25.0000.0000-003
 907=9287=14=Garuda
 908=9298=9=The Idol of Darkness
 909=9353=10=Shiva
+912=9250=9=The Ruby Weapon
+912=0=9999=-----
+913=9341=14=Varis yae Galvus
+922=9462=14=Warrior of Light
+922=0=9999=-----
+923=9462=14=Warrior of Light
+934=9696=6=The Emerald Weapon
+934=0=9999=-----
+935=9696=6=The Emerald Weapon
+935=0=9999=-----
 942=9764=10=Cloud of Darkness
 943=9769=14=Shadowkeeper
 944=9707=10=Fatebreaker
@@ -43,4 +142,7 @@ Version = 2022.01.25.0000.0000-003
 947=9769=14=Shadowkeeper
 948=9707=10=Fatebreaker
 949=9813=7=Eden's Promise
+949=0=9999=-----
+950=9953=-17=The Diamond Weapon
+951=9953=-17=The Diamond Weapon
 1009=10742=11=Hesperos
