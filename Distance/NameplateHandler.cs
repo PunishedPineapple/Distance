@@ -302,7 +302,7 @@ namespace Distance
 
 		//	Delgates and Hooks
 		private delegate void NameplateDrawFuncDelegate( AddonNamePlate* pThis );
-		private static NameplateDrawFuncDelegate mdNameplateDraw = new NameplateDrawFuncDelegate( NameplateDrawDetour );
+		private static readonly NameplateDrawFuncDelegate mdNameplateDraw = new( NameplateDrawDetour );
 		private static IntPtr mfpOnNameplateDraw = IntPtr.Zero;
 		private static Hook<NameplateDrawFuncDelegate> mNameplateDrawHook;
 

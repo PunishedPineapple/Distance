@@ -101,7 +101,7 @@ namespace Distance
 				mFilteredAggroEntities.Clear();
 
 				var filteredEntries = mKnownAggroEntities.Where( x => x.TerritoryType == territoryType );
-				if( filteredEntries.Count() > 0 )
+				if( filteredEntries.Any() )
 				{
 					mFilteredAggroEntities.InsertRange( 0, filteredEntries );
 					mCurrentFilteredTerritoryType = territoryType;
@@ -130,12 +130,12 @@ namespace Distance
 			return BNpcAggroInfoFile.GetFileVersionAsString( GetCurrentFileVersion() );
 		}
 
-		private static readonly List<BNpcAggroEntity> mKnownAggroEntities = new List<BNpcAggroEntity>();
-		private static readonly List<BNpcAggroEntity> mFilteredAggroEntities = new List<BNpcAggroEntity>();
+		private static readonly List<BNpcAggroEntity> mKnownAggroEntities = new();
+		private static readonly List<BNpcAggroEntity> mFilteredAggroEntities = new();
 		private static UInt32 mCurrentFilteredTerritoryType = 0;
 
 		private static BNpcAggroInfoFile mLoadedInfoFile = null;
 
-		private static readonly Object mLockObj = new Object();
+		private static readonly Object mLockObj = new();
 	}
 }

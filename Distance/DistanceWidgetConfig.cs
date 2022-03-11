@@ -107,14 +107,14 @@ namespace Distance
 			set { mFontAlignment = value; }
 		}
 
-		public Vector4 mTextColor = new Vector4( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
+		public Vector4 mTextColor = new( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
 		public Vector4 TextColor
 		{
 			get { return mTextColor; }
 			set { mTextColor = value; }
 		}
 
-		public Vector4 mTextEdgeColor = new Vector4( (float)0x63 / 255f, (float)0x4F / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 mTextEdgeColor = new( (float)0x63 / 255f, (float)0x4F / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
 		public Vector4 TextEdgeColor
 		{
 			get { return mTextEdgeColor; }

@@ -73,13 +73,13 @@ namespace Distance
 			str += $"Target Kind: {TargetKind}\r\n";
 			str += $"Object ID: {ObjectID:X8}\r\n";
 			str += $"BNpcName ID: {BNpcNameID}\r\n";
-			str += $"Player Position: {PlayerPosition.X}, {PlayerPosition.Y}, {PlayerPosition.Z}\r\n";
-			str += $"Target Position: {TargetPosition.X}, {TargetPosition.Y}, {TargetPosition.Z}\r\n";
-			str += $"Aggro Range: {( HasAggroRangeData ? $"{AggroRange_Yalms}" : "No Data" )}\r\n";
-			str += $"Target Radius (y): {TargetRadius_Yalms}\r\n";
-			str += $"Distance To Target (y): {DistanceFromTarget_Yalms}\r\n";
-			str += $"Distance To Ring (y): {DistanceFromTargetRing_Yalms}\r\n";
-			str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms} " : "No Data" )}";
+			str += $"Player Position: {PlayerPosition.X:F3}, {PlayerPosition.Y:F3}, {PlayerPosition.Z:F3}\r\n";
+			str += $"Target Position: {TargetPosition.X:F3}, {TargetPosition.Y:F3}, {TargetPosition.Z:F3}\r\n";
+			str += $"Aggro Range: {( HasAggroRangeData ? $"{AggroRange_Yalms:F3}" : "No Data" )}\r\n";
+			str += $"Target Radius (y): {TargetRadius_Yalms:F3}\r\n";
+			str += $"Distance To Target (y): {DistanceFromTarget_Yalms:F3}\r\n";
+			str += $"Distance To Ring (y): {DistanceFromTargetRing_Yalms:F3}\r\n";
+			str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms:F3} " : "No Data" )}";
 			
 			return str;
 		}

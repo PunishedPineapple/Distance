@@ -87,7 +87,7 @@ namespace Distance
 			OnLanguageChanged( mPluginInterface.UiLanguage );
 
 			//	UI Initialization
-			mUI = new PluginUI( this, mPluginInterface, mConfiguration, mDataManager, mGameGui, mSigScanner, mClientState, mCondition );
+			mUI = new PluginUI( this, mPluginInterface, mConfiguration, mDataManager, mGameGui, mClientState, mCondition );
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
@@ -123,7 +123,7 @@ namespace Distance
 
 			if( allowedLang.Contains( langCode ) )
 			{
-				Loc.Setup( File.ReadAllText( Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, $"loc_{langCode}.json" ) ) );
+				Loc.Setup( File.ReadAllText( Path.Join( Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "Resources\\Localization\\" ), $"loc_{langCode}.json" ) ) );
 			}
 			else
 			{
@@ -366,51 +366,19 @@ namespace Distance
 			if( !config.Enabled ) return false;
 			if( !mCurrentDistanceInfoArray[(int)targetType].IsValid ) return false;
 
-			bool show = false;
-
-			switch( mCurrentDistanceInfoArray[(int)targetType].TargetKind )
+			bool show = mCurrentDistanceInfoArray[(int)targetType].TargetKind switch
 			{
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc:
-					show = config.Filters.ShowDistanceOnBattleNpc;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player:
-					show = config.Filters.ShowDistanceOnPlayers && mClientState.LocalPlayer != null && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer.ObjectId;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc:
-					show = config.Filters.ShowDistanceOnEventNpc;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure:
-					show = config.Filters.ShowDistanceOnTreasure;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte:
-					show = config.Filters.ShowDistanceOnAetheryte;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint:
-					show = config.Filters.ShowDistanceOnGatheringNode;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj:
-					show = config.Filters.ShowDistanceOnEventObj;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion:
-					show = config.Filters.ShowDistanceOnCompanion;
-					break;
-
-				case Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing:
-					show = config.Filters.ShowDistanceOnHousing;
-					break;
-
-				default:
-					show = false;
-					break;
-			}
-
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc			=> config.Filters.ShowDistanceOnBattleNpc,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player			=> config.Filters.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)targetType].ObjectID != mClientState.LocalPlayer?.ObjectId,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc			=> config.Filters.ShowDistanceOnEventNpc,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure			=> config.Filters.ShowDistanceOnTreasure,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte			=> config.Filters.ShowDistanceOnAetheryte,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint	=> config.Filters.ShowDistanceOnGatheringNode,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj			=> config.Filters.ShowDistanceOnEventObj,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion			=> config.Filters.ShowDistanceOnCompanion,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing			=> config.Filters.ShowDistanceOnHousing,
+				_ => false,
+			};
 			return show;
 		}
 
@@ -426,11 +394,8 @@ namespace Distance
 				return;
 			}
 
-			Dalamud.Game.ClientState.Objects.Types.GameObject target = null;
-			int i;
-
-			target = mTargetManager.Target;
-			i = (int)TargetType.Target;
+			var target = mTargetManager.Target;
+			int i = (int)TargetType.Target;
 			if( target != null )
 			{
 				mCurrentDistanceInfoArray[i].IsValid = true;
@@ -547,19 +512,14 @@ namespace Distance
 
 		public static string GetLocalizedTargetTypeEnumString( TargetType targetType )
 		{
-			switch( targetType )
+			return targetType switch
 			{
-				case TargetType.Target:
-					return Loc.Localize( "Terminology: Target Type - Target", "Target" );
-				case TargetType.SoftTarget:
-					return Loc.Localize( "Terminology: Target Type - Soft Target", "Soft Target" );
-				case TargetType.FocusTarget:
-					return Loc.Localize( "Terminology: Target Type - Focus Target", "Focus Target" );
-				case TargetType.MouseOverTarget:
-					return Loc.Localize( "Terminology: Target Type - Mouseover Target", "Mouseover Target" );
-				default:
-					return "You should never see this!";
-			}
+				TargetType.Target			=> Loc.Localize( "Terminology: Target Type - Target", "Target" ),
+				TargetType.SoftTarget		=> Loc.Localize( "Terminology: Target Type - Soft Target", "Soft Target" ),
+				TargetType.FocusTarget		=> Loc.Localize( "Terminology: Target Type - Focus Target", "Focus Target" ),
+				TargetType.MouseOverTarget	=> Loc.Localize( "Terminology: Target Type - Mouseover Target", "Mouseover Target" ),
+				_ => "You should never see this!",
+			};
 		}
 	}
 }

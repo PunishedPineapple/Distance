@@ -80,48 +80,18 @@ namespace Distance
 
 		public static string GetDownloadStatusMessage( DownloadStatus status )
 		{
-			string str = "You shouldn't ever see this!";
-
-			switch( status )
+			return status switch
 			{
-				case DownloadStatus.None:
-					str = Loc.Localize( "Download Status Message: None", "Ready" );
-					break;
-
-				case DownloadStatus.Downloading:
-					str = Loc.Localize( "Download Status Message: Downloading", "Downloading..." );
-					break;
-
-				case DownloadStatus.FailedDownload:
-					str = Loc.Localize( "Download Status Message: Failed Download", "Download failed!" );
-					break;
-
-				case DownloadStatus.FailedFileLoad:
-					str = Loc.Localize( "Download Status Message: Failed File Load", "The downloaded file was invalid!" );
-					break;
-
-				case DownloadStatus.FailedFileWrite:
-					str = Loc.Localize( "Download Status Message: Failed File Write", "The downloaded file could not be saved to disk; any updates will be lost upon reloading." );
-					break;
-
-				case DownloadStatus.OutOfDateFile:
-					str = Loc.Localize( "Download Status Message: Out of Date File", "The downloaded file was older than the current data, and has been discarded." );
-					break;
-
-				case DownloadStatus.Completed:
-					str = Loc.Localize( "Download Status Message: Completed", "Update Completed" );
-					break;
-
-				case DownloadStatus.Canceled:
-					str = Loc.Localize( "Download Status Message: Canceled", "The update operation was canceled!" );
-					break;
-
-				default:
-					str = "You shouldn't ever see this!";
-					break;
-			}
-
-			return str;
+				DownloadStatus.None				=> Loc.Localize( "Download Status Message: None", "Ready" ),
+				DownloadStatus.Downloading		=> Loc.Localize( "Download Status Message: Downloading", "Downloading..." ),
+				DownloadStatus.FailedDownload	=> Loc.Localize( "Download Status Message: Failed Download", "Download failed!" ),
+				DownloadStatus.FailedFileLoad	=> Loc.Localize( "Download Status Message: Failed File Load", "The downloaded file was invalid!" ),
+				DownloadStatus.FailedFileWrite	=> Loc.Localize( "Download Status Message: Failed File Write", "The downloaded file could not be saved to disk; any updates will be lost upon reloading." ),
+				DownloadStatus.OutOfDateFile	=> Loc.Localize( "Download Status Message: Out of Date File", "The downloaded file was older than the current data, and has been discarded." ),
+				DownloadStatus.Completed		=> Loc.Localize( "Download Status Message: Completed", "Update Completed" ),
+				DownloadStatus.Canceled			=> Loc.Localize( "Download Status Message: Canceled", "The update operation was canceled!" ),
+				_ => "You shouldn't ever see this!",
+			};
 		}
 
 		public static string GetCurrentDownloadStatusMessage()

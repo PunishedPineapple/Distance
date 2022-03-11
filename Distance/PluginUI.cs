@@ -28,7 +28,7 @@ namespace Distance
 	public class PluginUI : IDisposable
 	{
 		//	Construction
-		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, DataManager dataManager, GameGui gameGui, SigScanner sigScanner, ClientState clientState, Dalamud.Game.ClientState.Conditions.Condition condition )
+		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, DataManager dataManager, GameGui gameGui, ClientState clientState, Dalamud.Game.ClientState.Conditions.Condition condition )
 		{
 			mPlugin = plugin;
 			mPluginInterface = pluginInterface;
@@ -80,7 +80,7 @@ namespace Distance
 				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse /*| ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse*/ ) )
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
-				ImGuiHelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
+				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
 
 				if( mConfiguration.ShowAggroDistance )
 				{
@@ -110,7 +110,7 @@ namespace Distance
 
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
 						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
-						ImGuiHelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
+						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
 						ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
 
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
@@ -143,7 +143,7 @@ namespace Distance
 				{
 
 					ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses." ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
-					ImGuiHelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
 				}
 
 				ImGui.Spacing();
@@ -176,12 +176,12 @@ namespace Distance
 						ImGui.Text( Loc.Localize( "Config Option: Widget Name", "Widget Name:" ) );
 						ImGui.SameLine();
 						ImGui.InputTextWithHint( $"###WidgetNameInputBox {i}", Plugin.GetLocalizedTargetTypeEnumString( config.ApplicableTargetType ), ref config.mWidgetName, 50 );
-						ImGuiHelpMarker( Loc.Localize( "Help: Widget Name", "This is used to give a customized name to this widget for use with certain text commands.  If you leave it blank, the type of target for this widget will be used in the header above, but it will not have a name for use in text commands." )  );
+						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Widget Name", "This is used to give a customized name to this widget for use with certain text commands.  If you leave it blank, the type of target for this widget will be used in the header above, but it will not have a name for use in text commands." )  );
 						ImGui.Checkbox( Loc.Localize( "Config Option: Widget Enabled", "Enabled" ) + $"###Widget Enabled Checkbox {i}.", ref config.mEnabled );
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Rules", "Distance Rules" ) + $"###Distance Widget Rules Header {i}." ) )
 						{
 							ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-							ImGuiHelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
 							string str =	$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.Target )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.SoftTarget )}\0" +
 											$"{Plugin.GetLocalizedTargetTypeEnumString( Plugin.TargetType.FocusTarget )}\0" +
@@ -191,12 +191,12 @@ namespace Distance
 							{
 								ImGui.Indent();
 								ImGui.Checkbox( Loc.Localize( "Config Option: Target Includes Soft Target", "\"Target\" includes soft target." ) + $"###Target Includes Soft Target {i}.", ref config.mTargetIncludesSoftTarget );
-								ImGuiHelpMarker( Loc.Localize( "Help: Show Target Includes Soft Target", "When the target type above is set to \"Target\", also show the distance to the soft target when it is valid.  This generally only matters for controller players and some two-handed keyboard players." ) );
+								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Target Includes Soft Target", "When the target type above is set to \"Target\", also show the distance to the soft target when it is valid.  This generally only matters for controller players and some two-handed keyboard players." ) );
 								ImGui.Unindent();
 							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring {i}.", ref config.mDistanceIsToRing );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
-							ImGuiHelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 							ImGui.DragFloat( $"###DistanceOffsetSlider {i}", ref config.mDistanceOffset_Yalms, 0.01f, 0f, 30f );
 							ImGui.TreePop();
 						}
@@ -223,7 +223,7 @@ namespace Distance
 							if( config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget )
 							{
 								ImGui.Checkbox( Loc.Localize( "Config Option: Mouseover Widget Follows Mouse", "Widget follows the cursor." ) + $"###Mouseover Target Follow Mouse {i}.", ref config.mMouseoverTargetFollowsMouse );
-								ImGuiHelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location." ) );
+								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location." ) );
 							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text." ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
@@ -231,7 +231,7 @@ namespace Distance
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
 							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "" );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
-							ImGuiHelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + $"###DistanceTextEdgeColorPicker {i}", ref config.mTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units {i}.", ref config.mShowUnits );
@@ -313,22 +313,22 @@ namespace Distance
 
 				ImGui.Text( $"Target Distance Data:" );
 				ImGui.Indent();
-				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.Target, false ).ToString()}" );
+				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.Target, false ).ToString() );
 				ImGui.Unindent();
 
 				ImGui.Text( $"Soft Target Distance Data:" );
 				ImGui.Indent();
-				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.SoftTarget, false ).ToString()}" );
+				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.SoftTarget, false ).ToString() );
 				ImGui.Unindent();
 
 				ImGui.Text( $"Focus Target Distance Data:" );
 				ImGui.Indent();
-				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.FocusTarget, false ).ToString()}" );
+				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.FocusTarget, false ).ToString() );
 				ImGui.Unindent();
 
 				ImGui.Text( $"MO Target Distance Data:" );
 				ImGui.Indent();
-				ImGui.Text( $"{mPlugin.GetDistanceInfo( Plugin.TargetType.MouseOverTarget, false ).ToString()}" );
+				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.MouseOverTarget, false ).ToString() );
 				ImGui.Unindent();
 			}
 
@@ -425,10 +425,10 @@ namespace Distance
 			var distanceInfo = mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true );
 			float lineLength = distanceInfo.DistanceFromTarget_Yalms;
 			float distance_Norm = ( distanceInfo.AggroRange_Yalms + distanceInfo.TargetRadius_Yalms ) / lineLength;
-			if( distance_Norm >= 0 )
+			if( distance_Norm > 0 )
 			{
-				//	Get the point at the aggro distance between the player and the target.
-				Vector3 worldCoords = new Vector3()
+				//	Get the point at the aggro distance on the line between the player and the target.
+				Vector3 worldCoords = new()
 				{
 					X = distance_Norm * ( distanceInfo.PlayerPosition.X - distanceInfo.TargetPosition.X ) + distanceInfo.TargetPosition.X,
 					Y = distance_Norm * ( distanceInfo.PlayerPosition.Y - distanceInfo.TargetPosition.Y ) + distanceInfo.TargetPosition.Y,
@@ -439,13 +439,13 @@ namespace Distance
 				Vector3 translatedPlayerPos = distanceInfo.PlayerPosition - distanceInfo.TargetPosition;
 				double halfArcLength_Rad = mConfiguration.AggroArcLength_Deg / 2f * Math.PI / 180f;
 				double angle_Rad = Math.Atan2( translatedPlayerPos.Z, translatedPlayerPos.X );
-				Vector3 arcPos1 = new Vector3()
+				Vector3 arcPos1 = new()
 				{
 					X = (float)Math.Cos( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
 					Z = (float)Math.Sin( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
 					Y = worldCoords.Y
 				};
-				Vector3 arcPos2 = new Vector3()
+				Vector3 arcPos2 = new()
 				{
 					X = (float)Math.Cos( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
 					Z = (float)Math.Sin( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
@@ -465,22 +465,13 @@ namespace Distance
 					edgeColor = mConfiguration.AggroDistanceCautionTextEdgeColor;
 				}
 
-				uint colorForImgui =    (uint)( color.X * 255f ) << 0 |
-												(uint)( color.Y * 255f ) << 8 |
-												(uint)( color.Z * 255f ) << 16 |
-												(uint)( color.W * 255f ) << 24;
-				uint edgeColorForImgui =(uint)( edgeColor.X * 255f ) << 0 |
-												(uint)( edgeColor.Y * 255f ) << 8 |
-												(uint)( edgeColor.Z * 255f ) << 16 |
-												(uint)( edgeColor.W * 255f ) << 24;
+				uint colorForImgui = ImGuiUtils.ColorVecToUInt( color );
+				uint edgeColorForImgui = ImGuiUtils.ColorVecToUInt( edgeColor );
 
-				Vector2 screenPos = new Vector2();
-				Vector2 screenPos1 = new Vector2();
-				Vector2 screenPos2 = new Vector2();
 				bool isScreenPosValid = true;
-				isScreenPosValid &= mGameGui.WorldToScreen( worldCoords, out screenPos );
-				isScreenPosValid &= mGameGui.WorldToScreen( arcPos1, out screenPos1 );
-				isScreenPosValid &= mGameGui.WorldToScreen( arcPos2, out screenPos2 );
+				isScreenPosValid &= mGameGui.WorldToScreen( worldCoords, out Vector2 screenPos );
+				isScreenPosValid &= mGameGui.WorldToScreen( arcPos1, out Vector2 screenPos1 );
+				isScreenPosValid &= mGameGui.WorldToScreen( arcPos2, out Vector2 screenPos2 );
 
 				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColorForImgui, 36, 5 );
 				ImGui.GetWindowDrawList().AddBezierQuadratic( screenPos1, screenPos, screenPos2, edgeColorForImgui, 5 );
@@ -491,18 +482,10 @@ namespace Distance
 
 		protected void DrawOverlay()
 		{
-			const ImGuiWindowFlags flags =  ImGuiWindowFlags.NoDecoration |
-											ImGuiWindowFlags.NoSavedSettings |
-											ImGuiWindowFlags.NoMove |
-											ImGuiWindowFlags.NoMouseInputs |
-											ImGuiWindowFlags.NoFocusOnAppearing |
-											ImGuiWindowFlags.NoBackground |
-											ImGuiWindowFlags.NoNav;
-
 			ImGuiHelpers.ForceNextWindowMainViewport();
 			ImGui.SetNextWindowPos( ImGui.GetMainViewport().Pos );
 			ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
-			if( ImGui.Begin( "##AggroDistanceIndicatorWindow", flags ) )
+			if( ImGui.Begin( "##AggroDistanceIndicatorWindow", ImGuiUtils.OverlayWindowFlags ) )
 			{
 				if( mConfiguration.DrawAggroArc && mPlugin.ShouldDrawAggroDistanceInfo() )
 				{
@@ -637,7 +620,7 @@ namespace Distance
 				mouseoverOffset = screenPos;
 			};*/
 
-			TextNodeDrawData drawData = new TextNodeDrawData()
+			TextNodeDrawData drawData = new()
 			{
 				PositionX = (short)( config.TextPosition.X + mouseoverOffset.X ),
 				PositionY = (short)( config.TextPosition.Y + mouseoverOffset.Y ),
@@ -681,7 +664,7 @@ namespace Distance
 				}
 			}
 
-			TextNodeDrawData drawData = new TextNodeDrawData()
+			TextNodeDrawData drawData = new()
 			{
 				PositionX = (short)mConfiguration.AggroDistanceTextPosition.X,
 				PositionY = (short)mConfiguration.AggroDistanceTextPosition.Y,
@@ -799,20 +782,6 @@ namespace Distance
 						pAddon->UldManager.UpdateDrawNodeList();
 					}
 				}
-			}
-		}
-
-		protected void ImGuiHelpMarker( string description, bool sameLine = true, string marker = "(?)" )
-		{
-			if( sameLine ) ImGui.SameLine();
-			ImGui.TextDisabled( marker );
-			if( ImGui.IsItemHovered() )
-			{
-				ImGui.BeginTooltip();
-				ImGui.PushTextWrapPos( ImGui.GetFontSize() * 35.0f );
-				ImGui.TextUnformatted( description );
-				ImGui.PopTextWrapPos();
-				ImGui.EndTooltip();
 			}
 		}
 
