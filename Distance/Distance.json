@@ -1,7 +1,7 @@
 {
   "Author": "PunishedPineapple",
   "Name": "Distance",
-  "Punchline": "Target distance widget.",
+  "Punchline": "Target distance widgets.",
   "Description": "Displays the distance in yalms to the target (or optionally to the target's ring), and can display distance until aggro range for supported bosses.",
   "InternalName": "Distance",
   "AssemblyVersion": "0.9.3.0",

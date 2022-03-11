@@ -28,6 +28,7 @@ Maybe:
 	-Provide IPC for others to get aggro data?
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
 	-Config option to ignore soft target for aggro info.
+		-And/or maybe option to attach it to focus target.
 
 
 Rejected:

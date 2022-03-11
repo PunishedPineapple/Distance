@@ -76,7 +76,7 @@ namespace Distance
 				return;
 			}
 
-			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", ref mSettingsWindowVisible,
+			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", 
 				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse /*| ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse*/ ) )
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
@@ -88,7 +88,7 @@ namespace Distance
 					{
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Position", "Position of the aggro widget (X,Y):" ) );
 						ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.mAggroDistanceTextPosition, 1f, 0f, Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ), "%g" );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget" ) + "###Aggro Distance font heavy.", ref mConfiguration.mAggroDistanceFontHeavy );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget." ) + "###Aggro Distance font heavy.", ref mConfiguration.mAggroDistanceFontHeavy );
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Font Size", "Aggro widget font size:" ) );
 						ImGui.SliderInt( "###AggroDistanceTextFontSizeSlider", ref mConfiguration.mAggroDistanceFontSize, 6, 36 );
 						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Alignment", "Text alignment:" ) );
@@ -113,7 +113,7 @@ namespace Distance
 						ImGuiHelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
 						ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
 
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range" ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
 						if( mConfiguration.DrawAggroArc )
 						{
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Arc Length", "Length of the aggro arc (deg):" ) );
@@ -142,7 +142,7 @@ namespace Distance
 				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Miscellaneous", "Miscellaneous Options" ) + "###Misc. Options Header." ) )
 				{
 
-					ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses" ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses." ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
 					ImGuiHelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
 				}
 
@@ -190,7 +190,7 @@ namespace Distance
 							if( config.ApplicableTargetType == Plugin.TargetType.Target )
 							{
 								ImGui.Indent();
-								ImGui.Checkbox( Loc.Localize( "Config Option: Target Includes Soft Target", "\"Target\" includes soft target" ) + $"###Target Includes Soft Target {i}.", ref config.mTargetIncludesSoftTarget );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Target Includes Soft Target", "\"Target\" includes soft target." ) + $"###Target Includes Soft Target {i}.", ref config.mTargetIncludesSoftTarget );
 								ImGuiHelpMarker( Loc.Localize( "Help: Show Target Includes Soft Target", "When the target type above is set to \"Target\", also show the distance to the soft target when it is valid.  This generally only matters for controller players and some two-handed keyboard players." ) );
 								ImGui.Unindent();
 							}
@@ -222,15 +222,15 @@ namespace Distance
 							ImGui.DragFloat2( $"###DistanceTextPositionSlider {i}", ref config.mTextPosition, 1f, sliderLimits.X, sliderLimits.Y, "%g" );
 							if( config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget )
 							{
-								ImGui.Checkbox( Loc.Localize( "Config Option: Mouseover Widget Follows Mouse", "Widget follows the cursor" ) + $"###Mouseover Target Follow Mouse {i}.", ref config.mMouseoverTargetFollowsMouse );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Mouseover Widget Follows Mouse", "Widget follows the cursor." ) + $"###Mouseover Target Follow Mouse {i}.", ref config.mMouseoverTargetFollowsMouse );
 								ImGuiHelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location." ) );
 							}
-							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text" ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text." ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
 							ImGui.SliderInt( $"###DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
 							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "" );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color" ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
 							ImGuiHelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + $"###DistanceTextEdgeColorPicker {i}", ref config.mTextEdgeColor, ImGuiColorEditFlags.NoInputs );
