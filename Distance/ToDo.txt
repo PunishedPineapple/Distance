@@ -1,6 +1,5 @@
 ﻿Bugs:
 	-ImGui cursor position seems to lag the game's cursor position, making a mouseover widget get wiggly sometimes.
-	-Aggro arc isn't perfect as length gets longer due to it being a b-curve.  Fix this, even though it's a pretty small discrepancy at configurable arc lengths.
 
 
 Priority:

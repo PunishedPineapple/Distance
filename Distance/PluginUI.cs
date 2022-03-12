@@ -420,6 +420,30 @@ namespace Distance
 			}
 		}
 
+		protected Vector3[] GetArcPoints( Vector3 center, Vector3 tangentPoint, double arcLength_Deg, float y, int numPoints = -1 )
+		{
+			//	Compute some points that are on an arc intersecting that point.
+			Vector3 translatedTangentPoint = tangentPoint - center;
+			float distance = new Vector2( translatedTangentPoint.X, translatedTangentPoint.Z ).Length();
+			double arcLength_Rad = arcLength_Deg * Math.PI / 180.0;
+			double angle_Rad = Math.Atan2( translatedTangentPoint.Z, translatedTangentPoint.X );
+
+			if( numPoints < 2 ) numPoints = Math.Max( (int)arcLength_Deg, 2 );
+			Vector3[] arcPoints = new Vector3[numPoints];
+			double angleStep_Rad = arcLength_Rad / ( numPoints - 1 );
+
+			double angleOffset_Rad = -arcLength_Rad / 2.0;
+			for( int i = 0; i < arcPoints.Length; ++i )
+			{
+				arcPoints[i].X = (float)Math.Cos( angle_Rad + angleOffset_Rad ) * distance + center.X;
+				arcPoints[i].Z = (float)Math.Sin( angle_Rad + angleOffset_Rad ) * distance + center.Z;
+				arcPoints[i].Y = y;
+				angleOffset_Rad += angleStep_Rad;
+			}
+
+			return arcPoints;
+		}
+
 		protected void DrawAggroDistanceArc()
 		{
 			var distanceInfo = mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true );
@@ -435,48 +459,40 @@ namespace Distance
 					Z = distance_Norm * ( distanceInfo.PlayerPosition.Z - distanceInfo.TargetPosition.Z ) + distanceInfo.TargetPosition.Z
 				};
 
-				//	Compute some points that are on an arc intersecting that point.
-				Vector3 translatedPlayerPos = distanceInfo.PlayerPosition - distanceInfo.TargetPosition;
-				double halfArcLength_Rad = mConfiguration.AggroArcLength_Deg / 2f * Math.PI / 180f;
-				double angle_Rad = Math.Atan2( translatedPlayerPos.Z, translatedPlayerPos.X );
-				Vector3 arcPos1 = new()
-				{
-					X = (float)Math.Cos( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
-					Z = (float)Math.Sin( angle_Rad - halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
-					Y = worldCoords.Y
-				};
-				Vector3 arcPos2 = new()
-				{
-					X = (float)Math.Cos( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.X,
-					Z = (float)Math.Sin( angle_Rad + halfArcLength_Rad ) * distance_Norm * lineLength + distanceInfo.TargetPosition.Z,
-					Y = worldCoords.Y
-				};
-
-				Vector4 color = mConfiguration.AggroDistanceTextColor;
-				Vector4 edgeColor = mConfiguration.AggroDistanceTextEdgeColor;
-				if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
-				{
-					color = mConfiguration.AggroDistanceWarningTextColor;
-					edgeColor = mConfiguration.AggroDistanceWarningTextEdgeColor;
-				}
-				else if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroCautionDistance_Yalms )
-				{
-					color = mConfiguration.AggroDistanceCautionTextColor;
-					edgeColor = mConfiguration.AggroDistanceCautionTextEdgeColor;
-				}
-
-				uint colorForImgui = ImGuiUtils.ColorVecToUInt( color );
-				uint edgeColorForImgui = ImGuiUtils.ColorVecToUInt( edgeColor );
+				var arcPoints = GetArcPoints( distanceInfo.TargetPosition, worldCoords, mConfiguration.AggroArcLength_Deg, worldCoords.Y );
+				var arcScreenPoints = new Vector2[arcPoints.Length];
 
 				bool isScreenPosValid = true;
 				isScreenPosValid &= mGameGui.WorldToScreen( worldCoords, out Vector2 screenPos );
-				isScreenPosValid &= mGameGui.WorldToScreen( arcPos1, out Vector2 screenPos1 );
-				isScreenPosValid &= mGameGui.WorldToScreen( arcPos2, out Vector2 screenPos2 );
+				for( int i = 0; i < arcPoints.Length; ++i )
+				{
+					isScreenPosValid &= mGameGui.WorldToScreen( arcPoints[i], out arcScreenPoints[i] );
+				}
 
-				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColorForImgui, 36, 5 );
-				ImGui.GetWindowDrawList().AddBezierQuadratic( screenPos1, screenPos, screenPos2, edgeColorForImgui, 5 );
-				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, colorForImgui, 36, 3 );
-				ImGui.GetWindowDrawList().AddBezierQuadratic( screenPos1, screenPos, screenPos2, colorForImgui, 3 );
+				UInt32 color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextColor );
+				UInt32 edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextEdgeColor );
+				if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
+				{
+					color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceWarningTextColor );
+					edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceWarningTextEdgeColor );
+				}
+				else if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroCautionDistance_Yalms )
+				{
+					color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceCautionTextColor );
+					edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceCautionTextEdgeColor );
+				}
+
+				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColor, 36, 5 );
+				for( int i = 1; i < arcScreenPoints.Length; ++i )
+				{
+					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i-1], arcScreenPoints[i], edgeColor, 5 );
+				}
+
+				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, color, 36, 3 );
+				for( int i = 1; i < arcScreenPoints.Length; ++i )
+				{
+					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i-1], arcScreenPoints[i], color, 3 );
+				}
 			}
 		}
 
