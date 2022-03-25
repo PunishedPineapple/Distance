@@ -498,6 +498,8 @@ namespace Distance
 
 		protected void DrawOverlay()
 		{
+			if( ShouldHideUIOverlays() ) return;
+
 			ImGuiHelpers.ForceNextWindowMainViewport();
 			ImGui.SetNextWindowPos( ImGui.GetMainViewport().Pos );
 			ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
@@ -721,7 +723,7 @@ namespace Distance
 				//	If we have our node, set the colors, size, and text from settings.
 				if( pNode != null )
 				{
-					bool visible =  show && !mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
+					bool visible =	show && !ShouldHideUIOverlays();
 					( (AtkResNode*)pNode )->ToggleVisibility( visible );
 					if( visible )
 					{
@@ -799,6 +801,14 @@ namespace Distance
 					}
 				}
 			}
+		}
+
+		protected bool ShouldHideUIOverlays()
+		{
+			return	mGameGui.GameUiHidden ||
+					mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.OccupiedInCutSceneEvent] ||
+					mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene] ||
+					mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.CreatingCharacter];
 		}
 
 		protected Plugin mPlugin;

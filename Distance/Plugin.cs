@@ -92,6 +92,9 @@ namespace Distance
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
 
+			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
+			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;
+
 			//	Event Subscription
 			mPluginInterface.LanguageChanged += OnLanguageChanged;
 			mFramework.Update += OnGameFrameworkUpdate;
