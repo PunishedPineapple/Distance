@@ -223,7 +223,7 @@ namespace Distance
 							if( config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget )
 							{
 								ImGui.Checkbox( Loc.Localize( "Config Option: Mouseover Widget Follows Mouse", "Widget follows the cursor." ) + $"###Mouseover Target Follow Mouse {i}.", ref config.mMouseoverTargetFollowsMouse );
-								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location." ) );
+								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Mouseover Widget Follows Mouse", "The widget will follow the mouse, and the position above becomes an offset from the cursor location.  Note: This can look odd if you use the hardware cursor; switch to the software cursor in the game options if necessary." ) );
 							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text." ) + $"###Distance font heavy {i}.", ref config.mFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
