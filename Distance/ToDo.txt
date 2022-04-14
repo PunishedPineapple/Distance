@@ -4,6 +4,7 @@
 
 Priority:
 	-Rate limit download attempts.
+		-Github does this for us, no?
 
 
 Cleanup:
@@ -36,6 +37,7 @@ Maybe:
 Rejected:
 	-Editor for aggro data?
 		-Not worth the effort; just use a spreadsheet.
+		-Having to deal with potential re-sorts based on edits would be annoying.
 	-Add an ImGui window over the text node and track its position to allow for dragging?
 		-Not worth the effort for a very minor convenience that will rarely be used.
 	-Maybe add option to use caution/warning aggro colors as a gradient rather than just step color changes.
