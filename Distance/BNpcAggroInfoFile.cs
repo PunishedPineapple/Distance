@@ -25,7 +25,7 @@ namespace Distance
 
 			for( int i = 0; i < lines.Length; ++i )
 			{
-				string[] tokens = lines[i].Split( '=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
+				string[] tokens = lines[i].Split( '=', StringSplitOptions.TrimEntries );
 
 				//	The first line will be the version of the data.  The following lines should all be data entries.
 				if( tokens.Length == 2 && tokens[0].ToLowerInvariant() == "version" && TryParseVersionString( tokens[1], out mFileVersion ) ) continue;

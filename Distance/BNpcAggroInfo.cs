@@ -27,10 +27,14 @@ namespace Distance
 					{
 						Init( dataManager, file );
 					}
+					else
+					{
+						PluginLog.LogWarning( $"Unable to read BNpc aggro file." );
+					}
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogWarning( $"Unable to read BNpc aggro file: {e}" );
+					PluginLog.LogWarning( $"Unable to read BNpc aggro file:\r\n{e}" );
 				}
 			} );
 		}
