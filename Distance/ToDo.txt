@@ -17,6 +17,7 @@ Misc:
 
 
 Maybe:
+	-Options to "attach" widgets to target and focus target bars (coordinates become offsets in this case).
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
