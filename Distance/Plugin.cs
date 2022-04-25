@@ -49,7 +49,6 @@ namespace Distance
 			//NameplateHandler.Init( mSigScanner, mClientState, mCondition );
 
 			//	Configuration
-			mPluginInterface = pluginInterface;
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration;
 			if( mConfiguration == null )
 			{
@@ -350,7 +349,8 @@ namespace Distance
 
 		public bool ShouldDrawAggroDistanceInfo()
 		{
-			return	mConfiguration.ShowAggroDistance &&
+			return	!mClientState.IsPvP &&
+					mConfiguration.ShowAggroDistance &&
 					GetDistanceInfo( TargetType.Target, true ).IsValid &&
 					GetDistanceInfo( TargetType.Target, true ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
 					GetDistanceInfo( TargetType.Target, true ).HasAggroRangeData &&
@@ -360,6 +360,8 @@ namespace Distance
 		//	It's tempting to put this into the config filters class, but we rely on a few things that won't know about, so just keeping it here to avoid having to pass in even more stuff.
 		public bool ShouldDrawDistanceInfo( DistanceWidgetConfig config )
 		{
+			if( mClientState.IsPvP ) return false;
+
 			TargetType targetType = config.ApplicableTargetType;
 			if( targetType == TargetType.Target && config.TargetIncludesSoftTarget && mCurrentDistanceInfoArray[(int)TargetType.SoftTarget].IsValid )
 			{
