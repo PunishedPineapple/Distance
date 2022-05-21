@@ -23,6 +23,20 @@ namespace Distance
 			set { mEnabled = value; }
 		}
 
+		public bool mHideInCombat = false;
+		public bool HideInCombat
+		{
+			get { return mHideInCombat; }
+			set { mHideInCombat = value; }
+		}
+
+		public bool mHideOutOfCombat = false;
+		public bool HideOutOfCombat
+		{
+			get { return mHideOutOfCombat; }
+			set { mHideOutOfCombat = value; }
+		}
+
 		public Vector2 mTextPosition = Vector2.One;
 		public Vector2 TextPosition
 		{
@@ -44,11 +58,11 @@ namespace Distance
 			set { mTargetIncludesSoftTarget = value; }
 		}
 
-		public bool mMouseoverTargetFollowsMouse = false;
-		public bool MouseoverTargetFollowsMouse
+		public int mUIAttachType;   //	Backing field as an int to work with ImGui.
+		public Distance.Plugin.WidgetUIAttachType UIAttachType
 		{
-			get { return mMouseoverTargetFollowsMouse; }
-			set { mMouseoverTargetFollowsMouse = value; }
+			get { return (Distance.Plugin.WidgetUIAttachType)mUIAttachType; }
+			set { mUIAttachType = (int)value; }
 		}
 
 		public bool mDistanceIsToRing = true;
@@ -84,6 +98,13 @@ namespace Distance
 		{
 			get { return mDecimalPrecision; }
 			set { mDecimalPrecision = value; }
+		}
+
+		public bool mAllowNegativeDistances = false;
+		public bool AllowNegativeDistances
+		{
+			get { return mAllowNegativeDistances; }
+			set { mAllowNegativeDistances = value; }
 		}
 
 		public int mFontSize = 16;
@@ -129,5 +150,44 @@ namespace Distance
 		}
 
 		public DistanceWidgetFiltersConfig Filters { get; protected set; } = new DistanceWidgetFiltersConfig();
+
+		public GameAddonEnum GetGameAddonToUse()
+		{
+			if( UIAttachType == Plugin.WidgetUIAttachType.ScreenText )
+			{
+				return GameAddonEnum.ScreenText;
+			}
+			else if( UIAttachType == Plugin.WidgetUIAttachType.Cursor )
+			{
+				return GameAddonEnum.ScreenText;
+			}
+			else if( UIAttachType == Plugin.WidgetUIAttachType.Target )
+			{
+				return GameAddonEnum.TargetBar;
+			}
+			else if( UIAttachType == Plugin.WidgetUIAttachType.FocusTarget )
+			{
+				return GameAddonEnum.FocusTargetBar;
+			}
+			/*else if( UIAttachType == Plugin.WidgetUIAttachType.Nameplate )
+			{
+				return GameAddonToUse.Nameplate;
+			}*/
+			else
+			{
+				if( ApplicableTargetType == Plugin.TargetType.Target || ApplicableTargetType == Plugin.TargetType.SoftTarget )
+				{
+					return GameAddonEnum.TargetBar;
+				}
+				else if( ApplicableTargetType == Plugin.TargetType.FocusTarget )
+				{
+					return GameAddonEnum.FocusTargetBar;
+				}
+				else
+				{
+					return GameAddonEnum.ScreenText;
+				}
+			}
+		}
 	}
 }

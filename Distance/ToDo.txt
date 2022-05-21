@@ -17,7 +17,6 @@ Misc:
 
 
 Maybe:
-	-Options to "attach" widgets to target and focus target bars (coordinates become offsets in this case).
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
@@ -26,6 +25,8 @@ Maybe:
 			-The added nodes caused crashes when hovering in the addon inspector.
 				-Is it possible that indexing the nameplate base nodes from the nameplate addon was not the order that we see in the addon inspector?
 			-Not sure how to add in-game occlusion to the new nodes like the extant nameplate nodes have.
+				-This is probably the "baking" process.
+		-Probably want to make lots of conditions, not just "is aggro'd".
 	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
 		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
 	-Provide IPC for others to get aggro data?
@@ -33,6 +34,8 @@ Maybe:
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
 	-Config option to ignore soft target for aggro info.
 		-And/or maybe option to attach it to focus target.
+	-A text input box to let people format their aggro widget.
+		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
 
 
 Rejected:

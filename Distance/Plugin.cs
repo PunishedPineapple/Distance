@@ -349,11 +349,12 @@ namespace Distance
 
 		public bool ShouldDrawAggroDistanceInfo()
 		{
-			return	!mClientState.IsPvP &&
-					mConfiguration.ShowAggroDistance &&
-					GetDistanceInfo( TargetType.Target, true ).IsValid &&
-					GetDistanceInfo( TargetType.Target, true ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
-					GetDistanceInfo( TargetType.Target, true ).HasAggroRangeData &&
+			if( mClientState.IsPvP ) return false;
+
+			return	mConfiguration.ShowAggroDistance &&
+					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType, mConfiguration.AggroDistanceTargetIncludesSoftTarget ).IsValid &&
+					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType, mConfiguration.AggroDistanceTargetIncludesSoftTarget ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
+					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType, mConfiguration.AggroDistanceTargetIncludesSoftTarget ).HasAggroRangeData &&
 					!mCondition[ConditionFlag.InCombat];
 		}
 
@@ -369,6 +370,8 @@ namespace Distance
 			}
 
 			if( !config.Enabled ) return false;
+			if( config.HideInCombat && mCondition[ConditionFlag.InCombat] ) return false;
+			if( config.HideOutOfCombat && !mCondition[ConditionFlag.InCombat] ) return false;
 			if( !mCurrentDistanceInfoArray[(int)targetType].IsValid ) return false;
 
 			bool show = mCurrentDistanceInfoArray[(int)targetType].TargetKind switch
@@ -507,6 +510,30 @@ namespace Distance
 		protected Configuration mConfiguration;
 		protected PluginUI mUI;
 
+		public enum WidgetUIAttachType : int
+		{
+			Auto,
+			ScreenText,
+			Target,
+			FocusTarget,
+			Cursor,
+			//Nameplate*/
+		}
+
+		public static string GetTranslatedUIAttachTypeEnumString( WidgetUIAttachType attachType )
+		{
+			return attachType switch
+			{
+				WidgetUIAttachType.Auto => Loc.Localize( "Terminology: UI Attach Point - Auto", "Automatic" ),
+				WidgetUIAttachType.ScreenText => Loc.Localize( "Terminology: UI Attach Point - Screen Text", "Screen Space" ),
+				WidgetUIAttachType.Target => Loc.Localize( "Terminology: UI Attach Point - Target", "Target Bar" ),
+				WidgetUIAttachType.FocusTarget => Loc.Localize( "Terminology: UI Attach Point - Focus Target", "Focus Target Bar" ),
+				WidgetUIAttachType.Cursor => Loc.Localize( "Terminology: UI Attach Point - Mouse Cursor", "Mouse Cursor" ),
+				//WidgetUIAttachType.Nameplate => Loc.Localize( "Terminology: UI Attach Point - Nameplate", "Target Nameplate" ),
+				_ => "You should never see this!",
+			};
+		}
+
 		public enum TargetType : int
 		{
 			Target,
@@ -515,7 +542,7 @@ namespace Distance
 			MouseOverTarget
 		}
 
-		public static string GetLocalizedTargetTypeEnumString( TargetType targetType )
+		public static string GetTranslatedTargetTypeEnumString( TargetType targetType )
 		{
 			return targetType switch
 			{
