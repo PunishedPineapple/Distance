@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace Distance
 {
@@ -86,7 +81,7 @@ namespace Distance
 			set { mShowUnits = value; }
 		}
 
-		public bool mShowDistanceModeMarker = true;
+		public bool mShowDistanceModeMarker = false;
 		public bool ShowDistanceModeMarker
 		{
 			get { return mShowDistanceModeMarker; }
@@ -142,7 +137,7 @@ namespace Distance
 			set { mTextEdgeColor = value; }
 		}
 
-		public bool mTrackTargetBarTextColor = false;
+		public bool mTrackTargetBarTextColor = true;
 		public bool TrackTargetBarTextColor
 		{
 			get { return mTrackTargetBarTextColor; }

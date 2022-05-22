@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
 
-using Dalamud.Plugin;
-using Dalamud.Game.ClientState.Conditions;
+using CheapLoc;
+
+using Dalamud.Data;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
-using Dalamud.Game;
-using Dalamud.Data;
 using Dalamud.Logging;
-
-using CheapLoc;
+using Dalamud.Plugin;
 
 namespace Distance
 {
@@ -104,12 +103,12 @@ namespace Distance
 		public void Dispose()
 		{
 			mFramework.Update -= OnGameFrameworkUpdate;
-			mUI.Dispose();
 			mClientState.TerritoryChanged -= OnTerritoryChanged;
 			mPluginInterface.UiBuilder.Draw -= DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 			mPluginInterface.LanguageChanged -= OnLanguageChanged;
 			mCommandManager.RemoveHandler( mTextCommandName );
+			mUI.Dispose();
 
 			BNpcAggroInfoDownloader.CancelAllDownloads();
 
@@ -517,7 +516,7 @@ namespace Distance
 			Target,
 			FocusTarget,
 			Cursor,
-			//Nameplate*/
+			//Nameplate
 		}
 
 		public static string GetTranslatedUIAttachTypeEnumString( WidgetUIAttachType attachType )

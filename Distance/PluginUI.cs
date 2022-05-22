@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Linq;
-using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
-using ImGuiNET;
-using ImGuiScene;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using Dalamud.Plugin;
+using CheapLoc;
+
 using Dalamud.Data;
+using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
+using Dalamud.Plugin;
+
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using FFXIVClientStructs.FFXIV.Client.System.Memory;
-using CheapLoc;
+
+using ImGuiNET;
 
 
 namespace Distance
@@ -331,6 +327,16 @@ namespace Distance
 			}
 
 			ImGui.End();
+		}
+
+		public static bool IsUsableAggroDistanceFormatString( string str )
+		{
+			if( str.Where( x => { return x == '{'; } ).Count() != 1 || str.Where( x => { return x == '}'; } ).Count() != 1 ) return false;
+			var openBraceIndex = str.IndexOf( '{' );
+			var closeBraceIndex = str.IndexOf( '}' );
+			if( closeBraceIndex - openBraceIndex != 2 ) return false;
+			if( str[closeBraceIndex - 1] != '0' ) return false;
+			return true;
 		}
 
 		protected void DrawDebugWindow()
@@ -769,11 +775,10 @@ namespace Distance
 				CharSpacing = 1
 			};
 
-			//***** TODO: Bind to a configured addon.
 			UpdateTextNode( mConfiguration.GetGameAddonToUseForAggroDistance(), mAggroDistanceNodeID, str, drawData, show );
 		}
 
-		unsafe protected void UpdateTextNode( GameAddonEnum addonToUse, uint nodeID, string str, TextNodeDrawData drawData, bool show = true )
+		protected unsafe void UpdateTextNode( GameAddonEnum addonToUse, uint nodeID, string str, TextNodeDrawData drawData, bool show = true )
 		{
 			AtkTextNode* pNode = null;
 			AtkUnitBase* pAddon = null;
@@ -798,12 +803,12 @@ namespace Distance
 			if( pAddon != null )
 			{
 				//	Find our node by ID.  Doing this allows us to not have to deal with freeing the node resources and removing connections to sibling nodes (we'll still leak, but only once).
-				pNode = GetNodeByID( pAddon, nodeID );
+				pNode = AtkNodeHelpers.GetTextNodeByID( pAddon, nodeID );
 
 				//	If we have our node, set the colors, size, and text from settings.
 				if( pNode != null )
 				{
-					bool visible =	show && !ShouldHideUIOverlays();
+					bool visible = show && !ShouldHideUIOverlays();
 					( (AtkResNode*)pNode )->ToggleVisibility( visible );
 					if( visible )
 					{
@@ -830,83 +835,15 @@ namespace Distance
 				//	Set up the node if it hasn't been.
 				else if( pAddon->RootNode != null )
 				{
-					var pNewTextNode = (AtkTextNode*)IMemorySpace.GetUISpace()->Malloc((ulong)sizeof(AtkTextNode), 8);
-					if( pNewTextNode != null )
-					{
-						pNode = pNewTextNode;
-						IMemorySpace.Memset( pNode, 0, (ulong)sizeof( AtkTextNode ) );
-						pNode->Ctor();
-
-						pNode->AtkResNode.Type = NodeType.Text;
-						pNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
-						pNode->AtkResNode.DrawFlags = 0;
-						pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
-						pNode->AtkResNode.SetWidth( 200 );
-						pNode->AtkResNode.SetHeight( 14 );
-
-						pNode->LineSpacing = drawData.LineSpacing;
-						pNode->CharSpacing = drawData.CharSpacing;
-						pNode->AlignmentFontType = drawData.AlignmentFontType;
-						pNode->FontSize = drawData.FontSize;
-						pNode->TextFlags = (byte)( TextFlags.Edge );
-						pNode->TextFlags2 = 0;
-
-						pNode->AtkResNode.NodeID = nodeID;
-
-						pNode->AtkResNode.Color.A = 0xFF;
-						pNode->AtkResNode.Color.R = 0xFF;
-						pNode->AtkResNode.Color.G = 0xFF;
-						pNode->AtkResNode.Color.B = 0xFF;
-
-						var lastNode = pAddon->RootNode;
-						if( lastNode->ChildNode != null )
-						{
-							lastNode = lastNode->ChildNode;
-							while( lastNode->PrevSiblingNode != null )
-							{
-								lastNode = lastNode->PrevSiblingNode;
-							}
-
-							pNode->AtkResNode.NextSiblingNode = lastNode;
-							pNode->AtkResNode.ParentNode = pAddon->RootNode;
-							lastNode->PrevSiblingNode = (AtkResNode*)pNode;
-						}
-						else
-						{
-							lastNode->ChildNode = (AtkResNode*)pNode;
-							pNode->AtkResNode.ParentNode = lastNode;
-						}
-
-						pAddon->UldManager.UpdateDrawNodeList();
-					}
+					pNode = AtkNodeHelpers.CreateNewTextNode( pAddon, nodeID );
 				}
 			}
 
 			//	Hide the node(s) with the same ID on any of the other addons (in case we switched addon for the node recently).
-			if( pAddon != pScreenTextAddon ) HideNode( pScreenTextAddon, nodeID );
-			if( pAddon != pFocusTargetBarAddon ) HideNode( pFocusTargetBarAddon, nodeID );
-			if( pAddon != pNormalTargetBarAddon ) HideNode( pNormalTargetBarAddon, nodeID );
-			if( pAddon != pSplitTargetBarAddon ) HideNode( pSplitTargetBarAddon, nodeID );
-		}
-
-		unsafe protected void HideNode( AtkUnitBase* pAddon, uint nodeID )
-		{
-			var pNode = GetNodeByID( pAddon, nodeID );
-			if( pNode != null ) ( (AtkResNode*)pNode )->ToggleVisibility( false );
-		}
-
-		unsafe protected AtkTextNode* GetNodeByID( AtkUnitBase* pAddon, uint nodeID )
-		{
-			if( pAddon == null ) return null;
-			for( var i = 0; i < pAddon->UldManager.NodeListCount; ++i )
-			{
-				if( pAddon->UldManager.NodeList[i] == null ) continue;
-				if( pAddon->UldManager.NodeList[i]->NodeID == nodeID )
-				{
-					return (AtkTextNode*)pAddon->UldManager.NodeList[i];
-				}
-			}
-			return null;
+			if( pAddon != pScreenTextAddon ) AtkNodeHelpers.HideNode( pScreenTextAddon, nodeID );
+			if( pAddon != pFocusTargetBarAddon ) AtkNodeHelpers.HideNode( pFocusTargetBarAddon, nodeID );
+			if( pAddon != pNormalTargetBarAddon ) AtkNodeHelpers.HideNode( pNormalTargetBarAddon, nodeID );
+			if( pAddon != pSplitTargetBarAddon ) AtkNodeHelpers.HideNode( pSplitTargetBarAddon, nodeID );
 		}
 
 		protected bool ShouldHideUIOverlays()
@@ -957,7 +894,7 @@ namespace Distance
 		protected int mWidgetIndexWantToDelete = -1;
 
 		//	Note: Node IDs only need to be unique within a given addon.
-		protected static readonly uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.
-		protected static readonly uint mAggroDistanceNodeID = mDistanceNodeIDBase - 1;
+		protected const uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.
+		protected const uint mAggroDistanceNodeID = mDistanceNodeIDBase - 1;
 	}
 }

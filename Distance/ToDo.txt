@@ -1,10 +1,12 @@
 ﻿Bugs:
-	-None for now?
+	-Aggro range showed up for a brief moment after killing boss in Levi Ex.  Check for monster dead too when deciding whether to show?
 
 
 Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
+	-Make sure defaults provide an ok experience, including default widget positions.
+	-Get Aggro data for revised trials.
 
 
 Cleanup:
@@ -32,8 +34,6 @@ Maybe:
 	-Provide IPC for others to get aggro data?
 		-Also maybe to get the aggro point on line from an enemy.
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
-	-Config option to ignore soft target for aggro info.
-		-And/or maybe option to attach it to focus target.
 	-A text input box to let people format their aggro widget.
 		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
 
