@@ -1,4 +1,4 @@
-Version = 2022.04.20.0000.0000-001
+Version = 2022.04.20.0000.0000-002
 142=3046=8=Typhon
 142=3047=8=Ultros
 143=3330=40=Vishap
@@ -55,11 +55,13 @@ Version = 2022.04.20.0000.0000-001
 437=3632=14=King Thordan
 442=3745=14=Faust
 442=3747=14=Oppressor
+443=3757=14=Gordian Soldier
 444=3765=14=Living Liquid
 446=3660=8=Ravana
 448=3632=14=King Thordan
 449=3745=14=Faust
-449=3747=9999=Oppressor
+449=3747=14=Oppressor
+450=3757=14=Gordian Soldier
 451=3765=14=Living Liquid
 517=4776=7=Sephirot
 520=3745=14=Faust
@@ -192,3 +194,7 @@ Version = 2022.04.20.0000.0000-001
 1007=10720=12=Phoinix
 1009=10742=11=Hesperos
 1009=10744=10=Hesperos
+1045=1185=9=Ifrit
+1046=1801=9=Titan
+1047=1644=11=Garuda
+1048=2137=8=The Ultima Weapon
