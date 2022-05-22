@@ -1,4 +1,4 @@
-Version = 2022.03.01.0000.0000-001
+Version = 2022.04.20.0000.0000-001
 142=3046=8=Typhon
 142=3047=8=Ultros
 143=3330=40=Vishap
@@ -121,6 +121,7 @@ Version = 2022.03.01.0000.0000-001
 758=7092=7=Byakko
 761=7221=14=Rathalos
 762=7221=14=Rathalos
+777=1644=14=Garuda
 778=7225=14=Tsukuyomi
 779=7225=14=Tsukuyomi
 798=7691=14=Chaos
@@ -182,20 +183,12 @@ Version = 2022.03.01.0000.0000-001
 949=0=9999=-----
 950=9953=-17=The Diamond Weapon
 951=9953=-17=The Diamond Weapon
+968=0=9999=-----
+968=0=9999=-----
+968=3632=7=King Thordan
+995=10453=9999=Hydaelyn
 1003=10345=6=Erichthonios
 1005=10348=14=Hippokampos
 1007=10720=12=Phoinix
 1009=10742=11=Hesperos
 1009=10744=10=Hesperos
-0=0=0=Zodiark
-0=0=0=Hydaelyn
-0=0=0=Zodiark
-0=0=0=Hydaelyn
-0=0=0=Fatesinger
-0=0=0=Erichthonios
-0=0=0=Hippokampos
-0=0=0=Phoinix
-0=0=0=Hesperos
-0=0=0=Twintania
-0=0=0=Garuda
-0=0=0=Living Liquid
