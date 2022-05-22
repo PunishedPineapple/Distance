@@ -38,7 +38,8 @@ namespace Distance
 			set { mShowAggroDistance = value; }
 		}
 
-		public int mAggroDistanceApplicableTargetType;   //	Backing field as an int to work with ImGui.
+		//	Backing field as an int to work with ImGui.
+		public int mAggroDistanceApplicableTargetType = (int)Distance.Plugin.TargetType.Target;
 		public Distance.Plugin.TargetType AggroDistanceApplicableTargetType
 		{
 			get { return (Distance.Plugin.TargetType)mAggroDistanceApplicableTargetType; }
@@ -52,7 +53,8 @@ namespace Distance
 			set { mAggroDistanceTargetIncludesSoftTarget = value; }
 		}
 
-		public int mAggroDistanceUIAttachType;   //	Backing field as an int to work with ImGui.
+		//	Backing field as an int to work with ImGui.
+		public int mAggroDistanceUIAttachType = (int)Distance.Plugin.WidgetUIAttachType.Auto;
 		public Distance.Plugin.WidgetUIAttachType AggroDistanceUIAttachType
 		{
 			get { return (Distance.Plugin.WidgetUIAttachType)mAggroDistanceUIAttachType; }
@@ -94,7 +96,7 @@ namespace Distance
 			set { mAggroDistanceFontAlignment = value; }
 		}
 
-		public Vector2 mAggroDistanceTextPosition = new( 1f, 24f );
+		public Vector2 mAggroDistanceTextPosition = new( 130f, 0f );
 		public Vector2 AggroDistanceTextPosition
 		{
 			get { return mAggroDistanceTextPosition; }

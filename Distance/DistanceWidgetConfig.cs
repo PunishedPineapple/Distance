@@ -32,14 +32,15 @@ namespace Distance
 			set { mHideOutOfCombat = value; }
 		}
 
-		public Vector2 mTextPosition = Vector2.One;
+		public Vector2 mTextPosition = new( -200, 30 );
 		public Vector2 TextPosition
 		{
 			get { return mTextPosition; }
 			set { mTextPosition = value; }
 		}
 
-		public int mApplicableTargetType;	//	Backing field as an int to work with ImGui.
+		//	Backing field as an int to work with ImGui.
+		public int mApplicableTargetType = (int)Distance.Plugin.TargetType.Target;
 		public Distance.Plugin.TargetType ApplicableTargetType
 		{
 			get { return (Distance.Plugin.TargetType) mApplicableTargetType; }
@@ -53,7 +54,8 @@ namespace Distance
 			set { mTargetIncludesSoftTarget = value; }
 		}
 
-		public int mUIAttachType;   //	Backing field as an int to work with ImGui.
+		//	Backing field as an int to work with ImGui.
+		public int mUIAttachType = (int)Distance.Plugin.WidgetUIAttachType.Auto;
 		public Distance.Plugin.WidgetUIAttachType UIAttachType
 		{
 			get { return (Distance.Plugin.WidgetUIAttachType)mUIAttachType; }
@@ -102,7 +104,7 @@ namespace Distance
 			set { mAllowNegativeDistances = value; }
 		}
 
-		public int mFontSize = 16;
+		public int mFontSize = 14;
 		public int FontSize
 		{
 			get { return mFontSize; }
