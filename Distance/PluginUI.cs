@@ -72,21 +72,14 @@ namespace Distance
 				return;
 			}
 
-			string[] targetDropdownOptions =
-			{
-				$"{Plugin.GetTranslatedTargetTypeEnumString( Plugin.TargetType.Target )}",
-				$"{Plugin.GetTranslatedTargetTypeEnumString( Plugin.TargetType.SoftTarget )}",
-				$"{Plugin.GetTranslatedTargetTypeEnumString( Plugin.TargetType.FocusTarget )}",
-				$"{Plugin.GetTranslatedTargetTypeEnumString( Plugin.TargetType.MouseOverTarget )}"
-			};
 			string[] UIAttachDropdownOptions =
 			{
-				$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.Auto )}",
-				$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.ScreenText )}",
-				$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.Target )}",
-				$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.FocusTarget )}",
-				$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.Cursor )}",
-				//$"{Plugin.GetTranslatedUIAttachTypeEnumString( Plugin.WidgetUIAttachType.Nameplate )}"
+				AddonAttachType.Auto.GetTranslatedName(),
+				AddonAttachType.ScreenText.GetTranslatedName(),
+				AddonAttachType.Target.GetTranslatedName(),
+				AddonAttachType.FocusTarget.GetTranslatedName(),
+				AddonAttachType.Cursor.GetTranslatedName(),
+				//AddonAttachType.Nameplate.GetTranslatedUIAttachTypeEnumString(),
 			};
 
 			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", 
@@ -102,15 +95,19 @@ namespace Distance
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Distance Rules", "Distance Rules" ) + $"###Aggro Widget Distance Rules Header." ) )
 						{
 							ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
-							ImGui.Combo( $"###AggroDistanceTypeDropdown", ref mConfiguration.mAggroDistanceApplicableTargetType, targetDropdownOptions, targetDropdownOptions.Length );
-							if( mConfiguration.AggroDistanceApplicableTargetType == Plugin.TargetType.Target )
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"UI Mouseover\" is for when you mouseover the party list." ) );
+							if( ImGui.BeginCombo( $"###AggroDistanceTypeDropdown", mConfiguration.AggroDistanceApplicableTargetType.GetTranslatedName() ) )
 							{
-								ImGui.Indent();
-								ImGui.Checkbox( Loc.Localize( "Config Option: Target Includes Soft Target", "\"Target\" includes soft target." ) + $"###Aggro Widget Target Includes Soft Target.", ref mConfiguration.mAggroDistanceTargetIncludesSoftTarget );
-								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Target Includes Soft Target", "When the target type above is set to \"Target\", also show the distance to the soft target when it is valid.  This generally only matters for controller players and some two-handed keyboard players." ) );
-								ImGui.Unindent();
+								foreach( var item in TargetDropdownMenuItems )
+								{
+									if( ImGui.Selectable( item.GetTranslatedName(), mConfiguration.AggroDistanceApplicableTargetType == item ) )
+									{
+										mConfiguration.AggroDistanceApplicableTargetType = item;
+									}
+								}
+								ImGui.EndCombo();
 							}
+							
 							ImGui.TreePop();
 						}
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Appearance", "Appearance" ) + $"###Aggro Widget Appearance Header." ) )
@@ -118,9 +115,10 @@ namespace Distance
 							ImGui.Text( Loc.Localize( "Config Option: UI Attach Point", "UI Binding:" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: UI Attach Point", "This is the UI element to which you wish to attach this widget.  \"Automatic\" tries to infer the best choice based on the target type you've selected for this widget.  \"Screen Space\" does not attach to a specific UI element, but floats above everything.  The others should be self-explanatory.  Note: Attaching to the mouse cursor can look odd if you use the hardware cursor; switch to the software cursor in the game options if necessary." ) );
 							ImGui.Combo( $"###AggroDistanceUIAttachTypeDropdown", ref mConfiguration.mAggroDistanceUIAttachType, UIAttachDropdownOptions, UIAttachDropdownOptions.Length );
-							Vector2 sliderLimits = new( mConfiguration.GetGameAddonToUseForAggroDistance() == GameAddonEnum.ScreenText ? 0 : -300, mConfiguration.GetGameAddonToUseForAggroDistance() == GameAddonEnum.ScreenText ? Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) : 300 );
-
+							bool useScreenText = mConfiguration.AggroDistanceUIAttachType.GetGameAddonToUse( mConfiguration.AggroDistanceApplicableTargetType ) == GameAddonEnum.ScreenText;
+							Vector2 sliderLimits = new( useScreenText ? 0 : -300, useScreenText ? Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) : 300 );
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Position", "Position of the aggro widget (X,Y):" ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Position", "This is an offset relative to the UI element if it is attached to one, or is an absolute position on the screen if not." ) );
 							ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.mAggroDistanceTextPosition, 1f, sliderLimits.X, sliderLimits.Y, "%g", ImGuiSliderFlags.AlwaysClamp );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget." ) + "###Aggro Distance font heavy.", ref mConfiguration.mAggroDistanceFontHeavy );
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Font Size", "Aggro widget font size:" ) );
@@ -129,19 +127,14 @@ namespace Distance
 							ImGui.SliderInt( "###AggroDistanceTextFontAlignmentSlider", ref mConfiguration.mAggroDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color", "Aggro widget text color" ) + "###AggroDistanceTextColorPicker", ref mConfiguration.mAggroDistanceTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color", "Aggro widget text glow color" ) + "###AggroDistanceTextEdgeColorPicker", ref mConfiguration.mAggroDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Caution", "Aggro widget text color (caution range)" ) + "###AggroDistanceCautionTextColorPicker", ref mConfiguration.mAggroDistanceCautionTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Caution", "Aggro widget text glow color (caution range)" ) + "###AggroDistanceCautionTextEdgeColorPicker", ref mConfiguration.mAggroDistanceCautionTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Warning", "Aggro widget text color (warning range)" ) + "###AggroDistanceWarningTextColorPicker", ref mConfiguration.mAggroDistanceWarningTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Warning", "Aggro widget text glow color (warning range)" ) + "###AggroDistanceWarningTextEdgeColorPicker", ref mConfiguration.mAggroDistanceWarningTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range (y):" ) );
 							ImGui.SliderInt( "###AggroDistanceCautionRangeSlider", ref mConfiguration.mAggroCautionDistance_Yalms, 0, 30 );
-
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
 							ImGui.SliderInt( "###AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
-
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
 							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
@@ -209,25 +202,28 @@ namespace Distance
 				{
 					var config = mConfiguration.DistanceWidgetConfigs[i];
 					var filters = config.Filters;
-					string name = config.mWidgetName.Length > 0 ? config.mWidgetName : Plugin.GetTranslatedTargetTypeEnumString( config.ApplicableTargetType );
+					string name = config.mWidgetName.Length > 0 ? config.mWidgetName : config.ApplicableTargetType.GetTranslatedName();
 					if( ImGui.CollapsingHeader( String.Format( Loc.Localize( "Config Section Header: Distance Widget", "Distance Widget ({0})" ), name ) + $"###Distance Widget Header {i}." ) )
 					{
 						ImGui.Text( Loc.Localize( "Config Option: Widget Name", "Widget Name:" ) );
 						ImGui.SameLine();
-						ImGui.InputTextWithHint( $"###WidgetNameInputBox {i}", Plugin.GetTranslatedTargetTypeEnumString( config.ApplicableTargetType ), ref config.mWidgetName, 50 );
+						ImGui.InputTextWithHint( $"###WidgetNameInputBox {i}", config.ApplicableTargetType.GetTranslatedName(), ref config.mWidgetName, 50 );
 						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Widget Name", "This is used to give a customized name to this widget for use with certain text commands.  If you leave it blank, the type of target for this widget will be used in the header above, but it will not have a name for use in text commands." )  );
 						ImGui.Checkbox( Loc.Localize( "Config Option: Widget Enabled", "Enabled" ) + $"###Widget Enabled Checkbox {i}.", ref config.mEnabled );
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Rules", "Distance Rules" ) + $"###Distance Widget Rules Header {i}." ) )
 						{
 							ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance." ) );
-							ImGui.Combo( $"###DistanceTypeDropdown {i}", ref config.mApplicableTargetType, targetDropdownOptions, targetDropdownOptions.Length );
-							if( config.ApplicableTargetType == Plugin.TargetType.Target )
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"UI Mouseover\" is for when you mouseover the party list." ) );
+							if( ImGui.BeginCombo( $"###DistanceTypeDropdown {i}", config.ApplicableTargetType.GetTranslatedName() ) )
 							{
-								ImGui.Indent();
-								ImGui.Checkbox( Loc.Localize( "Config Option: Target Includes Soft Target", "\"Target\" includes soft target." ) + $"###Target Includes Soft Target {i}.", ref config.mTargetIncludesSoftTarget );
-								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Target Includes Soft Target", "When the target type above is set to \"Target\", also show the distance to the soft target when it is valid.  This generally only matters for controller players and some two-handed keyboard players." ) );
-								ImGui.Unindent();
+								foreach( var item in TargetDropdownMenuItems )
+								{
+									if( ImGui.Selectable( item.GetTranslatedName(), config.ApplicableTargetType == item ) )
+									{
+										config.ApplicableTargetType = item;
+									}
+								}
+								ImGui.EndCombo();
 							}
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring {i}.", ref config.mDistanceIsToRing );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
@@ -257,7 +253,8 @@ namespace Distance
 							ImGui.Text( Loc.Localize( "Config Option: UI Attach Point", "UI Binding:" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: UI Attach Point", "This is the UI element to which you wish to attach this widget.  \"Automatic\" tries to infer the best choice based on the target type you've selected for this widget.  \"Screen Space\" does not attach to a specific UI element, but floats above everything.  The others should be self-explanatory.  Note: Attaching to the mouse cursor can look odd if you use the hardware cursor; switch to the software cursor in the game options if necessary." ) );
 							ImGui.Combo( $"###UIAttachTypeDropdown {i}", ref config.mUIAttachType, UIAttachDropdownOptions, UIAttachDropdownOptions.Length );
-							Vector2 sliderLimits = new( config.GetGameAddonToUse() == GameAddonEnum.ScreenText ? 0 : -300, config.GetGameAddonToUse() == GameAddonEnum.ScreenText ? Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) : 300 );
+							bool useScreenText = config.UIAttachType.GetGameAddonToUse( config.ApplicableTargetType ) == GameAddonEnum.ScreenText;
+							Vector2 sliderLimits = new( useScreenText ? 0 : -300, useScreenText ? Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) : 300 );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Position", "Position of the distance readout (X,Y):" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Position", "This is an offset relative to the UI element if it is attached to one, or is an absolute position on the screen if not." ) );
 							ImGui.DragFloat2( $"###DistanceTextPositionSlider {i}", ref config.mTextPosition, 1f, sliderLimits.X, sliderLimits.Y, "%g", ImGuiSliderFlags.AlwaysClamp );
@@ -265,9 +262,9 @@ namespace Distance
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
 							ImGui.SliderInt( $"###DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
-							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "" );
+							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the (focus) target bar text can be determined, it will take precedence; otherwise the colors set below will be used." ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text (or focus target) can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + $"###DistanceTextEdgeColorPicker {i}", ref config.mTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units {i}.", ref config.mShowUnits );
@@ -275,7 +272,6 @@ namespace Distance
 							ImGui.Checkbox( Loc.Localize( "Config Option: Allow Negative Distances", "Allow negative distances." ) + $"###Allow negative distances {i}.", ref config.mAllowNegativeDistances );
 							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
 							ImGui.SliderInt( $"###DistancePrecisionSlider {i}", ref config.mDecimalPrecision, 0, 3 );
-
 							ImGui.TreePop();
 						}
 
@@ -375,25 +371,13 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
-				ImGui.Text( $"Target Distance Data:" );
-				ImGui.Indent();
-				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.Target, false ).ToString() );
-				ImGui.Unindent();
-
-				ImGui.Text( $"Soft Target Distance Data:" );
-				ImGui.Indent();
-				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.SoftTarget, false ).ToString() );
-				ImGui.Unindent();
-
-				ImGui.Text( $"Focus Target Distance Data:" );
-				ImGui.Indent();
-				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.FocusTarget, false ).ToString() );
-				ImGui.Unindent();
-
-				ImGui.Text( $"MO Target Distance Data:" );
-				ImGui.Indent();
-				ImGui.Text( mPlugin.GetDistanceInfo( Plugin.TargetType.MouseOverTarget, false ).ToString() );
-				ImGui.Unindent();
+				foreach( TargetType entry in Enum.GetValues( typeof( TargetType ) ) )
+				{
+					ImGui.Text( $"{entry.GetTranslatedName()} Distance Data:" );
+					ImGui.Indent();
+					ImGui.Text( mPlugin.GetDistanceInfo( entry ).ToString() );
+					ImGui.Unindent();
+				}
 			}
 
 			//	We're done.
@@ -510,7 +494,7 @@ namespace Distance
 
 		protected void DrawAggroDistanceArc()
 		{
-			var distanceInfo = mPlugin.GetDistanceInfo( Plugin.TargetType.Target, true );
+			var distanceInfo = mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType );
 			float lineLength = distanceInfo.DistanceFromTarget_Yalms;
 			float distance_Norm = ( distanceInfo.AggroRange_Yalms + distanceInfo.TargetRadius_Yalms ) / lineLength;
 			if( distance_Norm > 0 )
@@ -569,7 +553,9 @@ namespace Distance
 			ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
 			if( ImGui.Begin( "##AggroDistanceIndicatorWindow", ImGuiUtils.OverlayWindowFlags ) )
 			{
-				if( mConfiguration.DrawAggroArc && mPlugin.ShouldDrawAggroDistanceInfo() )
+				if( mConfiguration.DrawAggroArc &&
+					mPlugin.ShouldDrawAggroDistanceInfo() /*&&
+					AddonIsVisible( mConfiguration.AggroDistanceUIAttachType.GetGameAddonToUse( mConfiguration.AggroDistanceApplicableTargetType ) )*/ )	//***** TODO: This is kind of a heavyweight solution, and doesn't even work well.  We probably need director information to get it right.
 				{
 					DrawAggroDistanceArc();
 				}
@@ -581,14 +567,13 @@ namespace Distance
 		protected void DrawOnGameUI()
 		{
 			//	Draw the aggro widget.
-			UpdateAggroDistanceTextNode(	mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType, mConfiguration.AggroDistanceTargetIncludesSoftTarget ),
-											mPlugin.ShouldDrawAggroDistanceInfo() );
+			UpdateAggroDistanceTextNode( mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ), mPlugin.ShouldDrawAggroDistanceInfo() );
 
 			//	Draw each configured distance widget.
 			for( int i = 0; i < mConfiguration.DistanceWidgetConfigs.Count; ++i )
 			{
 				UpdateDistanceTextNode( (uint)i,
-										mPlugin.GetDistanceInfo( mConfiguration.DistanceWidgetConfigs[i].ApplicableTargetType, mConfiguration.DistanceWidgetConfigs[i].TargetIncludesSoftTarget ),
+										mPlugin.GetDistanceInfo( mConfiguration.DistanceWidgetConfigs[i].ApplicableTargetType ),
 										mConfiguration.DistanceWidgetConfigs[i],
 										mPlugin.ShouldDrawDistanceInfo( mConfiguration.DistanceWidgetConfigs[i] ) );
 			}
@@ -653,20 +638,30 @@ namespace Distance
 				var pTargetAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
 				var pTargetAddonSplit = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
 				var pFocusTargetAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_FocusTargetInfo", 1 );
-				if( config.ApplicableTargetType == Plugin.TargetType.FocusTarget && pFocusTargetAddon != null && pFocusTargetAddon->IsVisible )
+				if( config.ApplicableTargetType == TargetType.FocusTarget && pFocusTargetAddon != null && pFocusTargetAddon->IsVisible )
 				{
 					pTargetAddonToUse = pFocusTargetAddon;
-					targetBarNameNodeIndex = 10;
+					targetBarNameNodeIndex = FocusTargetBarColorNodeIndex;
+				}
+				else if( config.ApplicableTargetType == TargetType.TargetOfTarget && pTargetAddon != null && pTargetAddon->IsVisible )
+				{
+					pTargetAddonToUse = pTargetAddon;
+					targetBarNameNodeIndex = TargetOfTargetBarColorNodeIndex;
+				}
+				else if( config.ApplicableTargetType == TargetType.TargetOfTarget && pTargetAddonSplit != null && pTargetAddonSplit->IsVisible )
+				{
+					pTargetAddonToUse = pTargetAddonSplit;
+					targetBarNameNodeIndex = SplitTargetOfTargetBarColorNodeIndex;
 				}
 				else if( pTargetAddon != null && pTargetAddon->IsVisible )
 				{
 					pTargetAddonToUse = pTargetAddon;
-					targetBarNameNodeIndex = 39;
+					targetBarNameNodeIndex = TargetBarColorNodeIndex;
 				}
 				else if( pTargetAddonSplit != null && pTargetAddonSplit->IsVisible )
 				{
 					pTargetAddonToUse = pTargetAddonSplit;
-					targetBarNameNodeIndex = 8;
+					targetBarNameNodeIndex = SplitTargetBarColorNodeIndex;
 				}
 
 				if( pTargetAddonToUse != null )
@@ -689,10 +684,12 @@ namespace Distance
 				}
 			}
 
+			GameAddonEnum addonToUse = config.UIAttachType.GetGameAddonToUse( config.ApplicableTargetType );
+
 			Vector2 mouseoverOffset = Vector2.Zero;
-			if( config.GetGameAddonToUse() == GameAddonEnum.ScreenText && (
-				config.UIAttachType == Plugin.WidgetUIAttachType.Cursor ||
-				( config.UIAttachType == Plugin.WidgetUIAttachType.Auto && config.ApplicableTargetType == Plugin.TargetType.MouseOverTarget ) ) )
+			if( addonToUse == GameAddonEnum.ScreenText && (
+				config.UIAttachType == AddonAttachType.Cursor ||
+				( config.UIAttachType == AddonAttachType.Auto && ( config.ApplicableTargetType is TargetType.MouseOverTarget or TargetType.UIMouseOverTarget or TargetType.MouseOver_And_UIMouseOver_Target ) ) ) )
 			{
 				mouseoverOffset = ImGui.GetMousePos();
 			};
@@ -723,7 +720,7 @@ namespace Distance
 				CharSpacing = 1
 			};
 
-			UpdateTextNode( config.GetGameAddonToUse(), mDistanceNodeIDBase + distanceWidgetNumber, str, drawData, show );
+			UpdateTextNode( addonToUse, mDistanceNodeIDBase + distanceWidgetNumber, str, drawData, show );
 		}
 
 		unsafe protected void UpdateAggroDistanceTextNode( DistanceInfo distanceInfo, bool show )
@@ -749,10 +746,12 @@ namespace Distance
 				}
 			}
 
+			GameAddonEnum addonToUse = mConfiguration.AggroDistanceUIAttachType.GetGameAddonToUse( mConfiguration.AggroDistanceApplicableTargetType );
+
 			Vector2 mouseoverOffset = Vector2.Zero;
-			if( mConfiguration.GetGameAddonToUseForAggroDistance() == GameAddonEnum.ScreenText && (
-				mConfiguration.AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.Cursor ||
-				( mConfiguration.AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.Auto && mConfiguration.AggroDistanceApplicableTargetType == Plugin.TargetType.MouseOverTarget ) ) )
+			if( addonToUse == GameAddonEnum.ScreenText && (
+				mConfiguration.AggroDistanceUIAttachType == AddonAttachType.Cursor ||
+				( mConfiguration.AggroDistanceUIAttachType == AddonAttachType.Auto && ( mConfiguration.AggroDistanceApplicableTargetType is TargetType.MouseOverTarget or TargetType.UIMouseOverTarget or TargetType.MouseOver_And_UIMouseOver_Target ) ) ) )
 			{
 				mouseoverOffset = ImGui.GetMousePos();
 			};
@@ -775,7 +774,7 @@ namespace Distance
 				CharSpacing = 1
 			};
 
-			UpdateTextNode( mConfiguration.GetGameAddonToUseForAggroDistance(), mAggroDistanceNodeID, str, drawData, show );
+			UpdateTextNode( addonToUse, mAggroDistanceNodeID, str, drawData, show );
 		}
 
 		protected unsafe void UpdateTextNode( GameAddonEnum addonToUse, uint nodeID, string str, TextNodeDrawData drawData, bool show = true )
@@ -846,6 +845,22 @@ namespace Distance
 			if( pAddon != pSplitTargetBarAddon ) AtkNodeHelpers.HideNode( pSplitTargetBarAddon, nodeID );
 		}
 
+		protected unsafe bool AddonIsVisible( GameAddonEnum addon )
+		{
+			switch( addon )
+			{
+				case GameAddonEnum.TargetBar:
+					var pNormalTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
+					var pSplitTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
+					return ( pNormalTargetBarAddon != null && pNormalTargetBarAddon->IsVisible ) || ( pSplitTargetBarAddon != null && pSplitTargetBarAddon->IsVisible );
+				case GameAddonEnum.FocusTargetBar:
+					var pFocusTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_FocusTargetInfo", 1 );
+					return pFocusTargetBarAddon != null && pFocusTargetBarAddon->IsVisible;
+				default:
+					return false;
+			}
+		}
+
 		protected bool ShouldHideUIOverlays()
 		{
 			return	mGameGui.GameUiHidden ||
@@ -892,6 +907,25 @@ namespace Distance
 		}
 
 		protected int mWidgetIndexWantToDelete = -1;
+
+		//	Do this to control the order of dropdown items.
+		protected static readonly TargetType[] TargetDropdownMenuItems =
+		{
+			TargetType.Target_And_Soft_Target,
+			TargetType.FocusTarget,
+			TargetType.MouseOver_And_UIMouseOver_Target,
+			TargetType.Target,
+			TargetType.SoftTarget,
+			TargetType.MouseOverTarget,
+			TargetType.UIMouseOverTarget,
+			TargetType.TargetOfTarget,
+		};
+
+		protected const UInt16 FocusTargetBarColorNodeIndex = 10;
+		protected const UInt16 TargetBarColorNodeIndex = 39;
+		protected const UInt16 SplitTargetBarColorNodeIndex = 8;
+		protected const UInt16 TargetOfTargetBarColorNodeIndex = 49;
+		protected const UInt16 SplitTargetOfTargetBarColorNodeIndex = 12;
 
 		//	Note: Node IDs only need to be unique within a given addon.
 		protected const uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.

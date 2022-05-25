@@ -1,12 +1,13 @@
 ﻿Bugs:
 	-Aggro range showed up for a brief moment after killing boss in Levi Ex.  Check for monster dead too when deciding whether to show?
+		-Check for player dead too.
+		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
+		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 
 
 Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
-	-Make sure defaults provide an ok experience, including default widget positions.
-	-Get Aggro data for revised trials.
 
 
 Cleanup:

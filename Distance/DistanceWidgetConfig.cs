@@ -40,25 +40,18 @@ namespace Distance
 		}
 
 		//	Backing field as an int to work with ImGui.
-		public int mApplicableTargetType = (int)Distance.Plugin.TargetType.Target;
-		public Distance.Plugin.TargetType ApplicableTargetType
+		public int mApplicableTargetType = (int)TargetType.Target_And_Soft_Target;
+		public TargetType ApplicableTargetType
 		{
-			get { return (Distance.Plugin.TargetType) mApplicableTargetType; }
+			get { return (TargetType) mApplicableTargetType; }
 			set { mApplicableTargetType = (int)value; }
 		}
 
-		public bool mTargetIncludesSoftTarget = true;
-		public bool TargetIncludesSoftTarget
-		{
-			get { return mTargetIncludesSoftTarget; }
-			set { mTargetIncludesSoftTarget = value; }
-		}
-
 		//	Backing field as an int to work with ImGui.
-		public int mUIAttachType = (int)Distance.Plugin.WidgetUIAttachType.Auto;
-		public Distance.Plugin.WidgetUIAttachType UIAttachType
+		public int mUIAttachType = (int)AddonAttachType.Auto;
+		public AddonAttachType UIAttachType
 		{
-			get { return (Distance.Plugin.WidgetUIAttachType)mUIAttachType; }
+			get { return (AddonAttachType)mUIAttachType; }
 			set { mUIAttachType = (int)value; }
 		}
 
@@ -147,44 +140,5 @@ namespace Distance
 		}
 
 		public DistanceWidgetFiltersConfig Filters { get; protected set; } = new DistanceWidgetFiltersConfig();
-
-		public GameAddonEnum GetGameAddonToUse()
-		{
-			if( UIAttachType == Plugin.WidgetUIAttachType.ScreenText )
-			{
-				return GameAddonEnum.ScreenText;
-			}
-			else if( UIAttachType == Plugin.WidgetUIAttachType.Cursor )
-			{
-				return GameAddonEnum.ScreenText;
-			}
-			else if( UIAttachType == Plugin.WidgetUIAttachType.Target )
-			{
-				return GameAddonEnum.TargetBar;
-			}
-			else if( UIAttachType == Plugin.WidgetUIAttachType.FocusTarget )
-			{
-				return GameAddonEnum.FocusTargetBar;
-			}
-			/*else if( UIAttachType == Plugin.WidgetUIAttachType.Nameplate )
-			{
-				return GameAddonToUse.Nameplate;
-			}*/
-			else
-			{
-				if( ApplicableTargetType == Plugin.TargetType.Target || ApplicableTargetType == Plugin.TargetType.SoftTarget )
-				{
-					return GameAddonEnum.TargetBar;
-				}
-				else if( ApplicableTargetType == Plugin.TargetType.FocusTarget )
-				{
-					return GameAddonEnum.FocusTargetBar;
-				}
-				else
-				{
-					return GameAddonEnum.ScreenText;
-				}
-			}
-		}
 	}
 }

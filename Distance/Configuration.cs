@@ -39,25 +39,18 @@ namespace Distance
 		}
 
 		//	Backing field as an int to work with ImGui.
-		public int mAggroDistanceApplicableTargetType = (int)Distance.Plugin.TargetType.Target;
-		public Distance.Plugin.TargetType AggroDistanceApplicableTargetType
+		public int mAggroDistanceApplicableTargetType = (int)TargetType.Target_And_Soft_Target;
+		public TargetType AggroDistanceApplicableTargetType
 		{
-			get { return (Distance.Plugin.TargetType)mAggroDistanceApplicableTargetType; }
+			get { return (TargetType)mAggroDistanceApplicableTargetType; }
 			set { mAggroDistanceApplicableTargetType = (int)value; }
 		}
 
-		public bool mAggroDistanceTargetIncludesSoftTarget = true;
-		public bool AggroDistanceTargetIncludesSoftTarget
-		{
-			get { return mAggroDistanceTargetIncludesSoftTarget; }
-			set { mAggroDistanceTargetIncludesSoftTarget = value; }
-		}
-
 		//	Backing field as an int to work with ImGui.
-		public int mAggroDistanceUIAttachType = (int)Distance.Plugin.WidgetUIAttachType.Auto;
-		public Distance.Plugin.WidgetUIAttachType AggroDistanceUIAttachType
+		public int mAggroDistanceUIAttachType = (int)AddonAttachType.Auto;
+		public AddonAttachType AggroDistanceUIAttachType
 		{
-			get { return (Distance.Plugin.WidgetUIAttachType)mAggroDistanceUIAttachType; }
+			get { return (AddonAttachType)mAggroDistanceUIAttachType; }
 			set { mAggroDistanceUIAttachType = (int)value; }
 		}
 
@@ -185,45 +178,6 @@ namespace Distance
 		}
 
 		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new List<DistanceWidgetConfig>();
-
-		public GameAddonEnum GetGameAddonToUseForAggroDistance()
-		{
-			if( AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.ScreenText )
-			{
-				return GameAddonEnum.ScreenText;
-			}
-			else if( AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.Cursor )
-			{
-				return GameAddonEnum.ScreenText;
-			}
-			else if( AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.Target )
-			{
-				return GameAddonEnum.TargetBar;
-			}
-			else if( AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.FocusTarget )
-			{
-				return GameAddonEnum.FocusTargetBar;
-			}
-			/*else if( AggroDistanceUIAttachType == Plugin.WidgetUIAttachType.Nameplate )
-			{
-				return GameAddonToUse.Nameplate;
-			}*/
-			else
-			{
-				if( AggroDistanceApplicableTargetType == Plugin.TargetType.Target || AggroDistanceApplicableTargetType == Plugin.TargetType.SoftTarget )
-				{
-					return GameAddonEnum.TargetBar;
-				}
-				else if( AggroDistanceApplicableTargetType == Plugin.TargetType.FocusTarget )
-				{
-					return GameAddonEnum.FocusTargetBar;
-				}
-				else
-				{
-					return GameAddonEnum.ScreenText;
-				}
-			}
-		}
 
 		[NonSerialized]
 		protected DalamudPluginInterface mPluginInterface;
