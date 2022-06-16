@@ -413,11 +413,11 @@ namespace Distance
 						ImGui.TableSetColumnIndex( 0 );
 						ImGui.Text( "TerritoryType" );
 						ImGui.TableSetColumnIndex( 1 );
-						ImGui.Text( "BNpcName ID" );
+						ImGui.Text( "BNpc ID" );
 						ImGui.TableSetColumnIndex( 2 );
 						ImGui.Text( "Aggro Distance (y)" );
 						ImGui.TableSetColumnIndex( 3 );
-						ImGui.Text( "BNpcName Text" );
+						ImGui.Text( "BNpc Name" );
 
 						foreach( var entry in entries )
 						{
@@ -425,7 +425,7 @@ namespace Distance
 							ImGui.TableSetColumnIndex( 0 );
 							ImGui.Text( $"{entry.TerritoryType}" );
 							ImGui.TableSetColumnIndex( 1 );
-							ImGui.Text( $"{entry.NameID}" );
+							ImGui.Text( $"{entry.BNpcID}" );
 							ImGui.TableSetColumnIndex( 2 );
 							ImGui.Text( $"{entry.AggroDistance_Yalms}" );
 							ImGui.TableSetColumnIndex( 3 );

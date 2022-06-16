@@ -55,17 +55,17 @@ namespace Distance
 				{
 					if( mKnownAggroEntities[i].TerritoryType < 1 || territorySheet.GetRow( mKnownAggroEntities[i].TerritoryType ) == null )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						PluginLog.LogDebug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
-					else if( mKnownAggroEntities[i].NameID < 1 || BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ) == null )
+					else if( mKnownAggroEntities[i].BNpcID < 1 || BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ) == null )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						PluginLog.LogDebug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
-					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].NameID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
+					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].NameID}, {mKnownAggroEntities[i].EnglishName}" );
+						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
 				}
@@ -111,13 +111,13 @@ namespace Distance
 			}
 		}
 
-		public static float? GetAggroRange( UInt32 BNpcNameID, UInt32 territoryType )
+		public static float? GetAggroRange( UInt32 BNpcID, UInt32 territoryType )
 		{
 			FilterAggroEntities( territoryType );
 
 			lock( mLockObj )
 			{
-				int index = mFilteredAggroEntities.FindIndex( x => x.NameID == BNpcNameID  );
+				int index = mFilteredAggroEntities.FindIndex( x => x.BNpcID == BNpcID  );
 				return index >= 0 ? mFilteredAggroEntities[index].AggroDistance_Yalms : null;
 			}
 		}

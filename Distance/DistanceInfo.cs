@@ -8,7 +8,7 @@ namespace Distance
 		public bool IsValid { get; set; }
 		public Dalamud.Game.ClientState.Objects.Enums.ObjectKind TargetKind { get; set; }
 		public UInt32 ObjectID { get; set; }
-		public UInt32 BNpcNameID { get; set; }
+		public UInt32 BNpcID { get; set; }
 		public Vector3 PlayerPosition { get; set; }
 		public Vector3 TargetPosition { get; set; }
 		public float TargetRadius_Yalms { get; set; }
@@ -20,7 +20,7 @@ namespace Distance
 			IsValid = false;
 			TargetKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind.None;
 			ObjectID = 0;
-			BNpcNameID = 0;
+			BNpcID = 0;
 			PlayerPosition = Vector3.Zero;
 			TargetPosition = Vector3.Zero;
 			TargetRadius_Yalms = 0;
@@ -68,7 +68,7 @@ namespace Distance
 			str += $"Is Valid: {IsValid}\r\n";
 			str += $"Target Kind: {TargetKind}\r\n";
 			str += $"Object ID: {ObjectID:X8}\r\n";
-			str += $"BNpcName ID: {BNpcNameID}\r\n";
+			str += $"BNpc ID: {BNpcID}\r\n";
 			str += $"Player Position: {PlayerPosition.X:F3}, {PlayerPosition.Y:F3}, {PlayerPosition.Z:F3}\r\n";
 			str += $"Target Position: {TargetPosition.X:F3}, {TargetPosition.Y:F3}, {TargetPosition.Z:F3}\r\n";
 			str += $"Aggro Range: {( HasAggroRangeData ? $"{AggroRange_Yalms:F3}" : "No Data" )}\r\n";

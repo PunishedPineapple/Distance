@@ -93,8 +93,8 @@ namespace Distance
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer != null ? mClientState.LocalPlayer.Position : System.Numerics.Vector3.Zero;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetPosition = new( pObject->Position.X, pObject->Position.Y, pObject->Position.Z );
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetRadius_Yalms = pObject->HitboxRadius;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcNameID = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? pObject->GetNpcID() : 0;
-						float? aggroRange = BNpcAggroInfo.GetAggroRange( mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcNameID, mClientState.TerritoryType );
+						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? pObject->GetNpcID() : 0;
+						float? aggroRange = BNpcAggroInfo.GetAggroRange( mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID, mClientState.TerritoryType );
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = aggroRange.HasValue;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = aggroRange ?? 0;
 					}

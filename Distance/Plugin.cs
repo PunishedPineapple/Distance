@@ -405,8 +405,8 @@ namespace Distance
 					mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
 					mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
 					mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
-					mCurrentDistanceInfoArray[i].BNpcNameID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
-					float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcNameID, mClientState.TerritoryType );
+					mCurrentDistanceInfoArray[i].BNpcID = target.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? ( (Dalamud.Game.ClientState.Objects.Types.BattleNpc)target ).NameId : 0;
+					float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcID, mClientState.TerritoryType );
 					mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
 					mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
 				}

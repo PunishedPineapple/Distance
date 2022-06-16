@@ -29,13 +29,13 @@ namespace Distance
 				else if( tokens.Length != 4 ) throw new InvalidDataException( $"Line {i} contained an unexpected number of entries." );
 
 				if( !UInt32.TryParse( tokens[0], out UInt32 territoryType ) ) throw new InvalidDataException( $"Unparsable TerritoryType at line {i}" );
-				if( !UInt32.TryParse( tokens[1], out UInt32 BNpcNameID ) ) throw new InvalidDataException( $"Unparsable BNpcNameID at line {i}" );
+				if( !UInt32.TryParse( tokens[1], out UInt32 BNpcID ) ) throw new InvalidDataException( $"Unparsable BNpc ID at line {i}" );
 				if( !float.TryParse( tokens[2], out float aggroRange_Yalms ) ) throw new InvalidDataException( $"Unparsable aggro range at line {i}" );
 
 				mAggroInfoList.Add( new BNpcAggroEntity()
 				{
 					TerritoryType = territoryType,
-					NameID = BNpcNameID,
+					BNpcID = BNpcID,
 					AggroDistance_Yalms = aggroRange_Yalms,
 					EnglishName = tokens[3],
 				} );
@@ -56,7 +56,7 @@ namespace Distance
 			
 			foreach( var entry in mAggroInfoList)
 			{
-				lines.Add( $"{entry.TerritoryType}={entry.NameID}={entry.AggroDistance_Yalms}={entry.EnglishName}" );
+				lines.Add( $"{entry.TerritoryType}={entry.BNpcID}={entry.AggroDistance_Yalms}={entry.EnglishName}" );
 			}
 
 			File.WriteAllLines( filePath, lines );
