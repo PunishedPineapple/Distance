@@ -7,6 +7,8 @@ namespace Distance
 		public short PositionX;
 		public short PositionY;
 
+		public byte Alpha;
+
 		public byte TextColorA;
 		public byte TextColorR;
 		public byte TextColorG;
@@ -26,6 +28,7 @@ namespace Distance
 		{
 			PositionX = 1,
 			PositionY = 1,
+			Alpha = 255,
 			TextColorA = 255,
 			TextColorR = 255,
 			TextColorG = 255,

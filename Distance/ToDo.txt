@@ -13,8 +13,6 @@ Priority:
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
 	-Make nameplate sig(s) optional.
-	-Add alpha to what gets copied when matching target bar color?
-		-Noticeable when you run out of target range with focus target.
 	
 
 Misc:

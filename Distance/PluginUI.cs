@@ -617,6 +617,7 @@ namespace Distance
 		unsafe protected void UpdateDistanceTextNode( uint distanceWidgetNumber, DistanceInfo distanceInfo, DistanceWidgetConfig config, bool show )
 		{
 			string str = "";
+			byte nodeAlphaToUse = 255;
 			Vector4 textColorToUse = config.TextColor;
 			Vector4 edgeColorToUse = config.TextEdgeColor;
 
@@ -671,6 +672,8 @@ namespace Distance
 					{
 						var pTargetNameTextNode = pTargetNameNode->GetAsAtkTextNode();
 
+						nodeAlphaToUse = pTargetNameTextNode->AtkResNode.Color.A;
+
 						textColorToUse.W = (float)pTargetNameTextNode->TextColor.A / 255f;
 						textColorToUse.X = (float)pTargetNameTextNode->TextColor.R / 255f;
 						textColorToUse.Y = (float)pTargetNameTextNode->TextColor.G / 255f;
@@ -706,6 +709,7 @@ namespace Distance
 			{
 				PositionX = (short)( config.TextPosition.X + mouseoverOffset.X ),
 				PositionY = (short)( config.TextPosition.Y + mouseoverOffset.Y ),
+				Alpha = nodeAlphaToUse,
 				TextColorA = (byte)( textColorToUse.W * 255f ),
 				TextColorR = (byte)( textColorToUse.X * 255f ),
 				TextColorG = (byte)( textColorToUse.Y * 255f ),
@@ -812,6 +816,8 @@ namespace Distance
 					if( visible )
 					{
 						pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
+
+						pNode->AtkResNode.Color.A = drawData.Alpha;
 
 						pNode->TextColor.A = drawData.TextColorA;
 						pNode->TextColor.R = drawData.TextColorR;
