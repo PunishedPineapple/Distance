@@ -517,6 +517,7 @@ namespace Distance
 					isScreenPosValid &= mGameGui.WorldToScreen( arcPoints[i], out arcScreenPoints[i] );
 				}
 
+				//***** TODO: Maybe grab the alpha off of the focus target addon when aggro node is attached to focus target bar to make things make sense.
 				UInt32 color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextColor );
 				UInt32 edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextEdgeColor );
 				if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
@@ -559,6 +560,7 @@ namespace Distance
 				{
 					DrawAggroDistanceArc();
 				}
+				//ImGuiUtils.DrawTextWithShadow( "Test Text", new( 1 ), new( 0, 0, 0, 1 ), 1, 1f / ImGuiHelpers.GlobalScale );
 			}
 
 			ImGui.End();
@@ -764,6 +766,7 @@ namespace Distance
 			{
 				PositionX = (short)( mConfiguration.AggroDistanceTextPosition.X + mouseoverOffset.X ),
 				PositionY = (short)( mConfiguration.AggroDistanceTextPosition.Y + mouseoverOffset.Y ),
+				Alpha = 255,	//***** TODO: Should probably grab this off of the focus target addon when this node is attached to focus target bar, since that can fade out a bit.
 				TextColorA = (byte)( color.W * 255f ),
 				TextColorR = (byte)( color.X * 255f ),
 				TextColorG = (byte)( color.Y * 255f ),
