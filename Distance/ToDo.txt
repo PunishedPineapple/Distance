@@ -3,6 +3,7 @@
 		-Check for player dead too.
 		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
+		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
 
 
 Priority:
@@ -13,6 +14,7 @@ Priority:
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
 	-Make nameplate sig(s) optional.
+	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
 	
 
 Misc:
@@ -21,14 +23,9 @@ Misc:
 
 Maybe:
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
+		-Could also have other neat icons like the auto attack one (ui/uld/TargetCursor_hr1.tex) that people could attach.
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Add distances for aggro'd enemies to nameplates?
-		-This is relatively difficult.  Rough support was added, but disabled in the plugin constructor because it was buggy.
-			-Distances didn't always correlate at the same index of nameplate addon node, and nameplate game object.
-			-The added nodes caused crashes when hovering in the addon inspector.
-				-Is it possible that indexing the nameplate base nodes from the nameplate addon was not the order that we see in the addon inspector?
-			-Not sure how to add in-game occlusion to the new nodes like the extant nameplate nodes have.
-				-This is probably the "baking" process.
 		-Probably want to make lots of conditions, not just "is aggro'd".
 	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
 		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
@@ -37,6 +34,13 @@ Maybe:
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
 	-A text input box to let people format their aggro widget.
 		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
+
+
+Target Cursor Addon Notes:
+	-Soft Target Ring Res node is idx 12, doesn't become invisible, but alpha goes to zero when not shown.  Image nodes for it stay full alpha.
+	-Focus Target Pip Res node is idx 15.  Res node alpha never changes, but image node alpha (16 and 17) go to zero when not shown.
+	-Target Pip Res node is idx 18.  Uses visible flags on image modes.
+	-Auto attack indicator is Res node 22.  Uses visible flag on res node.
 
 
 Rejected:
