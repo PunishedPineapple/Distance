@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -61,8 +62,15 @@ namespace Distance
 			DrawDebugNameplateInfoWindow();
 
 			//	Draw other UI stuff.
+			mOverlayDrawTimer.Restart();
 			DrawOverlay();
+			mOverlayDrawTimer.Stop();
+			mOverlayDrawTime_uSec = mOverlayDrawTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
+
+			mWidgetNodeUpdateTimer.Restart();
 			DrawOnGameUI();
+			mWidgetNodeUpdateTimer.Stop();
+			mWidgetNodeUpdateTime_uSec = mWidgetNodeUpdateTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 		}
 
 		protected void DrawSettingsWindow()
@@ -388,6 +396,18 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
+				ImGui.Text( "Performance Timers:" );
+				ImGui.Text( $"Nameplate Distance Update Time: {NameplateHandler.mDistanceUpdateTime_uSec}μs" );
+				ImGui.Text( $"Nameplate Draw Hook Time: {NameplateHandler.mDrawHookTime_uSec}μs" );
+				ImGui.Text( $"Widget Node Configuration Time: {mWidgetNodeUpdateTime_uSec}μs" );
+				ImGui.Text( $"Overlay Draw Time: {mOverlayDrawTime_uSec}μs" );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
 				ImGui.Text( $"TerritoryType: {mClientState.TerritoryType}" );
 
 				ImGui.Spacing();
@@ -482,8 +502,8 @@ namespace Distance
 				{
 					ImGui.Text( $"{i}:" );
 					ImGui.Text( NameplateHandler.mNameplateDistanceInfoArray[i].ToString() );
+					ImGui.Text( $"Should draw?: {NameplateHandler.mShouldDrawDistanceInfoArray[i]}" );
 
-					ImGui.Spacing();
 					ImGui.Spacing();
 					ImGui.Spacing();
 					ImGui.Spacing();
@@ -941,6 +961,11 @@ namespace Distance
 		protected const UInt16 SplitTargetBarColorNodeIndex = 8;
 		protected const UInt16 TargetOfTargetBarColorNodeIndex = 49;
 		protected const UInt16 SplitTargetOfTargetBarColorNodeIndex = 12;
+
+		private readonly Stopwatch mWidgetNodeUpdateTimer = new();
+		private readonly Stopwatch mOverlayDrawTimer = new();
+		private Int64 mWidgetNodeUpdateTime_uSec = 0;
+		private Int64 mOverlayDrawTime_uSec = 0;
 
 		//	Note: Node IDs only need to be unique within a given addon.
 		protected const uint mDistanceNodeIDBase = 0x6C78B300;    //YOLO hoping for no collisions.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
@@ -52,29 +53,7 @@ namespace Distance
 
 		unsafe public static void UpdateNameplateEntityDistanceData()
 		{
-			if( mClientState == null )
-			{
-				InvalidateAllNameplateDistanceData();
-				return;
-			}
-			var pFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance();
-			if( pFramework == null )
-			{
-				InvalidateAllNameplateDistanceData();
-				return;
-			}
-			var pUIModule = pFramework->GetUiModule();
-			if( pUIModule == null )
-			{
-				InvalidateAllNameplateDistanceData();
-				return;
-			}
-			var pUI3DModule = pUIModule->GetUI3DModule();
-			if( pUI3DModule == null )
-			{
-				InvalidateAllNameplateDistanceData();
-				return;
-			}
+			mDistanceUpdateTimer.Restart();
 
 			//	Start with a clean slate.
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
@@ -83,47 +62,52 @@ namespace Distance
 				mShouldDrawDistanceInfoArray[i] = false;
 			}
 
-			//	Update the available distance data.
-			for( int i = 0; i < pUI3DModule->NamePlateObjectInfoCount; ++i )
+			if( mClientState != null &&
+				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance() != null &&
+				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule() != null &&
+				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetUI3DModule() != null )
 			{
-				var pObjectInfo = ((UI3DModule.ObjectInfo**)pUI3DModule->NamePlateObjectInfoPointerArray)[i];
-				if( pObjectInfo != null &&
-					pObjectInfo->GameObject != null &&
-					pObjectInfo->NamePlateIndex >= 0 &&
-					pObjectInfo->NamePlateIndex < mNameplateDistanceInfoArray.Length )
+				var pUI3DModule = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetUI3DModule();
+
+				//	Update the available distance data.
+				for( int i = 0; i < pUI3DModule->NamePlateObjectInfoCount; ++i )
 				{
-					var pObject = pObjectInfo->GameObject;
-					if( pObject != null )
+					var pObjectInfo = ((UI3DModule.ObjectInfo**)pUI3DModule->NamePlateObjectInfoPointerArray)[i];
+					if( pObjectInfo != null &&
+						pObjectInfo->GameObject != null &&
+						pObjectInfo->NamePlateIndex >= 0 &&
+						pObjectInfo->NamePlateIndex < mNameplateDistanceInfoArray.Length )
 					{
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].IsValid = true;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetKind = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].ObjectID = pObject->ObjectID;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer?.Position ?? System.Numerics.Vector3.Zero;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetPosition = new( pObject->Position.X, pObject->Position.Y, pObject->Position.Z );
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetRadius_Yalms = pObject->HitboxRadius;
+						var pObject = pObjectInfo->GameObject;
+						if( pObject != null )
+						{
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].IsValid = true;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetKind = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].ObjectID = pObject->ObjectID;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer?.Position ?? System.Numerics.Vector3.Zero;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetPosition = new( pObject->Position.X, pObject->Position.Y, pObject->Position.Z );
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetRadius_Yalms = pObject->HitboxRadius;
 
-						//***** TODO: Update the following to be right at some point maybe.  Think about whether we care about these parts for nameplates.
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = 0;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = false;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = 0;
+							//***** TODO: Update the following to be right at some point maybe.  Think about whether we care about these parts for nameplates.
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = 0;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = false;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = 0;
 
-						//	Whether we actually want to draw the distance on the nameplate.
-						mShouldDrawDistanceInfoArray[pObjectInfo->NamePlateIndex] = pObject->ObjectID != mClientState?.LocalPlayer.ObjectId;
+							//	Whether we actually want to draw the distance on the nameplate.
+							mShouldDrawDistanceInfoArray[pObjectInfo->NamePlateIndex] = pObject->ObjectID != mClientState?.LocalPlayer.ObjectId;
+						}
 					}
 				}
 			}
-		}
 
-		private static void InvalidateAllNameplateDistanceData()
-		{
-			foreach( var entry in mNameplateDistanceInfoArray )
-			{
-				entry.Invalidate();
-			}
+			mDistanceUpdateTimer.Stop();
+			mDistanceUpdateTime_uSec = mDistanceUpdateTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 		}
 
 		private static void NameplateDrawDetour( AddonNamePlate* pThis )
 		{
+			mDrawHookTimer.Restart();
+
 			if( mpNameplateAddon != pThis )
 			{
 				PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
@@ -137,6 +121,8 @@ namespace Distance
 			}
 
 			TESTING_UpdateNameplateDistanceNodes();
+			mDrawHookTimer.Stop();
+			mDrawHookTime_uSec = mDrawHookTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 
 			mNameplateDrawHook.Original( pThis );
 		}
@@ -151,6 +137,7 @@ namespace Distance
 					{
 						PositionX = (short)35,
 						PositionY = (short)76,
+						UseDepth = true,
 						TextColorA = (byte)255,
 						TextColorR = (byte)255,
 						TextColorG = (byte)255,
@@ -167,6 +154,7 @@ namespace Distance
 
 					drawData.PositionX = (short)35;
 					drawData.PositionY = (short)65;
+					drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID );
 					drawData.FontSize = (byte)18;
 					drawData.AlignmentFontType = (byte)( 8 | 0 );
 					drawData.LineSpacing = 24;
@@ -175,6 +163,16 @@ namespace Distance
 					UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F1}y", drawData, mShouldDrawDistanceInfoArray[i] );
 				}
 			}
+		}
+
+		//	Certain types of targets remove depth from their nameplates.  This is to help determine that.
+		private static bool ObjectIsNonDepthTarget( uint objectID )
+		{
+			uint targetOID = TargetResolver.GetTarget( TargetType.Target )?.ObjectId ?? 0;
+			uint softTargetOID = TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId ?? 0;
+			//uint focusTargetOID = TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId ?? 0;
+
+			return objectID != 0 && objectID != 0xE0000000 && ( objectID == targetOID || objectID == softTargetOID /*|| objectID == focusTargetOID*/ );
 		}
 
 		public static TextNodeDrawData? GetNameplateNodeDrawData( int i )
@@ -325,6 +323,7 @@ namespace Distance
 				if( visible )
 				{
 					pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
+					pNode->AtkResNode.SetUseDepthBasedPriority( drawData.UseDepth );
 
 					pNode->TextColor.A = drawData.TextColorA;
 					pNode->TextColor.R = drawData.TextColorR;
@@ -359,6 +358,11 @@ namespace Distance
 		private static Condition mCondition;
 		private static AddonNamePlate* mpNameplateAddon = null;
 		private static readonly AtkTextNode*[] mDistanceTextNodes = new AtkTextNode*[AddonNamePlate.NumNamePlateObjects];
+
+		private static readonly Stopwatch mDrawHookTimer = new();
+		private static readonly Stopwatch mDistanceUpdateTimer = new();
+		internal static Int64 mDrawHookTime_uSec = 0;
+		internal static Int64 mDistanceUpdateTime_uSec = 0;
 
 		private static readonly uint mNameplateDistanceNodeIDBase = 0x6C78C400;    //YOLO hoping for no collisions.
 	}
