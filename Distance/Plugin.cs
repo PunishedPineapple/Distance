@@ -47,7 +47,7 @@ namespace Distance
 
 			//	Initialization
 			TargetResolver.Init( sigScanner, targetManager, objectTable );
-			//NameplateHandler.Init( mSigScanner, mClientState, mCondition );
+			NameplateHandler.Init( sigScanner, mClientState, mCondition );
 
 			//	Configuration
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration;

@@ -4,6 +4,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Hooking;
+using Dalamud.Logging;
 
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -128,7 +129,9 @@ namespace Distance
 		{
 			if( mpNameplateAddon != pThis )
 			{
-				DestroyNameplateDistanceNodes();
+				PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
+				//DestroyNameplateDistanceNodes();	//	Should we be doing this?  Does the game clean up the whole node tree including our stuff automatically if the UI gets reinitialized?
+				for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
 				mpNameplateAddon = pThis;
 				if( mpNameplateAddon != null )
 				{
@@ -136,8 +139,44 @@ namespace Distance
 				}
 			}
 
+			TESTING_UpdateNameplateDistanceNodes();
+
 			mNameplateDrawHook.Original( pThis );
 		}
+
+		public static void TESTING_UpdateNameplateDistanceNodes()
+		{
+			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
+			{
+				TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
+				{
+					PositionX = (short)35,
+					PositionY = (short)76,
+					TextColorA = (byte)255,
+					TextColorR = (byte)255,
+					TextColorG = (byte)255,
+					TextColorB = (byte)255,
+					EdgeColorA = (byte)255,
+					EdgeColorR = (byte)255,
+					EdgeColorG = (byte)255,
+					EdgeColorB = (byte)255,
+					FontSize = (byte)12,
+					AlignmentFontType = (byte)( 7 | 0 ),
+					LineSpacing = 24,
+					CharSpacing = 1
+				};
+
+				drawData.PositionX = (short)35;
+				drawData.PositionY = (short)76;
+				drawData.FontSize = (byte)18;
+				drawData.AlignmentFontType = (byte)( 7 | 0 );
+				drawData.LineSpacing = 24;
+				drawData.CharSpacing = 1;
+
+				UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
+			}
+		}
+
 
 		public static TextNodeDrawData? GetNameplateNodeDrawData( int i )
 		{
@@ -190,6 +229,11 @@ namespace Distance
 			for( int i = 0; i < AddonNamePlate.NumNamePlateObjects; ++i )
 			{
 				var pNameplateNode = GetNameplateNode( i );
+				if( pNameplateNode == null )
+				{
+					PluginLog.LogWarning( $"Nameplate base node null for index {i}" );
+					continue;
+				}
 
 				//	Make a node.
 				var pNewNode = CreateOrphanTextNode( (uint)( mNameplateDistanceNodeIDBase + i ));
