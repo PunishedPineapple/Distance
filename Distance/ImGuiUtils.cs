@@ -27,6 +27,23 @@ namespace Distance
 			};
 		}
 
+		public static void DrawTextWithShadow( string text, Vector4 textColor, Vector4 shadowColor, byte shadowWidth, float scale )
+		{
+			Vector2 startPos = ImGui.GetCursorPos();
+			ImGui.SetWindowFontScale( scale );
+			ImGui.SetCursorPos( startPos + new Vector2( -shadowWidth, -shadowWidth ) );
+			ImGui.TextColored( shadowColor, text );
+			ImGui.SetCursorPos( startPos + new Vector2( -shadowWidth, shadowWidth ) );
+			ImGui.TextColored( shadowColor, text );
+			ImGui.SetCursorPos( startPos + new Vector2( shadowWidth, shadowWidth ) );
+			ImGui.TextColored( shadowColor, text );
+			ImGui.SetCursorPos( startPos + new Vector2( shadowWidth, -shadowWidth ) );
+			ImGui.TextColored( shadowColor, text );
+			ImGui.SetCursorPos( startPos );
+			ImGui.TextColored( textColor, text );
+			ImGui.SetWindowFontScale( 1 );
+		}
+
 		public static void HelpMarker( string description, bool sameLine = true, string marker = "(?)" )
 		{
 			if( sameLine ) ImGui.SameLine();
