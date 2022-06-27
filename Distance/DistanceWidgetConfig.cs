@@ -138,6 +138,54 @@ namespace Distance
 			get { return mTrackTargetBarTextColor; }
 			set { mTrackTargetBarTextColor = value; }
 		}
+		public bool mUseDistanceBasedColor = false;
+		public bool UseDistanceBasedColor
+		{
+			get { return mUseDistanceBasedColor; }
+			set { mUseDistanceBasedColor = value; }
+		}
+
+		public Vector4 mNearThresholdTextColor = new( (float)0xFF / 255f, (float)0xB3 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 NearThresholdTextColor
+		{
+			get { return mNearThresholdTextColor; }
+			set { mNearThresholdTextColor = value; }
+		}
+
+		public Vector4 mNearThresholdTextEdgeColor = new( (float)0x66 / 255f, (float)0x43 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 NearThresholdTextEdgeColor
+		{
+			get { return mNearThresholdTextEdgeColor; }
+			set { mNearThresholdTextEdgeColor = value; }
+		}
+
+		public Vector4 mFarThresholdTextColor = new( (float)0xEF / 255f, (float)0x48 / 255f, (float)0x12 / 255f, (float)0xFF / 255f );
+		public Vector4 FarThresholdTextColor
+		{
+			get { return mFarThresholdTextColor; }
+			set { mFarThresholdTextColor = value; }
+		}
+
+		public Vector4 mFarThresholdTextEdgeColor = new( (float)0x4E / 255f, (float)0x11 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 FarThresholdTextEdgeColor
+		{
+			get { return mFarThresholdTextEdgeColor; }
+			set { mFarThresholdTextEdgeColor = value; }
+		}
+
+		public float mFarThresholdDistance_Yalms = 3.5f;
+		public float FarThresholdDistance_Yalms
+		{
+			get { return mFarThresholdDistance_Yalms; }
+			set { mFarThresholdDistance_Yalms = value; }
+		}
+
+		public float mNearThresholdDistance_Yalms = 2f;
+		public float NearThresholdDistance_Yalms
+		{
+			get { return mNearThresholdDistance_Yalms; }
+			set { mNearThresholdDistance_Yalms = value; }
+		}
 
 		public DistanceWidgetFiltersConfig Filters { get; protected set; } = new DistanceWidgetFiltersConfig();
 	}

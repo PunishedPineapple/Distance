@@ -110,6 +110,7 @@ namespace Distance
 							
 							ImGui.TreePop();
 						}
+
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Appearance", "Appearance" ) + $"###Aggro Widget Appearance Header." ) )
 						{
 							ImGui.Text( Loc.Localize( "Config Option: UI Attach Point", "UI Binding:" ) );
@@ -125,6 +126,15 @@ namespace Distance
 							ImGui.SliderInt( "###AggroDistanceTextFontSizeSlider", ref mConfiguration.mAggroDistanceFontSize, 6, 36 );
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Alignment", "Text alignment:" ) );
 							ImGui.SliderInt( "###AggroDistanceTextFontAlignmentSlider", ref mConfiguration.mAggroDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
+							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
+							ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
+							ImGui.TreePop();
+						}
+
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Colors", "Colors" ) + $"###Aggro Widget Colors Header." ) )
+						{
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color", "Aggro widget text color" ) + "###AggroDistanceTextColorPicker", ref mConfiguration.mAggroDistanceTextColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color", "Aggro widget text glow color" ) + "###AggroDistanceTextEdgeColorPicker", ref mConfiguration.mAggroDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Caution", "Aggro widget text color (caution range)" ) + "###AggroDistanceCautionTextColorPicker", ref mConfiguration.mAggroDistanceCautionTextColor, ImGuiColorEditFlags.NoInputs );
@@ -135,12 +145,9 @@ namespace Distance
 							ImGui.SliderInt( "###AggroDistanceCautionRangeSlider", ref mConfiguration.mAggroCautionDistance_Yalms, 0, 30 );
 							ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
 							ImGui.SliderInt( "###AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.mShowUnitsOnAggroDistance );
-							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
-							ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.mAggroDistanceDecimalPrecision, 0, 3 );
 							ImGui.TreePop();
 						}
+
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc" ) + $"###Aggro Widget Arc Header." ) )
 						{
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
@@ -228,7 +235,7 @@ namespace Distance
 							ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring {i}.", ref config.mDistanceIsToRing );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
-							ImGui.DragFloat( $"###DistanceOffsetSlider {i}", ref config.mDistanceOffset_Yalms, 0.01f, 0f, 30f );
+							ImGui.DragFloat( $"###DistanceOffsetSlider {i}", ref config.mDistanceOffset_Yalms, 0.1f, -30f, 30f );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Combat", "Hide when in combat." ) + $"###Hide In Combat {i}.", ref config.mHideInCombat);
 							ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Combat", "Hide when out of combat." ) + $"###Hide Out Of Combat {i}.", ref config.mHideOutOfCombat );
 							ImGui.TreePop();
@@ -263,15 +270,33 @@ namespace Distance
 							ImGui.SliderInt( $"###DistanceTextFontSizeSlider {i}", ref config.mFontSize, 6, 36 );
 							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
 							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider", ref config.mFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text (or focus target) can be determined, it will take precedence; otherwise the colors set below will be used." ) );
-							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
-							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + $"###DistanceTextEdgeColorPicker {i}", ref config.mTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units {i}.", ref config.mShowUnits );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Mode Indicator", "Show the distance mode indicator." ) + $"###Show distance type marker {i}.", ref config.mShowDistanceModeMarker );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Allow Negative Distances", "Allow negative distances." ) + $"###Allow negative distances {i}.", ref config.mAllowNegativeDistances );
 							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
 							ImGui.SliderInt( $"###DistancePrecisionSlider {i}", ref config.mDecimalPrecision, 0, 3 );
+							ImGui.TreePop();
+						}
+
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Colors", "Colors" ) + $"###Distance Widget Colors Header {i}." ) )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + $"###Distance Text Use Target Bar Color {i}.", ref config.mTrackTargetBarTextColor );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text (or focus target) can be determined, it will take precedence; otherwise the colors set below will be used." ) );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Distance-based Colors", "Use distance-based text colors." ) + $"###Distance Text Use distance-based colors {i}.", ref config.mUseDistanceBasedColor );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, otherwise the \"Near\" color if beyond that distance, otherwise uses the base color specified above.  This setting is ignored if the checkbox to track the target bar color is ticked." ) );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + $"###DistanceTextColorPicker {i}", ref config.mTextColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + $"###DistanceTextEdgeColorPicker {i}", ref config.mTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+							if( config.UseDistanceBasedColor )
+							{
+								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distance text color (near)" ) + $"###DistanceTextColorPicker Near {i}", ref config.mNearThresholdTextColor, ImGuiColorEditFlags.NoInputs );
+								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (near)" ) + $"###DistanceTextEdgeColorPicker Near {i}", ref config.mNearThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far {i}", ref config.mFarThresholdTextColor, ImGuiColorEditFlags.NoInputs );
+								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far {i}", ref config.mFarThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceNearRangeSlider {i}", ref config.mNearThresholdDistance_Yalms, 0.5f, -30f, 30f );
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceFarRangeSlider {i}", ref config.mFarThresholdDistance_Yalms, 0.5f, -30f, 30f );
+							}
 							ImGui.TreePop();
 						}
 
@@ -627,11 +652,25 @@ namespace Distance
 			{
 				float distance = config.DistanceIsToRing ? distanceInfo.DistanceFromTargetRing_Yalms : distanceInfo.DistanceFromTarget_Yalms;
 				distance -= config.DistanceOffset_Yalms;
-				distance = config.AllowNegativeDistances ? distance : Math.Max( 0, distance );
+				float displayDistance = config.AllowNegativeDistances ? distance : Math.Max( 0, distance );
 				string unitString = config.ShowUnits ? "y" : "";
 				string distanceTypeSymbol = "";
 				if( config.ShowDistanceModeMarker ) distanceTypeSymbol = config.DistanceIsToRing ? "◯ " : "· ";
-				str = $"{distanceTypeSymbol}{distance.ToString( $"F{config.DecimalPrecision}" )}{unitString}";
+				str = $"{distanceTypeSymbol}{displayDistance.ToString( $"F{config.DecimalPrecision}" )}{unitString}";
+
+				if( config.UseDistanceBasedColor )
+				{
+					if( distance > config.FarThresholdDistance_Yalms )
+					{
+						textColorToUse = config.FarThresholdTextColor;
+						edgeColorToUse = config.FarThresholdTextEdgeColor;
+					}
+					else if( distance > config.NearThresholdDistance_Yalms )
+					{
+						textColorToUse = config.NearThresholdTextColor;
+						edgeColorToUse = config.NearThresholdTextEdgeColor;
+					}
+				}
 			}
 
 			if( config.TrackTargetBarTextColor )
