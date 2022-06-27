@@ -5,6 +5,6 @@
 		ScreenText,
 		TargetBar,
 		FocusTargetBar,
-		//Nameplate
+		//TargetCursor,
 	}
 }

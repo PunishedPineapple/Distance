@@ -15,7 +15,7 @@ namespace Distance
 		Target,
 		FocusTarget,
 		Cursor,
-		//Nameplate
+		//TargetCursor,	//	Better to get nameplates working, and have distance drawn on those based on conditions like is target, is focus target, is on aggro list, etc.
 	}
 
 	public static class AddonAttachTypeExtensions
@@ -29,7 +29,7 @@ namespace Distance
 				AddonAttachType.Target => Loc.Localize( "Terminology: UI Attach Point - Target", "Target Bar" ),
 				AddonAttachType.FocusTarget => Loc.Localize( "Terminology: UI Attach Point - Focus Target", "Focus Target Bar" ),
 				AddonAttachType.Cursor => Loc.Localize( "Terminology: UI Attach Point - Mouse Cursor", "Mouse Cursor" ),
-				//WidgetUIAttachType.Nameplate => Loc.Localize( "Terminology: UI Attach Point - Nameplate", "Target Nameplate" ),
+				//AddonAttachType.TargetCursor => Loc.Localize( "Terminology: UI Attach Point - Target Cursor", "Target Cursor" ),
 				_ => "You should never see this!",
 			};
 		}
@@ -53,9 +53,9 @@ namespace Distance
 			{
 				return GameAddonEnum.FocusTargetBar;
 			}
-			/*else if( attachType == AddonAttachType.Nameplate )
+			/*else if( attachType == AddonAttachType.TargetCursor )
 			{
-				return GameAddonEnum.Nameplate;
+				return GameAddonEnum.TargetCursor;
 			}*/
 			else /*Auto*/
 			{
