@@ -605,40 +605,7 @@ namespace Distance
 										mPlugin.ShouldDrawDistanceInfo( mConfiguration.DistanceWidgetConfigs[i] ) );
 			}
 
-			//UpdateNameplateDistanceTextNodes();
-		}
-
-		protected void UpdateNameplateDistanceTextNodes()
-		{
-			for( int i = 0; i < NameplateHandler.mNameplateDistanceInfoArray.Length; ++i )
-			{
-				TextNodeDrawData drawData = NameplateHandler.GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
-				{
-					PositionX = (short)35,
-					PositionY = (short)76,
-					TextColorA = (byte)( 1 * 255f ),
-					TextColorR = (byte)( 1 * 255f ),
-					TextColorG = (byte)( 1 * 255f ),
-					TextColorB = (byte)( 1 * 255f ),
-					EdgeColorA = (byte)( 1 * 255f ),
-					EdgeColorR = (byte)( 1 * 255f ),
-					EdgeColorG = (byte)( 1 * 255f ),
-					EdgeColorB = (byte)( 1 * 255f ),
-					FontSize = (byte)12,
-					AlignmentFontType = (byte)( 7 | 0 ),
-					LineSpacing = 24,
-					CharSpacing = 1
-				};
-
-				drawData.PositionX = (short)35;
-				drawData.PositionY = (short)76;
-				drawData.FontSize = (byte)12;
-				drawData.AlignmentFontType = (byte)( 7 | 0 );
-				drawData.LineSpacing = 24;
-				drawData.CharSpacing = 1;
-
-				NameplateHandler.UpdateNameplateDistanceTextNode( i, $"{NameplateHandler.mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
-			}
+			//	Note: Nameplate drawing is handled in NameplateHandler.
 		}
 
 		unsafe protected void UpdateDistanceTextNode( uint distanceWidgetNumber, DistanceInfo distanceInfo, DistanceWidgetConfig config, bool show )

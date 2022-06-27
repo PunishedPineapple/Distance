@@ -80,6 +80,7 @@ namespace Distance
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
 			{
 				mNameplateDistanceInfoArray[i].Invalidate();
+				mShouldDrawDistanceInfoArray[i] = false;
 			}
 
 			//	Update the available distance data.
@@ -105,6 +106,9 @@ namespace Distance
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = 0;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = false;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = 0;
+
+						//	Whether we actually want to draw the distance on the nameplate.
+						mShouldDrawDistanceInfoArray[pObjectInfo->NamePlateIndex] = pObject->ObjectID != mClientState?.LocalPlayer.ObjectId;
 					}
 				}
 			}
@@ -156,34 +160,31 @@ namespace Distance
 						EdgeColorG = (byte)255,
 						EdgeColorB = (byte)255,
 						FontSize = (byte)12,
-						AlignmentFontType = (byte)( 7 | 0 ),
+						AlignmentFontType = (byte)( 8 | 0 ),
 						LineSpacing = 24,
 						CharSpacing = 1
 					};
 
 					drawData.PositionX = (short)35;
-					drawData.PositionY = (short)76;
+					drawData.PositionY = (short)65;
 					drawData.FontSize = (byte)18;
-					drawData.AlignmentFontType = (byte)( 7 | 0 );
+					drawData.AlignmentFontType = (byte)( 8 | 0 );
 					drawData.LineSpacing = 24;
 					drawData.CharSpacing = 1;
 
-					UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
+					UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F1}y", drawData, mShouldDrawDistanceInfoArray[i] );
 				}
 			}
 		}
 
-
 		public static TextNodeDrawData? GetNameplateNodeDrawData( int i )
 		{
-			var pNameplateNode = GetNameplateNode( i );
-			if( pNameplateNode == null ) return null;
+			var nameplateObject = GetNameplateObject( i );
+			if( nameplateObject == null ) return null;
 
-			int nameplateTextNodeIndex = 9;
-			var pTargetNameNode = pNameplateNode->UldManager.NodeListSize > nameplateTextNodeIndex ? pNameplateNode->UldManager.NodeList[nameplateTextNodeIndex] : null;
-			if( pTargetNameNode != null && pTargetNameNode->GetAsAtkTextNode() != null )
+			var pTargetNameTextNode = nameplateObject.Value.NameText;
+			if( pTargetNameTextNode != null  )
 			{
-				var pTargetNameTextNode = pTargetNameNode->GetAsAtkTextNode();
 				return new TextNodeDrawData()
 				{
 					TextColorA = ((AtkTextNode*)pTargetNameTextNode)->TextColor.A,
@@ -206,13 +207,13 @@ namespace Distance
 			}
 		}
 
-		private static AtkComponentBase* GetNameplateNode( int i )
+		private static AddonNamePlate.NamePlateObject? GetNameplateObject( int i )
 		{
 			if( i < AddonNamePlate.NumNamePlateObjects &&
 				mpNameplateAddon != null &&
 				mpNameplateAddon->NamePlateObjectArray[i].RootNode != null )
 			{
-				return mpNameplateAddon->NamePlateObjectArray[i].RootNode->Component;
+				return mpNameplateAddon->NamePlateObjectArray[i];
 			}
 			else
 			{
@@ -220,34 +221,42 @@ namespace Distance
 			}
 		}
 
+		private static AtkComponentNode* GetNameplateComponentNode( int i )
+		{
+			var nameplateObject = GetNameplateObject( i );
+			return nameplateObject != null ? nameplateObject.Value.RootNode : null;
+		}
+
 		private static void CreateNameplateDistanceNodes()
 		{
 			for( int i = 0; i < AddonNamePlate.NumNamePlateObjects; ++i )
 			{
-				var pNameplateNode = GetNameplateNode( i );
-				if( pNameplateNode == null )
+				var nameplateObject = GetNameplateObject( i );
+				if( nameplateObject == null )
 				{
-					PluginLog.LogWarning( $"Nameplate base node null for index {i}" );
+					PluginLog.LogWarning( $"Unable to obtain nameplate object for index {i}" );
 					continue;
 				}
 
 				//	Make a node.
 				var pNewNode = CreateOrphanTextNode( (uint)( mNameplateDistanceNodeIDBase + i ));
 
+				var pNameplateResNode = nameplateObject.Value.ResNode;
+
 				//	Set up the node in the addon.
 				if( pNewNode != null )
 				{
-					var pLastChild = pNameplateNode->UldManager.RootNode;
+					var pLastChild = pNameplateResNode->ChildNode;
 					while( pLastChild->PrevSiblingNode != null ) pLastChild = pLastChild->PrevSiblingNode;
 					pNewNode->AtkResNode.NextSiblingNode = pLastChild;
-					pNewNode->AtkResNode.ParentNode = (AtkResNode*)pNameplateNode;
+					pNewNode->AtkResNode.ParentNode = pNameplateResNode;
 					pLastChild->PrevSiblingNode = (AtkResNode*)pNewNode;
-					pNameplateNode->UldManager.UpdateDrawNodeList();
+					nameplateObject.Value.RootNode->Component->UldManager.UpdateDrawNodeList();
 					pNewNode->AtkResNode.SetUseDepthBasedPriority( true );
-				}
 
-				//	Store it in our array.
-				mDistanceTextNodes[i] = pNewNode;
+					//	Store it in our array.
+					mDistanceTextNodes[i] = pNewNode;
+				}
 			}
 		}
 
@@ -260,12 +269,12 @@ namespace Distance
 				var pTextNode = mDistanceTextNodes[i];
 				if( pTextNode != null )
 				{
-					var pNameplateNode = GetNameplateNode( i );
+					var pNameplateNode = GetNameplateComponentNode( i );
 
 					if( pTextNode->AtkResNode.PrevSiblingNode != null ) pTextNode->AtkResNode.PrevSiblingNode->NextSiblingNode = pTextNode->AtkResNode.NextSiblingNode;
 					if( pTextNode->AtkResNode.NextSiblingNode != null ) pTextNode->AtkResNode.NextSiblingNode->PrevSiblingNode = pTextNode->AtkResNode.PrevSiblingNode;
+					pNameplateNode->Component->UldManager.UpdateDrawNodeList();
 					pTextNode->AtkResNode.Destroy( true );
-					pNameplateNode->UldManager.UpdateDrawNodeList();
 
 					mDistanceTextNodes[i] = null;
 				}
@@ -345,6 +354,7 @@ namespace Distance
 
 		//	Members
 		internal static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];    //***** TODO: Expose the data properly. *****
+		internal static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 		private static ClientState mClientState;
 		private static Condition mCondition;
 		private static AddonNamePlate* mpNameplateAddon = null;
