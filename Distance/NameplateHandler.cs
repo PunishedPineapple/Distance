@@ -76,8 +76,14 @@ namespace Distance
 				return;
 			}
 
-			int i = 0;
-			for( ; i < pUI3DModule->NamePlateObjectInfoCount; ++i )
+			//	Start with a clean slate.
+			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
+			{
+				mNameplateDistanceInfoArray[i].Invalidate();
+			}
+
+			//	Update the available distance data.
+			for( int i = 0; i < pUI3DModule->NamePlateObjectInfoCount; ++i )
 			{
 				var pObjectInfo = ((UI3DModule.ObjectInfo**)pUI3DModule->NamePlateObjectInfoPointerArray)[i];
 				if( pObjectInfo != null &&
@@ -91,29 +97,16 @@ namespace Distance
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].IsValid = true;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetKind = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].ObjectID = pObject->ObjectID;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer != null ? mClientState.LocalPlayer.Position : System.Numerics.Vector3.Zero;
+						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer?.Position ?? System.Numerics.Vector3.Zero;
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetPosition = new( pObject->Position.X, pObject->Position.Y, pObject->Position.Z );
 						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetRadius_Yalms = pObject->HitboxRadius;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc ? pObject->GetNpcID() : 0;
-						float? aggroRange = BNpcAggroInfo.GetAggroRange( mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID, mClientState.TerritoryType );
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = aggroRange.HasValue;
-						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = aggroRange ?? 0;
-					}
-					else
-					{
-						mNameplateDistanceInfoArray[i].Invalidate();
-					}
-				}
-				else if( i >= 0 && i < mNameplateDistanceInfoArray.Length )
-				{
-					mNameplateDistanceInfoArray[i].Invalidate();
-				}
-			}
 
-			//	Invalidate any that we couldn't update.
-			for( ; i < mNameplateDistanceInfoArray.Length; ++i )
-			{
-				mNameplateDistanceInfoArray[i].Invalidate();
+						//***** TODO: Update the following to be right at some point maybe.  Think about whether we care about these parts for nameplates.
+						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].BNpcID = 0;
+						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].HasAggroRangeData = false;
+						mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = 0;
+					}
+				}
 			}
 		}
 
@@ -148,32 +141,35 @@ namespace Distance
 		{
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
 			{
-				TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
+				if( mNameplateDistanceInfoArray[i].IsValid )	//	If it's not valid, nameplate should be hiding itself and thus our node.  Double check this.
 				{
-					PositionX = (short)35,
-					PositionY = (short)76,
-					TextColorA = (byte)255,
-					TextColorR = (byte)255,
-					TextColorG = (byte)255,
-					TextColorB = (byte)255,
-					EdgeColorA = (byte)255,
-					EdgeColorR = (byte)255,
-					EdgeColorG = (byte)255,
-					EdgeColorB = (byte)255,
-					FontSize = (byte)12,
-					AlignmentFontType = (byte)( 7 | 0 ),
-					LineSpacing = 24,
-					CharSpacing = 1
-				};
+					TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
+					{
+						PositionX = (short)35,
+						PositionY = (short)76,
+						TextColorA = (byte)255,
+						TextColorR = (byte)255,
+						TextColorG = (byte)255,
+						TextColorB = (byte)255,
+						EdgeColorA = (byte)255,
+						EdgeColorR = (byte)255,
+						EdgeColorG = (byte)255,
+						EdgeColorB = (byte)255,
+						FontSize = (byte)12,
+						AlignmentFontType = (byte)( 7 | 0 ),
+						LineSpacing = 24,
+						CharSpacing = 1
+					};
 
-				drawData.PositionX = (short)35;
-				drawData.PositionY = (short)76;
-				drawData.FontSize = (byte)18;
-				drawData.AlignmentFontType = (byte)( 7 | 0 );
-				drawData.LineSpacing = 24;
-				drawData.CharSpacing = 1;
+					drawData.PositionX = (short)35;
+					drawData.PositionY = (short)76;
+					drawData.FontSize = (byte)18;
+					drawData.AlignmentFontType = (byte)( 7 | 0 );
+					drawData.LineSpacing = 24;
+					drawData.CharSpacing = 1;
 
-				UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
+					UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F2}", drawData );
+				}
 			}
 		}
 
@@ -247,6 +243,7 @@ namespace Distance
 					pNewNode->AtkResNode.ParentNode = (AtkResNode*)pNameplateNode;
 					pLastChild->PrevSiblingNode = (AtkResNode*)pNewNode;
 					pNameplateNode->UldManager.UpdateDrawNodeList();
+					pNewNode->AtkResNode.SetUseDepthBasedPriority( true );
 				}
 
 				//	Store it in our array.
