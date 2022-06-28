@@ -11,7 +11,7 @@ namespace Distance
 			set { mShowNameplateDistances = value; }
 		}
 
-		public bool mShowAll = true;
+		public bool mShowAll = false;
 		public bool ShowAll
 		{
 			get { return mShowAll; }
@@ -123,7 +123,7 @@ namespace Distance
 			set { mAggroDistanceTextPosition = value; }
 		}*/
 
-		public bool mFiltersAreExclusive = true;
+		public bool mFiltersAreExclusive = false;
 		public bool FiltersAreExclusive
 		{
 			get { return mFiltersAreExclusive; }

@@ -2,17 +2,19 @@
 
 namespace Distance
 {
+	//*****TODO: Subclass the nameplate stuff.
 	public struct TextNodeDrawData
 	{
+		public bool Show;	//Nameplate only
 		public short PositionX;
 		public short PositionY;
 
-		public ushort Width;
-		public ushort Height;
+		public ushort Width;	//Nameplate only
+		public ushort Height;	//Nameplate only
 
-		public bool UseDepth;
+		public bool UseDepth;	//Nameplate only
 
-		public byte Alpha;
+		public byte Alpha;		//Nameplate only
 
 		public byte TextColorA;
 		public byte TextColorR;
@@ -31,6 +33,7 @@ namespace Distance
 
 		public static readonly TextNodeDrawData Default = new TextNodeDrawData()
 		{
+			Show = true,
 			PositionX = 1,
 			PositionY = 1,
 			Width = 200,
