@@ -205,7 +205,7 @@ namespace Distance
 								//ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Aggro", "Show distance on enemies aggressive to you." ) + $"###Show distance to aggro (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAggressive );
 								//ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Party", "Show distance on party members." ) + $"###Show distance to party (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowPartyMembers );
 								//ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Alliance", "Show distance on alliance members." ) + $"###Show distance to alliance (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAllianceMembers );
-								ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exlusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.mFiltersAreExclusive );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exclusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.mFiltersAreExclusive );
 								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Filters are Exclusive", "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria." ) );
 							}
 							ImGui.TreePop();
