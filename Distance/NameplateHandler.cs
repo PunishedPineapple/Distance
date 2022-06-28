@@ -208,6 +208,7 @@ namespace Distance
 				{
 					TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
 					{
+						Show = false,
 						PositionX = 0,
 						PositionY = 0,
 						Width = 288,
@@ -273,28 +274,30 @@ namespace Distance
 			var nameplateObject = GetNameplateObject( i );
 			if( nameplateObject == null ) return null;
 
-			var pTargetNameResNode = nameplateObject.Value.ResNode;
-			var pTargetNameTextNode = nameplateObject.Value.NameText;
-			if( pTargetNameTextNode != null && pTargetNameResNode != null  )
+			var pNameplateIconNode = nameplateObject.Value.ImageNode2;	//	Need to check this for people that are using player icon plugins with names hidden.
+			var pNameplateResNode = nameplateObject.Value.ResNode;
+			var pNameplateTextNode = nameplateObject.Value.NameText;
+			if( pNameplateTextNode != null && pNameplateResNode != null && pNameplateIconNode != null )
 			{
 				return new TextNodeDrawData()
 				{
-					PositionX = (short)pTargetNameResNode->X,
-					PositionY = (short)pTargetNameResNode->Y,
-					Width = pTargetNameResNode->Width,
-					Height = pTargetNameResNode->Height,
-					TextColorA = ((AtkTextNode*)pTargetNameTextNode)->TextColor.A,
-					TextColorR = ((AtkTextNode*)pTargetNameTextNode)->TextColor.R,
-					TextColorG = ((AtkTextNode*)pTargetNameTextNode)->TextColor.G,
-					TextColorB = ((AtkTextNode*)pTargetNameTextNode)->TextColor.B,
-					EdgeColorA = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.A,
-					EdgeColorR = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.R,
-					EdgeColorG = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.G,
-					EdgeColorB = ((AtkTextNode*)pTargetNameTextNode)->EdgeColor.B,
-					FontSize = ((AtkTextNode*)pTargetNameTextNode)->FontSize,
-					AlignmentFontType = ((AtkTextNode*)pTargetNameTextNode)->AlignmentFontType,
-					LineSpacing = ((AtkTextNode*)pTargetNameTextNode)->LineSpacing,
-					CharSpacing = ((AtkTextNode*)pTargetNameTextNode)->CharSpacing
+					Show = ((AtkResNode*)pNameplateIconNode)->IsVisible || ( pNameplateResNode->IsVisible && ((AtkResNode*)pNameplateTextNode)->IsVisible ),
+					PositionX = (short)pNameplateResNode->X,
+					PositionY = (short)pNameplateResNode->Y,
+					Width = pNameplateResNode->Width,
+					Height = pNameplateResNode->Height,
+					TextColorA = ((AtkTextNode*)pNameplateTextNode)->TextColor.A,
+					TextColorR = ((AtkTextNode*)pNameplateTextNode)->TextColor.R,
+					TextColorG = ((AtkTextNode*)pNameplateTextNode)->TextColor.G,
+					TextColorB = ((AtkTextNode*)pNameplateTextNode)->TextColor.B,
+					EdgeColorA = ((AtkTextNode*)pNameplateTextNode)->EdgeColor.A,
+					EdgeColorR = ((AtkTextNode*)pNameplateTextNode)->EdgeColor.R,
+					EdgeColorG = ((AtkTextNode*)pNameplateTextNode)->EdgeColor.G,
+					EdgeColorB = ((AtkTextNode*)pNameplateTextNode)->EdgeColor.B,
+					FontSize = ((AtkTextNode*)pNameplateTextNode)->FontSize,
+					AlignmentFontType = ((AtkTextNode*)pNameplateTextNode)->AlignmentFontType,
+					LineSpacing = ((AtkTextNode*)pNameplateTextNode)->LineSpacing,
+					CharSpacing = ((AtkTextNode*)pNameplateTextNode)->CharSpacing
 				};
 			}
 			else
@@ -425,8 +428,8 @@ namespace Distance
 			var pNode = mDistanceTextNodes[i];
 			if( pNode != null )
 			{
-				( (AtkResNode*)pNode )->ToggleVisibility( show );
-				if( show )
+				( (AtkResNode*)pNode )->ToggleVisibility( show && drawData.Show );
+				if( show && drawData.Show )
 				{
 					pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
 					pNode->AtkResNode.SetUseDepthBasedPriority( drawData.UseDepth );
