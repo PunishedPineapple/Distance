@@ -47,7 +47,6 @@ namespace Distance
 
 			//	Initialization
 			TargetResolver.Init( sigScanner, targetManager, objectTable );
-			NameplateHandler.Init( sigScanner, mClientState, mCondition );
 
 			//	Configuration
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration;
@@ -91,6 +90,7 @@ namespace Distance
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
+			NameplateHandler.Init( sigScanner, clientState, condition, mConfiguration );
 
 			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
 			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;
@@ -115,6 +115,7 @@ namespace Distance
 			BNpcAggroInfoDownloader.CancelAllDownloads();
 
 			NameplateHandler.Uninit();
+			TargetResolver.Uninit();
 		}
 
 		protected void OnLanguageChanged( string langCode )

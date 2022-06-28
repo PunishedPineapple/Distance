@@ -10,12 +10,6 @@ namespace Distance
 	[Serializable]
 	public class Configuration : IPluginConfiguration
 	{
-		public Configuration()
-		{
-		}
-
-		//  Our own configuration options and data.
-
 		//	Need a real backing field on the properties for use with ImGui.
 		public bool mSuppressCommandLineResponses = false;
 		public bool SuppressCommandLineResponses
@@ -177,7 +171,8 @@ namespace Distance
 			mPluginInterface.SavePluginConfig( this );
 		}
 
-		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new List<DistanceWidgetConfig>();
+		public NameplateConfig NameplateDistancesConfig { get; protected set; } = new();
+		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new();
 
 		[NonSerialized]
 		protected DalamudPluginInterface mPluginInterface;

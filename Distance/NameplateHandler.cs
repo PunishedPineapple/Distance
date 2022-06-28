@@ -15,10 +15,11 @@ namespace Distance
 {
 	internal static unsafe class NameplateHandler
 	{
-		public static void Init( SigScanner sigScanner, ClientState clientState, Condition condition )
+		internal static void Init( SigScanner sigScanner, ClientState clientState, Condition condition, Configuration configuration )
 		{
 			mClientState = clientState;
 			mCondition = condition;
+			mConfiguration = configuration;	//	Ya it's kinda jank to init a static class with an instance's data, but it'll never matter here, and just as much work to make this non-static.
 
 			if( sigScanner == null )
 			{
@@ -32,16 +33,19 @@ namespace Distance
 				if( mfpOnNameplateDraw != IntPtr.Zero )
 				{
 					mNameplateDrawHook = new Hook<NameplateDrawFuncDelegate>( mfpOnNameplateDraw, mdNameplateDraw );
-					mNameplateDrawHook.Enable();
+					mNameplateDrawHook?.Enable();
 				}
 			}
 			catch( Exception e )
 			{
-				throw new Exception( $"Error in \"NameplateHandler.Init()\" while searching for required function signatures; this probably means that the plugin needs to be updated due to changes in Final Fantasy XIV.  Raw exception as follows:\r\n{e}" );
+				mNameplateDrawHook?.Disable();
+				mNameplateDrawHook?.Dispose();
+				mNameplateDrawHook = null;
+				PluginLog.LogError( $"Error in \"NameplateHandler.Init()\" while searching for required function signatures; this probably means that the plugin needs to be updated due to changes in Final Fantasy XIV.\r\n{e}" );
 			}
 		}
 
-		public static void Uninit()
+		internal static void Uninit()
 		{
 			mNameplateDrawHook?.Disable();
 			mNameplateDrawHook?.Dispose();
@@ -49,9 +53,11 @@ namespace Distance
 
 			DestroyNameplateDistanceNodes();
 			mpNameplateAddon = null;
+
+			mConfiguration = null;
 		}
 
-		unsafe public static void UpdateNameplateEntityDistanceData()
+		internal unsafe static void UpdateNameplateEntityDistanceData()
 		{
 			mDistanceUpdateTimer.Restart();
 
@@ -94,7 +100,7 @@ namespace Distance
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].AggroRange_Yalms = 0;
 
 							//	Whether we actually want to draw the distance on the nameplate.
-							mShouldDrawDistanceInfoArray[pObjectInfo->NamePlateIndex] = pObject->ObjectID != mClientState?.LocalPlayer.ObjectId;
+							mShouldDrawDistanceInfoArray[pObjectInfo->NamePlateIndex] = ShouldDrawDistanceForNameplate( pObjectInfo->NamePlateIndex );
 						}
 					}
 				}
@@ -102,6 +108,55 @@ namespace Distance
 
 			mDistanceUpdateTimer.Stop();
 			mDistanceUpdateTime_uSec = mDistanceUpdateTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
+		}
+
+		private static bool ShouldDrawDistanceForNameplate( int i )
+		{
+			if( i < 0 || i >= mNameplateDistanceInfoArray.Length ) return false;
+			if( mConfiguration == null ) return false;
+			if( !mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) return false;
+
+			var distanceInfo = mNameplateDistanceInfoArray[i];
+
+			if( distanceInfo.ObjectID == mClientState?.LocalPlayer.ObjectId ) return false;
+
+			bool filtersPermitShowing = false;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnPlayers ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnBattleNpc ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventNpc ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnTreasure ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnAetheryte ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnGatheringNode ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventObj ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnCompanion ) filtersPermitShowing = true;
+			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnHousing ) filtersPermitShowing = true;
+
+			if( mConfiguration.NameplateDistancesConfig.ShowAll )
+			{
+				return filtersPermitShowing;
+			}
+			else
+			{
+				if( mConfiguration.NameplateDistancesConfig.FiltersAreExclusive )
+				{
+					if( !filtersPermitShowing ) return false;
+				}
+				else
+				{
+					if( filtersPermitShowing ) return true;
+				}
+
+				if( mConfiguration.NameplateDistancesConfig.mShowTarget && TargetResolver.GetTarget( TargetType.Target )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowSoftTarget && TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowFocusTarget && TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget && TargetResolver.GetTarget( TargetType.MouseOverTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+
+				//if( Aggressive ) return true;
+				//if( Party Member ) return true;
+				//if( Alliance Member ) return true;
+
+				return false;
+			}
 		}
 
 		private static void NameplateDrawDetour( AddonNamePlate* pThis )
@@ -120,23 +175,43 @@ namespace Distance
 				}
 			}
 
-			TESTING_UpdateNameplateDistanceNodes();
+			//***** TODO:	Either use the lighter hide all nodes function when config isn't set to show any nameplate stuff, or preferably
+			//				disable the hook.  Is disabling the hook while in it safe?  Disabling the hook means that we could have an outdated
+			//				addon pointer when trying to dispose though, which would crash.
+			if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
+			{
+				UpdateNameplateDistanceNodes();
+			}
+			else
+			{
+				HideAllNameplateDistanceNodes();
+			}
 			mDrawHookTimer.Stop();
 			mDrawHookTime_uSec = mDrawHookTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 
 			mNameplateDrawHook.Original( pThis );
 		}
 
-		public static void TESTING_UpdateNameplateDistanceNodes()
+		private static void HideAllNameplateDistanceNodes()
 		{
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
 			{
-				if( mNameplateDistanceInfoArray[i].IsValid )	//	If it's not valid, nameplate should be hiding itself and thus our node.  Double check this.
+				HideNameplateDistanceTextNode( i );
+			}
+		}
+
+		private static void UpdateNameplateDistanceNodes()
+		{
+			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
+			{
+				if( mNameplateDistanceInfoArray[i].IsValid )	//	If it's not valid, nameplate should be hiding itself and thus our node.  No need to duplicate that.
 				{
 					TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
 					{
-						PositionX = (short)35,
-						PositionY = (short)76,
+						PositionX = 0,
+						PositionY = 0,
+						Width = 288,
+						Height = 107,
 						UseDepth = true,
 						TextColorA = (byte)255,
 						TextColorR = (byte)255,
@@ -146,21 +221,39 @@ namespace Distance
 						EdgeColorR = (byte)255,
 						EdgeColorG = (byte)255,
 						EdgeColorB = (byte)255,
-						FontSize = (byte)12,
-						AlignmentFontType = (byte)( 8 | 0 ),
+						FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize,
+						AlignmentFontType = (byte)( mConfiguration.NameplateDistancesConfig.DistanceFontAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) ),
 						LineSpacing = 24,
 						CharSpacing = 1
 					};
 
-					drawData.PositionX = (short)35;
-					drawData.PositionY = (short)65;
-					drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID );
-					drawData.FontSize = (byte)18;
-					drawData.AlignmentFontType = (byte)( 8 | 0 );
-					drawData.LineSpacing = 24;
-					drawData.CharSpacing = 1;
+					int textOffsetX = 0;
+					int textOffsetY = 0;
+					var nameplateObject = GetNameplateObject( i );
+					if( nameplateObject != null )
+					{
+						textOffsetX = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment switch
+						{
+							6 => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
+							7 => drawData.Width / 2 - 100,
+							8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - 200,
+							_ => 0,
+						};
 
-					UpdateNameplateDistanceTextNode( i, $"{mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms:F1}y", drawData, mShouldDrawDistanceInfoArray[i] );
+						textOffsetY = drawData.Height - nameplateObject.Value.TextH - 14;
+					}
+
+					drawData.PositionX = (short)textOffsetX;
+					drawData.PositionY = (short)textOffsetY;
+					drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID );
+					drawData.FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize;
+					drawData.AlignmentFontType = (byte)( mConfiguration.NameplateDistancesConfig.DistanceFontAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
+
+					float displayDistance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
+					if( !mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ) displayDistance = Math.Max( 0, displayDistance );
+					string distanceText = displayDistance.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
+					if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
+					UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
 				}
 			}
 		}
@@ -175,16 +268,21 @@ namespace Distance
 			return objectID != 0 && objectID != 0xE0000000 && ( objectID == targetOID || objectID == softTargetOID /*|| objectID == focusTargetOID*/ );
 		}
 
-		public static TextNodeDrawData? GetNameplateNodeDrawData( int i )
+		private static TextNodeDrawData? GetNameplateNodeDrawData( int i )
 		{
 			var nameplateObject = GetNameplateObject( i );
 			if( nameplateObject == null ) return null;
 
+			var pTargetNameResNode = nameplateObject.Value.ResNode;
 			var pTargetNameTextNode = nameplateObject.Value.NameText;
-			if( pTargetNameTextNode != null  )
+			if( pTargetNameTextNode != null && pTargetNameResNode != null  )
 			{
 				return new TextNodeDrawData()
 				{
+					PositionX = (short)pTargetNameResNode->X,
+					PositionY = (short)pTargetNameResNode->Y,
+					Width = pTargetNameResNode->Width,
+					Height = pTargetNameResNode->Height,
 					TextColorA = ((AtkTextNode*)pTargetNameTextNode)->TextColor.A,
 					TextColorR = ((AtkTextNode*)pTargetNameTextNode)->TextColor.R,
 					TextColorG = ((AtkTextNode*)pTargetNameTextNode)->TextColor.G,
@@ -313,14 +411,22 @@ namespace Distance
 			return pNewNode;
 		}
 
-		public static void UpdateNameplateDistanceTextNode( int i, string str, TextNodeDrawData drawData, bool show = true )
+		private static void HideNameplateDistanceTextNode( int i )
 		{
 			var pNode = mDistanceTextNodes[i];
 			if( pNode != null )
 			{
-				bool visible = show && !mCondition[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
-				( (AtkResNode*)pNode )->ToggleVisibility( visible );
-				if( visible )
+				( (AtkResNode*)pNode )->ToggleVisibility( false );
+			}
+		}
+
+		private static void UpdateNameplateDistanceTextNode( int i, string str, TextNodeDrawData drawData, bool show = true )
+		{
+			var pNode = mDistanceTextNodes[i];
+			if( pNode != null )
+			{
+				( (AtkResNode*)pNode )->ToggleVisibility( show );
+				if( show )
 				{
 					pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
 					pNode->AtkResNode.SetUseDepthBasedPriority( drawData.UseDepth );
@@ -356,6 +462,7 @@ namespace Distance
 		internal static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 		private static ClientState mClientState;
 		private static Condition mCondition;
+		private static Configuration mConfiguration = null;
 		private static AddonNamePlate* mpNameplateAddon = null;
 		private static readonly AtkTextNode*[] mDistanceTextNodes = new AtkTextNode*[AddonNamePlate.NumNamePlateObjects];
 

@@ -95,6 +95,7 @@ namespace Distance
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
+				ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.mShowNameplateDistances );
 
 				if( mConfiguration.ShowAggroDistance )
 				{
@@ -182,6 +183,59 @@ namespace Distance
 						if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
 						{
 							ImGui.Text( Loc.Localize( "Config Text: Download Status Indicator", $"Status of most recent update attempt:" ) + $"\r\n{BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
+						}
+					}
+				}
+
+				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
+				{
+					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
+					{
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Distance Rules", "Distance Rules" ) + $"###Nameplate Distance Rules Header." ) )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring (nameplates).", ref mConfiguration.NameplateDistancesConfig.mDistanceIsToRing );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show All", "Show distance on all nameplates." ) + $"###Show distance to all nameplates.", ref mConfiguration.NameplateDistancesConfig.mShowAll );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show All", "Shows distance on all nameplates for any objects that match the object type filters in the next section.  If this is unchecked, additional options will appear below." ) );
+							if( !mConfiguration.NameplateDistancesConfig.ShowAll )
+							{
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Target", "Show distance on target." ) + $"###Show distance to Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowTarget );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Soft Target", "Show distance on soft target." ) + $"###Show distance to Soft Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowSoftTarget );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Focus Target", "Show distance on focus target." ) + $"###Show distance to Focus Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowFocusTarget );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Mouseover Target", "Show distance on mouseover target." ) + $"###Show distance to mouseover target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Aggro", "Show distance on enemies aggressive to you." ) + $"###Show distance to aggro (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAggressive );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Party", "Show distance on party members." ) + $"###Show distance to party (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowPartyMembers );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Alliance", "Show distance on alliance members." ) + $"###Show distance to alliance (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAllianceMembers );
+								ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exlusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.mFiltersAreExclusive );
+								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Filters are Exclusive", "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria." ) );
+							}
+							ImGui.TreePop();
+						}
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Filters", "Filters" ) + $"###Nameplate Filters Header." ) )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnPlayers );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + $"###Show distance to BattleNpc (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnBattleNpc );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventNpc", "Show the distance to non-combatant NPCs." ) + $"###Show distance to EventNpc (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnEventNpc );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Treasure", "Show the distance to treasure chests." ) + $"###Show distance to treasure (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnTreasure );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Aetheryte", "Show the distance to aetherytes." ) + $"###Show distance to aetheryte (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnAetheryte );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Gathering Node", "Show the distance to gathering nodes." ) + $"###Show distance to gathering node (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnGatheringNode );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventObj", "Show the distance to interactable objects." ) + $"###Show distance to EventObj (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnEventObj );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Companion", "Show the distance to companions." ) + $"###Show distance to companion (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnCompanion );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Housing", "Show the distance to housing items." ) + $"###Show distance to housing (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnHousing );
+							ImGui.TreePop();
+						}
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Appearance", "Appearance" ) + $"###Nameplate Appearance Header." ) )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text." ) + $"###Distance font heavy  (nameplates).", ref mConfiguration.NameplateDistancesConfig.mDistanceFontHeavy );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
+							ImGui.SliderInt( $"###DistanceTextFontSizeSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.mDistanceFontSize, 6, 36 );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
+							ImGui.SliderInt( "###DistanceTextFontAlignmentSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.mDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowUnitsOnDistance );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Allow Negative Distances", "Allow negative distances." ) + $"###Allow negative distances (nameplates).", ref mConfiguration.NameplateDistancesConfig.mAllowNegativeDistances );
+							ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
+							ImGui.SliderInt( $"###DistancePrecisionSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.mDistanceDecimalPrecision, 0, 3 );
+
+							ImGui.TreePop();
 						}
 					}
 				}

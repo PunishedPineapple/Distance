@@ -4,18 +4,21 @@
 		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
+	-Some nameplate configurations show all ENpc/companions (0xE0000000) when clicking one.  Not sure how best to solve this.
 
 
 Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
+	-Add aggro/party/alliance conditions for nameplates ASAP.
 
 
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
 	-Make nameplate sig(s) optional.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
-	
+	-Make our text node sizes constants so that we don't have magic numbers laying around randomly.
+
 
 Misc:
 	-Translations.
@@ -25,8 +28,6 @@ Maybe:
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 		-Could also have other neat icons like the auto attack one (ui/uld/TargetCursor_hr1.tex) that people could attach.
 	-Allow the user to set custom colors for different distance values, like in the aggro widget.
-	-Add distances for aggro'd enemies to nameplates?
-		-Probably want to make lots of conditions, not just "is aggro'd".
 	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
 		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
 	-Provide IPC for others to get aggro data?
