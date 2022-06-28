@@ -50,6 +50,17 @@ namespace Distance
 			}
 		}
 
+		public float EffectiveRangeFromTarget_Yalms
+		{
+			get
+			{
+				return DistanceFromTarget_Yalms - TargetRadius_Yalms - PlayerHitRingRadius;
+			}
+			private set
+			{
+			}
+		}
+
 		public float DistanceFromTargetAggro_Yalms
 		{
 			get
@@ -75,9 +86,12 @@ namespace Distance
 			str += $"Target Radius (y): {TargetRadius_Yalms:F3}\r\n";
 			str += $"Distance To Target (y): {DistanceFromTarget_Yalms:F3}\r\n";
 			str += $"Distance To Ring (y): {DistanceFromTargetRing_Yalms:F3}\r\n";
+			str += $"Effective Range (y): {EffectiveRangeFromTarget_Yalms:F3}\r\n";
 			str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms:F3} " : "No Data" )}";
 			
 			return str;
 		}
+
+		public const float PlayerHitRingRadius = 0.5f;
 	}
 }
