@@ -11,6 +11,8 @@ Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
 	-Add aggro/party/alliance conditions for nameplates ASAP.
+	-Offset ring distance by player ring distance too.
+	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
 
 
 Cleanup:
@@ -22,6 +24,7 @@ Cleanup:
 
 Misc:
 	-Translations.
+	-Maybe add discussions regarding player to ring and ring to ring distances (your skills vs. enemy skills, etc.).
 
 
 Maybe:
