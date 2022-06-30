@@ -116,12 +116,26 @@ namespace Distance
 			set { mDistanceFontAlignment = value; }
 		}
 
-		/*public Vector2 mAggroDistanceTextPosition = new( 130f, 0f );
-		public Vector2 AggroDistanceTextPosition
+		public bool mAutomaticallyAlignText = true;
+		public bool AutomaticallyAlignText
 		{
-			get { return mAggroDistanceTextPosition; }
-			set { mAggroDistanceTextPosition = value; }
-		}*/
+			get { return mAutomaticallyAlignText; }
+			set { mAutomaticallyAlignText = value; }
+		}
+
+		public bool mPlaceTextBelowName = false;
+		public bool PlaceTextBelowName
+		{
+			get { return mPlaceTextBelowName; }
+			set { mPlaceTextBelowName = value; }
+		}
+
+		public Vector2 mDistanceTextOffset = Vector2.Zero;
+		public Vector2 DistanceTextOffset
+		{
+			get { return mDistanceTextOffset; }
+			set { mDistanceTextOffset = value; }
+		}
 
 		public bool mFiltersAreExclusive = false;
 		public bool FiltersAreExclusive

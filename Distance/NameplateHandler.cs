@@ -4,9 +4,11 @@ using System.Diagnostics;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Party;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 
+using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -15,11 +17,12 @@ namespace Distance
 {
 	internal static unsafe class NameplateHandler
 	{
-		internal static void Init( SigScanner sigScanner, ClientState clientState, Condition condition, Configuration configuration )
+		internal static void Init( SigScanner sigScanner, ClientState clientState, PartyList partyList, Condition condition, Configuration configuration )
 		{
 			mClientState = clientState;
+			mPartyList = partyList;
 			mCondition = condition;
-			mConfiguration = configuration;	//	Ya it's kinda jank to init a static class with an instance's data, but it'll never matter here, and just as much work to make this non-static.
+			mConfiguration = configuration; //	Ya it's kinda jank to init a static class with an instance's data, but it'll never matter here, and just as much work to make this non-static.
 
 			if( sigScanner == null )
 			{
@@ -146,14 +149,24 @@ namespace Distance
 					if( filtersPermitShowing ) return true;
 				}
 
-				if( mConfiguration.NameplateDistancesConfig.mShowTarget && TargetResolver.GetTarget( TargetType.Target )?.ObjectId == distanceInfo.ObjectID ) return true;
-				if( mConfiguration.NameplateDistancesConfig.mShowSoftTarget && TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
-				if( mConfiguration.NameplateDistancesConfig.mShowFocusTarget && TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
-				if( mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget && TargetResolver.GetTarget( TargetType.MouseOverTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowTarget &&
+					TargetResolver.GetTarget( TargetType.Target )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowSoftTarget &&
+					TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowFocusTarget &&
+					TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+				if( mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget &&
+					TargetResolver.GetTarget( TargetType.MouseOverTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
 
-				//if( Aggressive ) return true;
-				//if( Party Member ) return true;
-				//if( Alliance Member ) return true;
+				if( mConfiguration.NameplateDistancesConfig.ShowAggressive &&
+					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
+					ObjectIsAggressive( distanceInfo.ObjectID ) ) return true;
+				if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
+					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+					ObjectIsPartyMember( distanceInfo.ObjectID ) ) return true;
+				if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
+					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+					ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;
 
 				return false;
 			}
@@ -204,62 +217,54 @@ namespace Distance
 		{
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
 			{
-				if( mNameplateDistanceInfoArray[i].IsValid )	//	If it's not valid, nameplate should be hiding itself and thus our node.  No need to duplicate that.
+				if( !mNameplateDistanceInfoArray[i].IsValid ) continue;
+
+				TextNodeDrawData drawData = GetNameplateNodeDrawData( i );
+
+				int textPositionX = 0;
+				int textPositionY = 0;
+				int textAlignment = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment;
+
+				var nameplateObject = GetNameplateObject( i );
+				if( nameplateObject != null && mConfiguration.NameplateDistancesConfig.AutomaticallyAlignText )
 				{
-					TextNodeDrawData drawData = GetNameplateNodeDrawData( i ) ?? new TextNodeDrawData()
+					textPositionX = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment switch
 					{
-						Show = false,
-						PositionX = 0,
-						PositionY = 0,
-						Width = 288,
-						Height = 107,
-						UseDepth = true,
-						TextColorA = (byte)255,
-						TextColorR = (byte)255,
-						TextColorG = (byte)255,
-						TextColorB = (byte)255,
-						EdgeColorA = (byte)255,
-						EdgeColorR = (byte)255,
-						EdgeColorG = (byte)255,
-						EdgeColorB = (byte)255,
-						FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize,
-						AlignmentFontType = (byte)( mConfiguration.NameplateDistancesConfig.DistanceFontAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) ),
-						LineSpacing = 24,
-						CharSpacing = 1
+						6 => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
+						7 => drawData.Width / 2 - 100,
+						8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - 200,
+						_ => 0,
 					};
 
-					int textOffsetX = 0;
-					int textOffsetY = 0;
-					var nameplateObject = GetNameplateObject( i );
-					if( nameplateObject != null )
+					if( mConfiguration.NameplateDistancesConfig.PlaceTextBelowName )
 					{
-						textOffsetX = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment switch
-						{
-							6 => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
-							7 => drawData.Width / 2 - 100,
-							8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - 200,
-							_ => 0,
-						};
-
-						textOffsetY = drawData.Height - nameplateObject.Value.TextH - 14;
+						textPositionY = drawData.Height - 7;
+					}
+					else
+					{
+						textPositionY = drawData.Height - nameplateObject.Value.TextH - 14;
 					}
 
-					drawData.PositionX = (short)textOffsetX;
-					drawData.PositionY = (short)textOffsetY;
-					drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID );
-					drawData.FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize;
-					drawData.AlignmentFontType = (byte)( mConfiguration.NameplateDistancesConfig.DistanceFontAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
-
-					float displayDistance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
-					if( !mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ) displayDistance = Math.Max( 0, displayDistance );
-					string distanceText = displayDistance.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
-					if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
-					UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
+					//	Change the node to be top aligned (instead of bottom) if placing below name.
+					if( mConfiguration.NameplateDistancesConfig.PlaceTextBelowName ) textAlignment -= 6;
+					textAlignment = Math.Max( 0, Math.Min( textAlignment, 8 ) );
 				}
+
+				drawData.PositionX = (short)( textPositionX + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.X );
+				drawData.PositionY = (short)( textPositionY + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.Y );
+				drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID ); //Ideally we would just read this from the nameplate text node, but ClientStructs doesn't seem to have a way to do that.
+				drawData.FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize;
+				drawData.AlignmentFontType = (byte)( textAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
+
+				float displayDistance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
+				if( !mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ) displayDistance = Math.Max( 0, displayDistance );
+				string distanceText = displayDistance.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
+				if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
+
+				UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
 			}
 		}
 
-		//	Certain types of targets remove depth from their nameplates.  This is to help determine that.
 		private static bool ObjectIsNonDepthTarget( uint objectID )
 		{
 			uint targetOID = TargetResolver.GetTarget( TargetType.Target )?.ObjectId ?? 0;
@@ -269,10 +274,52 @@ namespace Distance
 			return objectID != 0 && objectID != 0xE0000000 && ( objectID == targetOID || objectID == softTargetOID /*|| objectID == focusTargetOID*/ );
 		}
 
-		private static TextNodeDrawData? GetNameplateNodeDrawData( int i )
+		private static bool ObjectIsAggressive( uint objectID )
+		{
+			if( objectID is 0 or 0xE0000000 ) return false;
+
+			if( FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance() != null &&
+				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule() != null &&
+				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule() != null )
+			{
+				var atkArrayDataHolder = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder;
+				if( atkArrayDataHolder.NumberArrayCount >= 18 )
+				{
+					var pEnmityListArray = atkArrayDataHolder.NumberArrays[19];
+					int enemyCount = pEnmityListArray->AtkArrayData.Size > 1 ? pEnmityListArray->IntArray[1] : 0;
+
+					for( int i = 0; i < enemyCount; ++i )
+					{
+						int index = 8 + i * 6;
+						if( index >= pEnmityListArray->AtkArrayData.Size ) return false;
+						if( pEnmityListArray->IntArray[index] == objectID ) return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private static bool ObjectIsPartyMember( uint objectID )
+		{
+			if( objectID is 0 or 0xE0000000 ) return false;
+			if( mPartyList.Length < 1 ) return false;
+			foreach( var member in mPartyList ) if( member?.ObjectId == objectID ) return true;
+			return false;
+		}
+
+		private static bool ObjectIsAllianceMember( uint objectID )
+		{
+			if( objectID is 0 or 0xE0000000 ) return false;
+			if( GroupManager.Instance() == null ) return false;
+			if( !GroupManager.Instance()->IsAlliance ) return false;
+			return GroupManager.Instance()->IsObjectIDInAlliance( objectID );
+		}
+
+		private static TextNodeDrawData GetNameplateNodeDrawData( int i )
 		{
 			var nameplateObject = GetNameplateObject( i );
-			if( nameplateObject == null ) return null;
+			if( nameplateObject == null ) return TextNodeDrawData.Default;
 
 			var pNameplateIconNode = nameplateObject.Value.ImageNode2;	//	Need to check this for people that are using player icon plugins with names hidden.
 			var pNameplateResNode = nameplateObject.Value.ResNode;
@@ -302,7 +349,7 @@ namespace Distance
 			}
 			else
 			{
-				return null;
+				return TextNodeDrawData.Default;
 			}
 		}
 
@@ -464,6 +511,7 @@ namespace Distance
 		internal static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];    //***** TODO: Expose the data properly. *****
 		internal static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 		private static ClientState mClientState;
+		private static PartyList mPartyList;
 		private static Condition mCondition;
 		private static Configuration mConfiguration = null;
 		private static AddonNamePlate* mpNameplateAddon = null;

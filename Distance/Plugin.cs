@@ -9,6 +9,7 @@ using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
@@ -27,6 +28,7 @@ namespace Distance
 			ClientState clientState,
 			CommandManager commandManager,
 			Dalamud.Game.ClientState.Conditions.Condition condition,
+			PartyList partyList,
 			TargetManager targetManager,
 			ChatGui chatGui,
 			GameGui gameGui,
@@ -90,7 +92,7 @@ namespace Distance
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
-			NameplateHandler.Init( sigScanner, clientState, condition, mConfiguration );
+			NameplateHandler.Init( sigScanner, clientState, partyList, condition, mConfiguration );
 
 			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
 			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;
