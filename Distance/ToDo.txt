@@ -11,8 +11,10 @@ Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
 	-Add aggro/party/alliance conditions for nameplates ASAP.
+		-Add friends/fc member conditions?
 	-Offset ring distance by player ring distance too.
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
+	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 
 
 Cleanup:
@@ -38,6 +40,9 @@ Maybe:
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
 	-A text input box to let people format their aggro widget.
 		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
+	-Add distances on party list?
+	-Add distance-based coloring to nameplate distances?
+	-Should make a more encapsulated node (or node controller or something) class before doing the preceeding; it's just getting too much tracking floating nodes with disparate functionality to have even more to do with them.
 
 
 Target Cursor Addon Notes:
