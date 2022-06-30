@@ -2,7 +2,7 @@
 
 namespace Distance
 {
-	//*****TODO: Subclass the nameplate stuff.
+	//*****TODO: Subclass the nameplate stuff and add a new default for that version.
 	public struct TextNodeDrawData
 	{
 		public bool Show;	//Nameplate only

@@ -70,7 +70,6 @@ namespace Distance
 			}
 		}
 
-
 		private static void UIMouseoverDetour( IntPtr pThis, IntPtr pActor )
 		{
 			mUIMouseoverHook.Original( pThis, pActor );
@@ -84,7 +83,6 @@ namespace Distance
 				mUIMouseoverTarget = null;
 			}
 		}
-
 
 		private static TargetManager mTargetManager;
 		private static ObjectTable mObjectTable;
