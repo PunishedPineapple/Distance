@@ -474,6 +474,16 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
+				ImGui.Text( "Addresses:" );
+				ImGui.Text( $"Nameplate Addon: 0x{mGameGui.GetAddonByName( "Nameplate", 1 ):X}" );
+				ImGui.Text( $"Nameplate Addon (Cached): 0x{NameplateHandler.DEBUG_GetCachedNameplateAddonPtr():X}" );
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
 				ImGui.Text( $"TerritoryType: {mClientState.TerritoryType}" );
 
 				ImGui.Spacing();

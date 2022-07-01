@@ -32,7 +32,7 @@ namespace Distance
 			set { mHideOutOfCombat = value; }
 		}
 
-		public Vector2 mTextPosition = new( -200, 30 );
+		public Vector2 mTextPosition = new( -AtkNodeHelpers.DefaultTextNodeWidth, 30 );
 		public Vector2 TextPosition
 		{
 			get { return mTextPosition; }

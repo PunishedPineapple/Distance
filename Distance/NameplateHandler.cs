@@ -5,6 +5,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Party;
+using Dalamud.Game.Gui;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 
@@ -17,11 +18,12 @@ namespace Distance
 {
 	internal static unsafe class NameplateHandler
 	{
-		internal static void Init( SigScanner sigScanner, ClientState clientState, PartyList partyList, Condition condition, Configuration configuration )
+		internal static void Init( SigScanner sigScanner, ClientState clientState, PartyList partyList, Condition condition, GameGui gameGui, Configuration configuration )
 		{
 			mClientState = clientState;
 			mPartyList = partyList;
 			mCondition = condition;
+			mGameGui = gameGui;
 			mConfiguration = configuration; //	Ya it's kinda jank to init a static class with an instance's data, but it'll never matter here, and just as much work to make this non-static.
 
 			if( sigScanner == null )
@@ -32,11 +34,12 @@ namespace Distance
 			//	Get Function Pointers, etc.
 			try
 			{
-				mfpOnNameplateDraw = sigScanner.ScanText( "0F B7 81 ?? ?? ?? ?? 4C 8B C1 66 C1 E0 06" );
+				mfpOnNameplateDraw = sigScanner.ScanText( "0F B7 81 ?? ?? ?? ?? 4C 8B C1 66 C1 E0 06" );	//***** TODO: Can we hook the draw vfunc through ClientStructs?  Would that be more stable?
 				if( mfpOnNameplateDraw != IntPtr.Zero )
 				{
 					mNameplateDrawHook = new Hook<NameplateDrawFuncDelegate>( mfpOnNameplateDraw, mdNameplateDraw );
-					mNameplateDrawHook?.Enable();
+					if( mNameplateDrawHook == null ) throw new Exception( "Unable to create nameplate draw hook." );
+					if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) mNameplateDrawHook.Enable();
 				}
 			}
 			catch( Exception e )
@@ -45,6 +48,7 @@ namespace Distance
 				mNameplateDrawHook?.Dispose();
 				mNameplateDrawHook = null;
 				PluginLog.LogError( $"Error in \"NameplateHandler.Init()\" while searching for required function signatures; this probably means that the plugin needs to be updated due to changes in Final Fantasy XIV.\r\n{e}" );
+				return;
 			}
 		}
 
@@ -58,6 +62,40 @@ namespace Distance
 			mpNameplateAddon = null;
 
 			mConfiguration = null;
+		}
+
+		internal static void EnableNameplateDistances()
+		{
+			if( mNameplateDrawHook == null ) return;
+			if( !mNameplateDrawHook.IsEnabled )
+			{
+				try
+				{
+					mNameplateDrawHook.Enable();
+				}
+				catch( Exception e )
+				{
+					PluginLog.LogError( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
+				}
+			}
+		}
+
+		internal static void DisableNameplateDistances()
+		{
+			if( mNameplateDrawHook == null ) return;
+			if( mNameplateDrawHook.IsEnabled )
+			{
+				try
+				{
+					mNameplateDrawHook.Disable();
+					mDrawHookTime_uSec = 0;
+					HideAllNameplateDistanceNodes();
+				}
+				catch( Exception e )
+				{
+					PluginLog.LogError( $"Unknown error while trying to disable nameplate distances:\r\n{e}" );
+				}
+			}
 		}
 
 		internal unsafe static void UpdateNameplateEntityDistanceData()
@@ -174,35 +212,36 @@ namespace Distance
 
 		private static void NameplateDrawDetour( AddonNamePlate* pThis )
 		{
-			mDrawHookTimer.Restart();
-
-			if( mpNameplateAddon != pThis )
+			try
 			{
-				PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
-				//DestroyNameplateDistanceNodes();	//	Should we be doing this?  Does the game clean up the whole node tree including our stuff automatically if the UI gets reinitialized?
-				for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
-				mpNameplateAddon = pThis;
-				if( mpNameplateAddon != null )
+				mDrawHookTimer.Restart();
+
+				if( mpNameplateAddon != pThis )
 				{
-					CreateNameplateDistanceNodes();
+					PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
+					//DestroyNameplateDistanceNodes();	//***** TODO: I'm assuming that the game cleans up the whole node tree including our stuff automatically if the UI gets reinitialized?
+					for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
+					mpNameplateAddon = pThis;
+					if( mpNameplateAddon != null )
+					{
+						CreateNameplateDistanceNodes();
+					}
 				}
-			}
 
-			//***** TODO:	Either use the lighter hide all nodes function when config isn't set to show any nameplate stuff, or preferably
-			//				disable the hook.  Is disabling the hook while in it safe?  Disabling the hook means that we could have an outdated
-			//				addon pointer when trying to dispose though, which would crash.
-			if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
-			{
 				UpdateNameplateDistanceNodes();
-			}
-			else
-			{
-				HideAllNameplateDistanceNodes();
-			}
-			mDrawHookTimer.Stop();
-			mDrawHookTime_uSec = mDrawHookTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 
-			mNameplateDrawHook.Original( pThis );
+				mDrawHookTimer.Stop();
+				mDrawHookTime_uSec = mDrawHookTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
+			}
+			catch( Exception e )
+			{
+				PluginLog.LogError( $"Unknown error in nameplate draw hook.  Disabling nameplate distances.\r\n{e}" );
+				DisableNameplateDistances();
+			}
+			finally
+			{
+				mNameplateDrawHook.Original( pThis );
+			}
 		}
 
 		private static void HideAllNameplateDistanceNodes()
@@ -231,18 +270,18 @@ namespace Distance
 					textPositionX = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment switch
 					{
 						6 => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
-						7 => drawData.Width / 2 - 100,
-						8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - 200,
+						7 => drawData.Width / 2 - AtkNodeHelpers.DefaultTextNodeWidth / 2,
+						8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - AtkNodeHelpers.DefaultTextNodeWidth,
 						_ => 0,
 					};
 
 					if( mConfiguration.NameplateDistancesConfig.PlaceTextBelowName )
 					{
-						textPositionY = drawData.Height - 7;
+						textPositionY = drawData.Height - AtkNodeHelpers.DefaultTextNodeHeight / 2;
 					}
 					else
 					{
-						textPositionY = drawData.Height - nameplateObject.Value.TextH - 14;
+						textPositionY = drawData.Height - nameplateObject.Value.TextH - AtkNodeHelpers.DefaultTextNodeHeight;
 					}
 
 					//	Change the node to be top aligned (instead of bottom) if placing below name.
@@ -385,7 +424,7 @@ namespace Distance
 				}
 
 				//	Make a node.
-				var pNewNode = CreateOrphanTextNode( (uint)( mNameplateDistanceNodeIDBase + i ));
+				var pNewNode = AtkNodeHelpers.CreateOrphanTextNode( (uint)( mNameplateDistanceNodeIDBase + i ) );
 
 				var pNameplateResNode = nameplateObject.Value.ResNode;
 
@@ -409,6 +448,7 @@ namespace Distance
 		private static void DestroyNameplateDistanceNodes()
 		{
 			if( mpNameplateAddon == null ) return;
+			if( mpNameplateAddon != (AddonNamePlate*)mGameGui.GetAddonByName( "Nameplate", 1 ) ) return;	//	Double check, because if the addon updated after we had disabled the hook, we can't really do anything.
 
 			for( int i = 0; i < AddonNamePlate.NumNamePlateObjects; ++i )
 			{
@@ -425,40 +465,6 @@ namespace Distance
 					mDistanceTextNodes[i] = null;
 				}
 			}
-		}
-
-		private static AtkTextNode* CreateOrphanTextNode( uint ID )
-		{
-			//	Just use some sane defaults.
-			var pNewNode = (AtkTextNode*)IMemorySpace.GetUISpace()->Malloc((ulong)sizeof(AtkTextNode), 8);
-			if( pNewNode != null )
-			{
-				IMemorySpace.Memset( pNewNode, 0, (ulong)sizeof( AtkTextNode ) );
-				pNewNode->Ctor();
-
-				pNewNode->AtkResNode.Type = NodeType.Text;
-				pNewNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
-				pNewNode->AtkResNode.DrawFlags = 0;
-				pNewNode->AtkResNode.SetPositionShort( 0, 0 );
-				pNewNode->AtkResNode.SetWidth( 200 );
-				pNewNode->AtkResNode.SetHeight( 14 );
-
-				pNewNode->LineSpacing = 24;
-				pNewNode->CharSpacing = 1;
-				pNewNode->AlignmentFontType = (byte)AlignmentType.BottomLeft;
-				pNewNode->FontSize = 12;
-				pNewNode->TextFlags = (byte)( TextFlags.Edge );
-				pNewNode->TextFlags2 = 0;
-
-				pNewNode->AtkResNode.NodeID = ID;
-
-				pNewNode->AtkResNode.Color.A = 0xFF;
-				pNewNode->AtkResNode.Color.R = 0xFF;
-				pNewNode->AtkResNode.Color.G = 0xFF;
-				pNewNode->AtkResNode.Color.B = 0xFF;
-			}
-
-			return pNewNode;
 		}
 
 		private static void HideNameplateDistanceTextNode( int i )
@@ -501,6 +507,11 @@ namespace Distance
 			}
 		}
 
+		internal static IntPtr DEBUG_GetCachedNameplateAddonPtr()
+		{
+			return new( mpNameplateAddon );
+		}
+
 		//	Delgates and Hooks
 		private delegate void NameplateDrawFuncDelegate( AddonNamePlate* pThis );
 		private static readonly NameplateDrawFuncDelegate mdNameplateDraw = new( NameplateDrawDetour );
@@ -513,6 +524,7 @@ namespace Distance
 		private static ClientState mClientState;
 		private static PartyList mPartyList;
 		private static Condition mCondition;
+		private static GameGui mGameGui;
 		private static Configuration mConfiguration = null;
 		private static AddonNamePlate* mpNameplateAddon = null;
 		private static readonly AtkTextNode*[] mDistanceTextNodes = new AtkTextNode*[AddonNamePlate.NumNamePlateObjects];

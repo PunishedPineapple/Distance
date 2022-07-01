@@ -3,9 +3,9 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace Distance
 {
-	internal static class AtkNodeHelpers
+	internal static unsafe class AtkNodeHelpers
 	{
-		public static unsafe AtkTextNode* GetTextNodeByID( AtkUnitBase* pAddon, uint nodeID )
+		internal static AtkTextNode* GetTextNodeByID( AtkUnitBase* pAddon, uint nodeID )
 		{
 			if( pAddon == null ) return null;
 			for( var i = 0; i < pAddon->UldManager.NodeListCount; ++i )
@@ -19,38 +19,20 @@ namespace Distance
 			return null;
 		}
 
-		public static unsafe AtkTextNode* CreateNewTextNode( AtkUnitBase* pAddon, uint nodeID )
+		internal static AtkTextNode* CreateNewTextNode( AtkUnitBase* pAddon, uint nodeID )
 		{
 			if( pAddon == null ) return null;
+			var pNewNode = CreateOrphanTextNode( nodeID );
+			if( pNewNode != null ) AttachTextNode( pAddon, pNewNode );
+			return pNewNode;
+		}
 
-			var pNode = (AtkTextNode*)IMemorySpace.GetUISpace()->Malloc( (ulong)sizeof( AtkTextNode ), 8 );
+		internal static void AttachTextNode( AtkUnitBase* pAddon, AtkTextNode* pNode )
+		{
+			if( pAddon == null ) return;
 
 			if( pNode != null )
 			{
-				IMemorySpace.Memset( pNode, 0, (ulong)sizeof( AtkTextNode ) );
-				pNode->Ctor();
-
-				pNode->AtkResNode.Type = NodeType.Text;
-				pNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
-				pNode->AtkResNode.DrawFlags = 0;
-				pNode->AtkResNode.SetPositionShort( 0, 0 );
-				pNode->AtkResNode.SetWidth( 200 );
-				pNode->AtkResNode.SetHeight( 14 );
-
-				pNode->LineSpacing = 24;
-				pNode->CharSpacing = 1;
-				pNode->AlignmentFontType = (byte)AlignmentType.TopLeft;
-				pNode->FontSize = 12;
-				pNode->TextFlags = (byte)( TextFlags.Edge );
-				pNode->TextFlags2 = 0;
-
-				pNode->AtkResNode.NodeID = nodeID;
-
-				pNode->AtkResNode.Color.A = 0xFF;
-				pNode->AtkResNode.Color.R = 0xFF;
-				pNode->AtkResNode.Color.G = 0xFF;
-				pNode->AtkResNode.Color.B = 0xFF;
-
 				var lastNode = pAddon->RootNode;
 				if( lastNode->ChildNode != null )
 				{
@@ -72,14 +54,49 @@ namespace Distance
 
 				pAddon->UldManager.UpdateDrawNodeList();
 			}
-
-			return pNode;
 		}
 
-		public static unsafe void HideNode( AtkUnitBase* pAddon, uint nodeID )
+		internal static AtkTextNode* CreateOrphanTextNode( uint nodeID )
+		{
+			//	Just use some sane defaults.
+			var pNewNode = (AtkTextNode*)IMemorySpace.GetUISpace()->Malloc((ulong)sizeof(AtkTextNode), 8);
+			if( pNewNode != null )
+			{
+				IMemorySpace.Memset( pNewNode, 0, (ulong)sizeof( AtkTextNode ) );
+				pNewNode->Ctor();
+
+				pNewNode->AtkResNode.Type = NodeType.Text;
+				pNewNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
+				pNewNode->AtkResNode.DrawFlags = 0;
+				pNewNode->AtkResNode.SetPositionShort( 0, 0 );
+				pNewNode->AtkResNode.SetWidth( DefaultTextNodeWidth );
+				pNewNode->AtkResNode.SetHeight( DefaultTextNodeHeight );
+
+				pNewNode->LineSpacing = 24;
+				pNewNode->CharSpacing = 1;
+				pNewNode->AlignmentFontType = (byte)AlignmentType.BottomLeft;
+				pNewNode->FontSize = 12;
+				pNewNode->TextFlags = (byte)( TextFlags.Edge );
+				pNewNode->TextFlags2 = 0;
+
+				pNewNode->AtkResNode.NodeID = nodeID;
+
+				pNewNode->AtkResNode.Color.A = 0xFF;
+				pNewNode->AtkResNode.Color.R = 0xFF;
+				pNewNode->AtkResNode.Color.G = 0xFF;
+				pNewNode->AtkResNode.Color.B = 0xFF;
+			}
+
+			return pNewNode;
+		}
+
+		internal static void HideNode( AtkUnitBase* pAddon, uint nodeID )
 		{
 			var pNode = GetTextNodeByID( pAddon, nodeID );
 			if( pNode != null ) ( (AtkResNode*)pNode )->ToggleVisibility( false );
 		}
+
+		internal const ushort DefaultTextNodeWidth = 200;
+		internal const ushort DefaultTextNodeHeight = 14;
 	}
 }

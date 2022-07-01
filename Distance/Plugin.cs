@@ -92,7 +92,7 @@ namespace Distance
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
-			NameplateHandler.Init( sigScanner, clientState, partyList, condition, mConfiguration );
+			NameplateHandler.Init( sigScanner, clientState, partyList, condition, gameGui, mConfiguration );
 
 			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
 			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;
@@ -332,7 +332,10 @@ namespace Distance
 		public void OnGameFrameworkUpdate( Framework framework )
 		{
 			UpdateTargetDistanceData();
-			NameplateHandler.UpdateNameplateEntityDistanceData();
+			if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) NameplateHandler.EnableNameplateDistances();
+			else NameplateHandler.DisableNameplateDistances();
+
+			NameplateHandler.UpdateNameplateEntityDistanceData();	//***** TODO: Move this to the draw hook.
 		}
 
 		protected void OnTerritoryChanged( object sender, UInt16 ID )
