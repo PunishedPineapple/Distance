@@ -198,18 +198,20 @@ namespace Distance
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show All", "Shows distance on all nameplates for any objects that match the object type filters in the next section.  If this is unchecked, additional options will appear below." ) );
 							if( !mConfiguration.NameplateDistancesConfig.ShowAll )
 							{
+								ImGui.Indent();
 								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Target", "Show distance on target." ) + $"###Show distance to Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowTarget );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Soft Target", "Show distance on soft target." ) + $"###Show distance to Soft Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowSoftTarget );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Focus Target", "Show distance on focus target." ) + $"###Show distance to Focus Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowFocusTarget );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Mouseover Target", "Show distance on mouseover target." ) + $"###Show distance to mouseover target (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Aggro", "Show distance on enemies aggressive to you." ) + $"###Show distance to aggro (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAggressive );
-								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Aggro", "This only applies to targets shown in the enemy list.  Distances for additional enemies aggressive to will not be shown." ) );
+								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Aggro", "This only applies to targets shown in the enemy list.  Distances for additional enemies aggressive to you will not be shown." ) );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Party", "Show distance on party members." ) + $"###Show distance to party (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowPartyMembers );
 								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Party", "This does not apply to cross-world party members." ) );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Alliance", "Show distance on alliance members." ) + $"###Show distance to alliance (nameplates).", ref mConfiguration.NameplateDistancesConfig.mShowAllianceMembers );
 								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Alliance", "This does not apply to cross-world alliance members." ) );
 								ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exclusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.mFiltersAreExclusive );
 								ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Filters are Exclusive", "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria." ) );
+								ImGui.Unindent();
 							}
 							ImGui.TreePop();
 						}
@@ -475,8 +477,8 @@ namespace Distance
 				ImGui.Spacing();
 
 				ImGui.Text( "Addresses:" );
-				ImGui.Text( $"Nameplate Addon: 0x{mGameGui.GetAddonByName( "Nameplate", 1 ):X}" );
-				ImGui.Text( $"Nameplate Addon (Cached): 0x{NameplateHandler.DEBUG_GetCachedNameplateAddonPtr():X}" );
+				ImGui.Text( $"Nameplate Addon: 0x{mGameGui.GetAddonByName( "NamePlate", 1 ):X}" );
+				ImGui.Text( $"Nameplate Addon (Cached): 0x{NameplateHandler.DEBUG_CachedNameplateAddonPtr:X}" );
 
 				ImGui.Spacing();
 				ImGui.Spacing();
@@ -574,11 +576,11 @@ namespace Distance
 			ImGui.SetNextWindowSizeConstraints( new Vector2( 375, 340 ) * ImGui.GetIO().FontGlobalScale, new Vector2( float.MaxValue, float.MaxValue ) );
 			if( ImGui.Begin( Loc.Localize( "Window Title: Nameplate Info", "Debug: Nameplate Distance Info" ) + "###Debug: Nameplate Info Window", ref mDebugNameplateInfoWindowVisible ) )
 			{
-				for( int i = 0; i < NameplateHandler.mNameplateDistanceInfoArray.Length; ++i )
+				for( int i = 0; i < NameplateHandler.DEBUG_NameplateDistanceInfo.Length; ++i )
 				{
 					ImGui.Text( $"{i}:" );
-					ImGui.Text( NameplateHandler.mNameplateDistanceInfoArray[i].ToString() );
-					ImGui.Text( $"Should draw?: {NameplateHandler.mShouldDrawDistanceInfoArray[i]}" );
+					ImGui.Text( NameplateHandler.DEBUG_NameplateDistanceInfo[i].ToString() );
+					ImGui.Text( $"Should draw?: {NameplateHandler.DEBUG_ShouldDrawDistanceInfo[i]}" );
 
 					ImGui.Spacing();
 					ImGui.Spacing();

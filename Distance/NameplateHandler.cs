@@ -202,9 +202,9 @@ namespace Distance
 				if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
 					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
 					ObjectIsPartyMember( distanceInfo.ObjectID ) ) return true;
-				if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
+				if( mConfiguration.NameplateDistancesConfig.ShowAllianceMembers &&
 					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
-					ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;
+					ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;	//	Make sure this comes after party check, because alliance check is exclusive of party members.
 
 				return false;
 			}
@@ -351,7 +351,8 @@ namespace Distance
 		{
 			if( objectID is 0 or 0xE0000000 ) return false;
 			if( GroupManager.Instance() == null ) return false;
-			if( !GroupManager.Instance()->IsAlliance ) return false;
+			//if( !GroupManager.Instance()->IsAlliance ) return false;	//***** TODO: IsAlliance always returns false; why?
+			if( GroupManager.Instance()->IsObjectIDInParty( objectID ) ) return false;
 			return GroupManager.Instance()->IsObjectIDInAlliance( objectID );
 		}
 
@@ -422,11 +423,10 @@ namespace Distance
 					PluginLog.LogWarning( $"Unable to obtain nameplate object for index {i}" );
 					continue;
 				}
+				var pNameplateResNode = nameplateObject.Value.ResNode;
 
 				//	Make a node.
-				var pNewNode = AtkNodeHelpers.CreateOrphanTextNode( (uint)( mNameplateDistanceNodeIDBase + i ) );
-
-				var pNameplateResNode = nameplateObject.Value.ResNode;
+				var pNewNode = AtkNodeHelpers.CreateOrphanTextNode( mNameplateDistanceNodeIDBase + (uint)i );
 
 				//	Set up the node in the addon.
 				if( pNewNode != null )
@@ -507,10 +507,9 @@ namespace Distance
 			}
 		}
 
-		internal static IntPtr DEBUG_GetCachedNameplateAddonPtr()
-		{
-			return new( mpNameplateAddon );
-		}
+		internal static IntPtr DEBUG_CachedNameplateAddonPtr => new( mpNameplateAddon );
+		internal static ReadOnlySpan<DistanceInfo> DEBUG_NameplateDistanceInfo => new( mNameplateDistanceInfoArray );
+		internal static ReadOnlySpan<bool> DEBUG_ShouldDrawDistanceInfo => new( mShouldDrawDistanceInfoArray );
 
 		//	Delgates and Hooks
 		private delegate void NameplateDrawFuncDelegate( AddonNamePlate* pThis );
@@ -519,8 +518,8 @@ namespace Distance
 		private static Hook<NameplateDrawFuncDelegate> mNameplateDrawHook;
 
 		//	Members
-		internal static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];    //***** TODO: Expose the data properly. *****
-		internal static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
+		private static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];
+		private static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 		private static ClientState mClientState;
 		private static PartyList mPartyList;
 		private static Condition mCondition;
