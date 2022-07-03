@@ -153,6 +153,8 @@ namespace Distance
 
 		private static bool ShouldDrawDistanceForNameplate( int i )
 		{
+			if( mClientState.IsPvP ) return false;
+
 			if( i < 0 || i >= mNameplateDistanceInfoArray.Length ) return false;
 			if( mConfiguration == null ) return false;
 			if( !mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) return false;
