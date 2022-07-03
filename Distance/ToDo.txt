@@ -13,6 +13,8 @@ Priority:
 	-Add aggro/party/alliance conditions for nameplates ASAP.
 		-Add friends/fc member conditions?
 	-Offset ring distance by player ring distance too.
+		-This will cause confusion when using distance to make decisions on aoe skills, since those are from player center.
+		-Maybe the better path is to provide an option to offset by ring, and have a help entry that is a discussion of this.
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 
