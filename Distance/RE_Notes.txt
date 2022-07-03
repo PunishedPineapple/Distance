@@ -1,0 +1,24 @@
+﻿Distance:
+	-Boss radius needs to take into account BNpc scale, but Dalamud handles this for us.
+	-Player hitring is 0.5y radius.
+	-The ranges stated by the game for skills are from the edge of the player's hitring to the edge of the enemy's hitring.  This applies to auto attacks too.
+	-AoE skills centered on the player unsurprisingly use distance from player center for their stated effect range.
+	-Some enemies (only seen so far on striking dummies, but not thoroughly tested) do not get hit by AoE attacks that significantly intersect their hitbox.  The reason for this is unknown.
+
+
+Aggro:
+	-Aggro range appears to be based on distance from player center to enemy hitring (they're nice, round numbers using this distance).
+	-Range to aggro seems to be variably 0.03 - 0.1 yalms less than expected.  It varies by boss, but is consistent for that boss.  Idk if this is distance/position imprecision, y-axis shenanigans, or something else.
+	-Enemies might be able to have multiple types of aggro; e8s Shiva, you can get behind the boss, where presumably a true sight aggro cone was not extended a full 360 degrees, and get much closer to her than normal; however, you will pull her if you get close enough even in this "blind spot".
+	-It is unknown whether sight-based aggro necessarily has a symmetric sight cone.
+
+
+Focus Target:
+	-Uses alpha on res node to dim when target is beyond targetable range.
+
+
+Target Cursor Addon:
+	-Soft Target Ring Res node is idx 12, doesn't become invisible, but alpha goes to zero when not shown.  Image nodes for it stay full alpha.
+	-Focus Target Pip Res node is idx 15.  Res node alpha never changes, but image node alpha (16 and 17) go to zero when not shown.
+	-Target Pip Res node is idx 18.  Uses visible flags on image modes.
+	-Auto attack indicator is Res node 22.  Uses visible flag on res node.

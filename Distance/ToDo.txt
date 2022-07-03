@@ -5,16 +5,17 @@
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
 	-Some nameplate configurations show all ENpc/companions (0xE0000000) when clicking one.  Not sure how best to solve this.
+		-Probably just move distance calculations into draw hook, and compare pointers instead of object IDs.
+			-I'm not sure how safe this is with UI mouseover target though, since idk when that hook is entered.
+			-Probably only do it when OID is 0xE0000000, which UI mouseover can't be (I think?  What about pets/chocobos?)
 
 
 Priority:
 	-Rate limit download attempts.
 		-Github does this for us, no?
-	-Add aggro/party/alliance conditions for nameplates ASAP.
-		-Add friends/fc member conditions?
 	-Offset ring distance by player ring distance too.
 		-This will cause confusion when using distance to make decisions on aoe skills, since those are from player center.
-		-Maybe the better path is to provide an option to offset by ring, and have a help entry that is a discussion of this.
+		-Maybe the better path forward is to provide an option to offset by ring, and have a help entry that is a discussion of this.
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 
@@ -22,6 +23,7 @@ Priority:
 Cleanup:
 	-Config option strings need to be gone over and made consistent.
 	-Make nameplate sig(s) optional.
+		-Implemented; just needs testing.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
 	-Make our text node sizes constants so that we don't have magic numbers laying around randomly.
 
@@ -43,15 +45,10 @@ Maybe:
 	-A text input box to let people format their aggro widget.
 		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
 	-Add distances on party list?
-	-Add distance-based coloring to nameplate distances?
+	-Add distances to enemy list?
+	-Add distance-based coloring to nameplate distances, party distances, etc.?
 	-Should make a more encapsulated node (or node controller or something) class before doing the preceeding; it's just getting too much tracking floating nodes with disparate functionality to have even more to do with them.
-
-
-Target Cursor Addon Notes:
-	-Soft Target Ring Res node is idx 12, doesn't become invisible, but alpha goes to zero when not shown.  Image nodes for it stay full alpha.
-	-Focus Target Pip Res node is idx 15.  Res node alpha never changes, but image node alpha (16 and 17) go to zero when not shown.
-	-Target Pip Res node is idx 18.  Uses visible flags on image modes.
-	-Auto attack indicator is Res node 22.  Uses visible flag on res node.
+	-Add friends/fc member conditions for nameplates?
 
 
 Rejected:
