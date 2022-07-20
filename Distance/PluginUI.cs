@@ -466,7 +466,7 @@ namespace Distance
 
 				ImGui.Text( "Performance Timers:" );
 				ImGui.Text( $"Nameplate Distance Update Time: {NameplateHandler.mDistanceUpdateTime_uSec}μs" );
-				ImGui.Text( $"Nameplate Draw Hook Time: {NameplateHandler.mDrawHookTime_uSec}μs" );
+				ImGui.Text( $"Nameplate Node Configuration Time: {NameplateHandler.mNodeUpdateTime_uSec}μs" );
 				ImGui.Text( $"Widget Node Configuration Time: {mWidgetNodeUpdateTime_uSec}μs" );
 				ImGui.Text( $"Overlay Draw Time: {mOverlayDrawTime_uSec}μs" );
 

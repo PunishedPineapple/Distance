@@ -332,10 +332,9 @@ namespace Distance
 		public void OnGameFrameworkUpdate( Framework framework )
 		{
 			UpdateTargetDistanceData();
+
 			if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) NameplateHandler.EnableNameplateDistances();
 			else NameplateHandler.DisableNameplateDistances();
-
-			NameplateHandler.UpdateNameplateEntityDistanceData();	//***** TODO: Move this to the draw hook.
 		}
 
 		protected void OnTerritoryChanged( object sender, UInt16 ID )

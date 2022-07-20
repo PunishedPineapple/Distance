@@ -37,7 +37,7 @@ namespace Distance
 				mfpOnNameplateDraw = sigScanner.ScanText( "0F B7 81 ?? ?? ?? ?? 4C 8B C1 66 C1 E0 06" );	//***** TODO: Can we hook the draw vfunc through ClientStructs?  Would that be more stable?
 				if( mfpOnNameplateDraw != IntPtr.Zero )
 				{
-					mNameplateDrawHook = new Hook<NameplateDrawFuncDelegate>( mfpOnNameplateDraw, mdNameplateDraw );
+					mNameplateDrawHook = Hook<NameplateDrawFuncDelegate>.FromAddress( mfpOnNameplateDraw, mdNameplateDraw );
 					if( mNameplateDrawHook == null ) throw new Exception( "Unable to create nameplate draw hook." );
 					if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) mNameplateDrawHook.Enable();
 				}
@@ -88,7 +88,7 @@ namespace Distance
 				try
 				{
 					mNameplateDrawHook.Disable();
-					mDrawHookTime_uSec = 0;
+					mNodeUpdateTime_uSec = 0;
 					HideAllNameplateDistanceNodes();
 				}
 				catch( Exception e )
@@ -131,6 +131,7 @@ namespace Distance
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].IsValid = true;
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetKind = (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)pObject->ObjectKind;
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].ObjectID = pObject->ObjectID;
+							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].ObjectAddress = new IntPtr( pObject );
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].PlayerPosition = mClientState.LocalPlayer?.Position ?? System.Numerics.Vector3.Zero;
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetPosition = new( pObject->Position.X, pObject->Position.Y, pObject->Position.Z );
 							mNameplateDistanceInfoArray[pObjectInfo->NamePlateIndex].TargetRadius_Yalms = pObject->HitboxRadius;
@@ -190,13 +191,13 @@ namespace Distance
 				}
 
 				if( mConfiguration.NameplateDistancesConfig.mShowTarget &&
-					TargetResolver.GetTarget( TargetType.Target )?.ObjectId == distanceInfo.ObjectID ) return true;
+					IsSameObject( TargetResolver.GetTarget( TargetType.Target ), distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
 				if( mConfiguration.NameplateDistancesConfig.mShowSoftTarget &&
-					TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+					IsSameObject( TargetResolver.GetTarget( TargetType.SoftTarget ), distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
 				if( mConfiguration.NameplateDistancesConfig.mShowFocusTarget &&
-					TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+					IsSameObject( TargetResolver.GetTarget( TargetType.FocusTarget ), distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
 				if( mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget &&
-					TargetResolver.GetTarget( TargetType.MouseOverTarget )?.ObjectId == distanceInfo.ObjectID ) return true;
+					IsSameObject( TargetResolver.GetTarget( TargetType.MouseOverTarget ), distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
 
 				if( mConfiguration.NameplateDistancesConfig.ShowAggressive &&
 					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
@@ -212,28 +213,29 @@ namespace Distance
 			}
 		}
 
+		//***** TODO: Dumb shit because I don't want to do lots of refactoring just to get companion and ENpc discrimination working.  Do it right eventually with proper game object comparison.
+		private static bool IsSameObject( Dalamud.Game.ClientState.Objects.Types.GameObject gameObject, UInt32 objectID, IntPtr pObject )
+		{
+			if( gameObject == null || gameObject.ObjectId == 0 ) return false;
+			if( gameObject.ObjectId == 0xE0000000 ) return gameObject.Address == pObject;
+			return gameObject.ObjectId == objectID;
+		}
+
 		private static void NameplateDrawDetour( AddonNamePlate* pThis )
 		{
 			try
 			{
-				mDrawHookTimer.Restart();
-
 				if( mpNameplateAddon != pThis )
 				{
 					PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
 					//DestroyNameplateDistanceNodes();	//***** TODO: I'm assuming that the game cleans up the whole node tree including our stuff automatically if the UI gets reinitialized?
 					for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
 					mpNameplateAddon = pThis;
-					if( mpNameplateAddon != null )
-					{
-						CreateNameplateDistanceNodes();
-					}
+					if( mpNameplateAddon != null ) CreateNameplateDistanceNodes();
 				}
 
+				UpdateNameplateEntityDistanceData();
 				UpdateNameplateDistanceNodes();
-
-				mDrawHookTimer.Stop();
-				mDrawHookTime_uSec = mDrawHookTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 			}
 			catch( Exception e )
 			{
@@ -256,6 +258,8 @@ namespace Distance
 
 		private static void UpdateNameplateDistanceNodes()
 		{
+			mNodeUpdateTimer.Restart();
+
 			for( int i = 0; i < mNameplateDistanceInfoArray.Length; ++i )
 			{
 				if( !mNameplateDistanceInfoArray[i].IsValid ) continue;
@@ -293,7 +297,7 @@ namespace Distance
 
 				drawData.PositionX = (short)( textPositionX + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.X );
 				drawData.PositionY = (short)( textPositionY + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.Y );
-				drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID ); //Ideally we would just read this from the nameplate text node, but ClientStructs doesn't seem to have a way to do that.
+				drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].ObjectAddress ); //Ideally we would just read this from the nameplate text node, but ClientStructs doesn't seem to have a way to do that.
 				drawData.FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize;
 				drawData.AlignmentFontType = (byte)( textAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
 
@@ -304,15 +308,30 @@ namespace Distance
 
 				UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
 			}
+
+			mNodeUpdateTimer.Stop();
+			mNodeUpdateTime_uSec = mNodeUpdateTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
 		}
 
-		private static bool ObjectIsNonDepthTarget( uint objectID )
+		private static bool ObjectIsNonDepthTarget( uint objectID, IntPtr pObject )
 		{
-			uint targetOID = TargetResolver.GetTarget( TargetType.Target )?.ObjectId ?? 0;
-			uint softTargetOID = TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId ?? 0;
-			//uint focusTargetOID = TargetResolver.GetTarget( TargetType.FocusTarget )?.ObjectId ?? 0;
-
-			return objectID != 0 && objectID != 0xE0000000 && ( objectID == targetOID || objectID == softTargetOID /*|| objectID == focusTargetOID*/ );
+			if( objectID == 0 )
+			{
+				return false;
+			}
+			else if( objectID == 0xE0000000 )
+			{
+				if( pObject == IntPtr.Zero ) return false;
+				var target = TargetResolver.GetTarget( TargetType.Target );
+				var softTarget = TargetResolver.GetTarget( TargetType.SoftTarget );
+				return pObject == target?.Address || pObject == softTarget?.Address;
+			}
+			else
+			{
+				uint targetOID = TargetResolver.GetTarget( TargetType.Target )?.ObjectId ?? 0;
+				uint softTargetOID = TargetResolver.GetTarget( TargetType.SoftTarget )?.ObjectId ?? 0;
+				return objectID == targetOID || objectID == softTargetOID;
+			}
 		}
 
 		private static bool ObjectIsAggressive( uint objectID )
@@ -530,9 +549,9 @@ namespace Distance
 		private static AddonNamePlate* mpNameplateAddon = null;
 		private static readonly AtkTextNode*[] mDistanceTextNodes = new AtkTextNode*[AddonNamePlate.NumNamePlateObjects];
 
-		private static readonly Stopwatch mDrawHookTimer = new();
+		private static readonly Stopwatch mNodeUpdateTimer = new();
 		private static readonly Stopwatch mDistanceUpdateTimer = new();
-		internal static Int64 mDrawHookTime_uSec = 0;
+		internal static Int64 mNodeUpdateTime_uSec = 0;
 		internal static Int64 mDistanceUpdateTime_uSec = 0;
 
 		private static readonly uint mNameplateDistanceNodeIDBase = 0x6C78C400;    //YOLO hoping for no collisions.
