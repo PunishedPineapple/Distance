@@ -23,7 +23,7 @@ namespace Distance
 			if( fpUIMouseover != IntPtr.Zero )
 			{
 				PluginLog.LogInformation( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
-				mUIMouseoverHook = new( fpUIMouseover, new( UIMouseoverDetour ) );
+				mUIMouseoverHook = Hook<UIMouseoverDelegate>.FromAddress( fpUIMouseover, new( UIMouseoverDetour ) );
 				mUIMouseoverHook.Enable();
 			}
 			else

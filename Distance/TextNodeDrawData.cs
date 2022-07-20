@@ -31,7 +31,7 @@ namespace Distance
 		public byte LineSpacing;
 		public byte CharSpacing;
 
-		public static readonly TextNodeDrawData Default = new TextNodeDrawData()
+		public static readonly TextNodeDrawData Default = new()
 		{
 			Show = true,
 			PositionX = 1,
