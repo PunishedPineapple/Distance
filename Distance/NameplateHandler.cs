@@ -88,6 +88,7 @@ namespace Distance
 				try
 				{
 					mNameplateDrawHook.Disable();
+					mDistanceUpdateTime_uSec = 0;
 					mNodeUpdateTime_uSec = 0;
 					HideAllNameplateDistanceNodes();
 				}
