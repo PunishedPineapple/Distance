@@ -25,7 +25,6 @@ Cleanup:
 	-Make nameplate sig(s) optional.
 		-Implemented; just needs testing.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
-	-Make our text node sizes constants so that we don't have magic numbers laying around randomly.
 
 
 Misc:
