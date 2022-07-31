@@ -63,7 +63,7 @@ namespace Distance
 			Task.Run( async () =>
 			{
 				//	We can have the aggro distances data that got shipped with the plugin, or one that got downloaded.  Load in both and see which has the higher version to decide which to actually use.
-				string aggroDistancesFilePath_Assembly = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "AggroDistances.dat" );
+				string aggroDistancesFilePath_Assembly = Path.Join( mPluginInterface.AssemblyLocation.DirectoryName, "Resources\\AggroDistances.dat" );
 				string aggroDistancesFilePath_Config = Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" );
 				BNpcAggroInfoFile aggroFile_Assembly = new();
 				BNpcAggroInfoFile aggroFile_Config = new();
