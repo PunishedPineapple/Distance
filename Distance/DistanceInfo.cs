@@ -8,7 +8,7 @@ namespace Distance
 		public bool IsValid { get; set; }
 		public Dalamud.Game.ClientState.Objects.Enums.ObjectKind TargetKind { get; set; }
 		public UInt32 ObjectID { get; set; }
-		public IntPtr ObjectAddress { get; set; }	//***** TODO: This is a kludge to enable 0xE0000000 objects comparisons for nameplates.  Change to use GameObject and do more things in here as get-only properties maybe.
+		public IntPtr ObjectAddress { get; set; }	//	This is a kludge to enable 0xE0000000 object comparisons for nameplates.  Should compare by object ID whenever possible.
 		public UInt32 BNpcID { get; set; }
 		public Vector3 PlayerPosition { get; set; }
 		public Vector3 TargetPosition { get; set; }
@@ -50,7 +50,7 @@ namespace Distance
 			str += $"Target Radius (y): {TargetRadius_Yalms:F3}\r\n";
 			str += $"Distance To Target (y): {DistanceFromTarget_Yalms:F3}\r\n";
 			str += $"Distance To Ring (y): {DistanceFromTargetRing_Yalms:F3}\r\n";
-			str += $"Effective Range (y): {EffectiveRangeFromTarget_Yalms:F3}\r\n";
+			str += $"Effective Targeted Range (y): {EffectiveRangeFromTarget_Yalms:F3}\r\n";
 			str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms:F3} " : "No Data" )}";
 			
 			return str;

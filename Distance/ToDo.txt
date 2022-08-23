@@ -4,10 +4,6 @@
 		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
-	-Some nameplate configurations show all ENpc/companions (0xE0000000) when clicking one.  Not sure how best to solve this.
-		-Probably just move distance calculations into draw hook, and compare pointers instead of object IDs.
-			-I'm not sure how safe this is with UI mouseover target though, since idk when that hook is entered.
-			-Probably only do it when OID is 0xE0000000, which UI mouseover can't be (I think?  What about pets/chocobos?)
 
 
 Priority:
@@ -18,6 +14,8 @@ Priority:
 		-Maybe the better path forward is to provide an option to offset by ring, and have a help entry that is a discussion of this.
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
+	-Show distances on party list?
+	-Add distances to enemy list?
 
 
 Cleanup:
@@ -43,8 +41,6 @@ Maybe:
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
 	-A text input box to let people format their aggro widget.
 		-We need to be really careful to validate the string and allow no format placeholders besides "{0}".
-	-Add distances on party list?
-	-Add distances to enemy list?
 	-Add distance-based coloring to nameplate distances, party distances, etc.?
 	-Should make a more encapsulated node (or node controller or something) class before doing the preceeding; it's just getting too much tracking floating nodes with disparate functionality to have even more to do with them.
 	-Add friends/fc member conditions for nameplates?

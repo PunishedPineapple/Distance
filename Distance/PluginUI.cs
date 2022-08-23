@@ -400,6 +400,7 @@ namespace Distance
 				}
 				if( widgetIndexToDelete > -1 && widgetIndexToDelete < mConfiguration.DistanceWidgetConfigs.Count )
 				{
+					//***** TODO: This wouldn't hide the node at the end of the list when deleting from the middle.  Take a closer look at what's going on with delete, because we should have noticed that issue long ago if it were happening.
 					UpdateDistanceTextNode( (uint)widgetIndexToDelete, new(), new(), false );
 					mConfiguration.DistanceWidgetConfigs.RemoveAt( widgetIndexToDelete );
 					mWidgetIndexWantToDelete = -1;
