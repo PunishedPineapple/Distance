@@ -43,10 +43,10 @@ namespace Distance
 			//	nodes, but by checking for a node with the right id before constructing one, we should only ever have a one-time leak per node, which is probably fine.
 			for( int i = 0; i < mConfiguration.DistanceWidgetConfigs.Count; i++ )
 			{
-				UpdateDistanceTextNode( (uint)i, new(), new(), false );
+				HideTextNode( mDistanceNodeIDBase + (uint)i );
 			}
 
-			UpdateAggroDistanceTextNode( new(), false );
+			HideTextNode( mAggroDistanceNodeID );
 		}
 
 		public void Initialize()
@@ -400,8 +400,8 @@ namespace Distance
 				}
 				if( widgetIndexToDelete > -1 && widgetIndexToDelete < mConfiguration.DistanceWidgetConfigs.Count )
 				{
-					//***** TODO: This wouldn't hide the node at the end of the list when deleting from the middle.  Take a closer look at what's going on with delete, because we should have noticed that issue long ago if it were happening.
-					UpdateDistanceTextNode( (uint)widgetIndexToDelete, new(), new(), false );
+					//***** TODO: This wouldn't hide the node at the end of the list when deleting from the middle.  Why was this done?  Test/fix it.
+					HideTextNode( mDistanceNodeIDBase + (uint)widgetIndexToDelete );
 					mConfiguration.DistanceWidgetConfigs.RemoveAt( widgetIndexToDelete );
 					mWidgetIndexWantToDelete = -1;
 				}
@@ -709,6 +709,8 @@ namespace Distance
 
 		unsafe protected void UpdateDistanceTextNode( uint distanceWidgetNumber, DistanceInfo distanceInfo, DistanceWidgetConfig config, bool show )
 		{
+			if( !show ) HideTextNode( mDistanceNodeIDBase + distanceWidgetNumber );
+
 			string str = "";
 			byte nodeAlphaToUse = 255;
 			Vector4 textColorToUse = config.TextColor;
@@ -836,6 +838,8 @@ namespace Distance
 
 		unsafe protected void UpdateAggroDistanceTextNode( DistanceInfo distanceInfo, bool show )
 		{
+			if( !show ) HideTextNode( mAggroDistanceNodeID );
+
 			string str = "";
 			Vector4 color = mConfiguration.mAggroDistanceTextColor;
 			Vector4 edgeColor = mConfiguration.mAggroDistanceTextEdgeColor;
@@ -957,6 +961,21 @@ namespace Distance
 			if( pAddon != pFocusTargetBarAddon ) AtkNodeHelpers.HideNode( pFocusTargetBarAddon, nodeID );
 			if( pAddon != pNormalTargetBarAddon ) AtkNodeHelpers.HideNode( pNormalTargetBarAddon, nodeID );
 			if( pAddon != pSplitTargetBarAddon ) AtkNodeHelpers.HideNode( pSplitTargetBarAddon, nodeID );
+		}
+
+		protected unsafe void HideTextNode( uint nodeID )
+		{
+			//	Get the possible addons we could be using.
+			var pNormalTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfo", 1 );
+			var pSplitTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
+			var pFocusTargetBarAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_FocusTargetInfo", 1 );
+			var pScreenTextAddon = (AtkUnitBase*)mGameGui.GetAddonByName( "_ScreenText", 1 );
+
+			//	Hide the node(s) with the specified ID in any of those addons.
+			if( pScreenTextAddon != null ) AtkNodeHelpers.HideNode( pScreenTextAddon, nodeID );
+			if( pFocusTargetBarAddon != null ) AtkNodeHelpers.HideNode( pFocusTargetBarAddon, nodeID );
+			if( pNormalTargetBarAddon != null ) AtkNodeHelpers.HideNode( pNormalTargetBarAddon, nodeID );
+			if( pSplitTargetBarAddon != null ) AtkNodeHelpers.HideNode( pSplitTargetBarAddon, nodeID );
 		}
 
 		protected unsafe bool AddonIsVisible( GameAddonEnum addon )
