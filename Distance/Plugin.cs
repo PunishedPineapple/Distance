@@ -92,7 +92,7 @@ namespace Distance
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
-			NameplateHandler.Init( sigScanner, clientState, partyList, condition, gameGui, mConfiguration );
+			//NameplateHandler.Init( sigScanner, clientState, partyList, condition, gameGui, mConfiguration );	//***** TODO: Disabled because nameplates appear to be broken in ClientStructs for 6.2.
 
 			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
 			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;

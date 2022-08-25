@@ -95,7 +95,8 @@ namespace Distance
 			{
 				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
-				ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.mShowNameplateDistances );
+				//***** TODO: Nameplates are broken in 6.2; commenting out settings until fixed.
+				//ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.mShowNameplateDistances );
 
 				if( mConfiguration.ShowAggroDistance )
 				{
@@ -187,6 +188,8 @@ namespace Distance
 					}
 				}
 
+				//***** TODO: Nameplates are broken in 6.2; commenting out settings until fixed.
+				/*
 				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
 				{
 					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
@@ -252,7 +255,7 @@ namespace Distance
 							ImGui.TreePop();
 						}
 					}
-				}
+				}*/
 
 				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Miscellaneous", "Miscellaneous Options" ) + "###Misc. Options Header." ) )
 				{
