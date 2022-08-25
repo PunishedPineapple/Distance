@@ -344,9 +344,9 @@ namespace Distance
 				FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule() != null )
 			{
 				var atkArrayDataHolder = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder;
-				if( atkArrayDataHolder.NumberArrayCount >= 18 )
+				if( atkArrayDataHolder.NumberArrayCount >= 22 )
 				{
-					var pEnmityListArray = atkArrayDataHolder.NumberArrays[19];
+					var pEnmityListArray = atkArrayDataHolder.NumberArrays[21];
 					int enemyCount = pEnmityListArray->AtkArrayData.Size > 1 ? pEnmityListArray->IntArray[1] : 0;
 
 					for( int i = 0; i < enemyCount; ++i )
