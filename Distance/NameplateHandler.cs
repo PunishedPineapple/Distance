@@ -28,7 +28,7 @@ namespace Distance
 
 			if( sigScanner == null )
 			{
-				throw new Exception( "Error in \"MemoryHandler.Init()\": A null SigScanner was passed!" );
+				throw new Exception( "Error in \"NameplateHandler.Init()\": A null SigScanner was passed!" );
 			}
 
 			//	Get Function Pointers, etc.
