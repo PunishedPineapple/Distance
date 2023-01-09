@@ -1,9 +1,52 @@
 ﻿Distance:
 	-Boss radius needs to take into account BNpc scale, but Dalamud handles this for us.
-	-Player hitring is 0.5y radius.
-	-The ranges stated by the game for skills are from the edge of the player's hitring to the edge of the enemy's hitring.  This applies to auto attacks too.
+	-Player hitring is 0.5y radius.  This varies when mounted, but the specific radius when mounted does not seem to actually affect anything.
+
+
+Player to Enemy Ranges:
+	-The ranges stated by the game for targeted skills are from the edge of the player's hitring to the edge of the enemy's hitring.  This applies to auto attacks too.
 	-AoE skills centered on the player unsurprisingly use distance from player center for their stated effect range.
 	-Some enemies (only seen so far on striking dummies, but not thoroughly tested) do not get hit by AoE attacks that significantly intersect their hitbox.  The reason for this is unknown.
+
+
+Player to Player Ranges (PvE):
+	-Single Target works like single target damage: Skill range plus your character's hitring radius to character ring.
+		-This applies to all beneficial skills tested (Healing, Rescue, Cover, TBN, etc.)
+	-AoE healing radius is to ally's center, just like enemy AoEs hitting players.
+
+
+Player to Player Ranges (PvP):
+	-Untested
+
+
+Enemy to Player Ranges:
+	-AoE effects centered on boss use range from boss center to player center.
+	-Targeted effects from boss are unclear.  Limited testing did not match ranges in the Action sheet in any meaningful way, but I only checked a couple of bosses.
+
+
+Player to Trust:
+	-Targeted effects use player ring to Trust NPC ring.
+	-AoE effects centered on player use Trust NPC center for distance (center to center).
+
+
+Player to NPC:
+	-Interaction distance is 6y from player ring, did not change when mounted on larger mount.
+
+
+Player to Gathering Node:
+	-Interaction distance is 3y from player center to node ring.
+	-Dismount distance seems to be 3.5y regardless of player ring size when mounted.
+
+
+Player to EventObjects:
+	-Variable, not well tested.
+
+
+Misc:
+	-Melee autos appear to be 3.1y, not 3?
+	-Striking dummies are really weird; targeted skills work at stated range, aoe skills and autos act like their hitring is 0.5y.
+		-This only appears to apply to some dummies (Level 50 one at house was like this (BNpc ID 541), level 80 ones at Ondo Cups worked like normal enemies).
+
 
 
 Aggro:
