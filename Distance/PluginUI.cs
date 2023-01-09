@@ -251,6 +251,70 @@ namespace Distance
 
 							ImGui.TreePop();
 						}
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Colors", "Colors" ) + $"###Nameplate Colors Header." ) )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Distance-based Colors (Party)", "Use distance-based text colors for party members." ) + $"###Distance Text Use distance-based colors (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.mUseDistanceBasedColor_Party );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplate Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, the \"Mid\" color if between far and near thresholds, and the \"Near\" color if within that distance." ) );
+							if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party )
+							{
+								ImGui.Indent();
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Near", "Use default nameplate color when near." ) + $"###Distance Text Use nameplate color (near) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextUseNameplateColor_Party );
+								if( !mConfiguration.NameplateDistancesConfig.mNearRangeTextUseNameplateColor_Party )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Near", "Distance text color (near)" ) + $"###DistanceTextColorPicker Near (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + $"###DistanceTextEdgeColorPicker Near (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Mid", "Use default nameplate color when mid." ) + $"###Distance Text Use nameplate color (mid) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextUseNameplateColor_Party );
+								if( !mConfiguration.NameplateDistancesConfig.mMidRangeTextUseNameplateColor_Party )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Mid", "Distance text color (mid)" ) + $"###DistanceTextColorPicker Mid (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Mid", "Distance text glow color (mid)" ) + $"###DistanceTextEdgeColorPicker Mid (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Far", "Use default nameplate color when far." ) + $"###Distance Text Use nameplate color (far) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextUseNameplateColor_Party );
+								if( !mConfiguration.NameplateDistancesConfig.mFarRangeTextUseNameplateColor_Party )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mNearThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.mFarThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
+								ImGui.Unindent();
+								ImGui.Spacing();
+							}
+
+							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Distance-based Colors (BNpc)", "Use distance-based text colors for battle NPCs." ) + $"###Distance Text Use distance-based colors (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.mUseDistanceBasedColor_BNpc );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplate Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, the \"Mid\" color if between far and near thresholds, and the \"Near\" color if within that distance." ) );
+							if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_BNpc )
+							{
+								ImGui.Indent();
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Near", "Use default nameplate color when near." ) + $"###Distance Text Use nameplate color (near) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextUseNameplateColor_BNpc );
+								if( !mConfiguration.NameplateDistancesConfig.mNearRangeTextUseNameplateColor_BNpc )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Near", "Distance text color (near)" ) + $"###DistanceTextColorPicker Near (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + $"###DistanceTextEdgeColorPicker Near (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mNearRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Mid", "Use default nameplate color when mid." ) + $"###Distance Text Use nameplate color (mid) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextUseNameplateColor_BNpc );
+								if( !mConfiguration.NameplateDistancesConfig.mMidRangeTextUseNameplateColor_BNpc )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Mid", "Distance text color (mid)" ) + $"###DistanceTextColorPicker Mid (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Mid", "Distance text glow color (mid)" ) + $"###DistanceTextEdgeColorPicker Mid (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mMidRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Far", "Use default nameplate color when far." ) + $"###Distance Text Use nameplate color (far) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextUseNameplateColor_BNpc );
+								if( !mConfiguration.NameplateDistancesConfig.mFarRangeTextUseNameplateColor_BNpc )
+								{
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
+									ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mFarRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
+								}
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mNearThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
+								ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+								ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.mFarThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
+								ImGui.Unindent();
+							}
+							ImGui.TreePop();
+						}
 					}
 				}
 

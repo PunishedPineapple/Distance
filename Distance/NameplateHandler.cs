@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Numerics;
 
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
@@ -13,6 +14,8 @@ using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+
+using ImGuiNET;
 
 namespace Distance
 {
@@ -302,8 +305,10 @@ namespace Distance
 				drawData.FontSize = (byte)mConfiguration.NameplateDistancesConfig.DistanceFontSize;
 				drawData.AlignmentFontType = (byte)( textAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
 
-				float displayDistance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
-				if( !mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ) displayDistance = Math.Max( 0, displayDistance );
+				float distance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
+				SetDistanceBasedColor( ref drawData, distance, mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].TargetKind );
+
+				float displayDistance = mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ? distance : Math.Max( 0, distance );
 				string distanceText = displayDistance.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
 				if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
 
@@ -312,6 +317,71 @@ namespace Distance
 
 			mNodeUpdateTimer.Stop();
 			mNodeUpdateTime_uSec = mNodeUpdateTimer.ElapsedTicks * 1_000_000 / Stopwatch.Frequency;
+		}
+
+		private static void SetDistanceBasedColor( ref TextNodeDrawData rDrawData, float distance, UInt32 objectID, Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+		{
+			bool setColor = false;
+			Vector4 textColorToUse = new();
+			Vector4 edgeColorToUse = new();
+
+			if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party &&
+				objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+				ObjectIsPartyMember( objectID ) )
+			{
+				if( distance > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms )
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_Party;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextColor_Party;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_Party;
+				}
+				else if( distance > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_Party_Yalms )
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_Party;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextColor_Party;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextEdgeColor_Party;
+				}
+				else
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_Party;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.NearRangeTextColor_Party;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.NearRangeTextEdgeColor_Party;
+				}
+			}
+			else if(	mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_BNpc &&
+						objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
+			{
+				if( distance > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_BNpc_Yalms )
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_BNpc;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextColor_BNpc;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_BNpc;
+				}
+				else if( distance > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_BNpc_Yalms )
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_BNpc;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextColor_BNpc;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextEdgeColor_BNpc;
+				}
+				else
+				{
+					setColor = !mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_BNpc;
+					textColorToUse = mConfiguration.NameplateDistancesConfig.NearRangeTextColor_BNpc;
+					edgeColorToUse = mConfiguration.NameplateDistancesConfig.NearRangeTextEdgeColor_BNpc;
+				}
+			}
+
+			if( setColor )
+			{
+				rDrawData.TextColorR = (byte)( textColorToUse.X * 255f );
+				rDrawData.TextColorG = (byte)( textColorToUse.Y * 255f );
+				rDrawData.TextColorB = (byte)( textColorToUse.Z * 255f );
+				rDrawData.TextColorA = (byte)( textColorToUse.W * 255f );
+				rDrawData.EdgeColorR = (byte)( edgeColorToUse.X * 255f );
+				rDrawData.EdgeColorG = (byte)( edgeColorToUse.Y * 255f );
+				rDrawData.EdgeColorB = (byte)( edgeColorToUse.Z * 255f );
+				rDrawData.EdgeColorA = (byte)( edgeColorToUse.W * 255f );
+			}
 		}
 
 		private static bool ObjectIsNonDepthTarget( uint objectID, IntPtr pObject )

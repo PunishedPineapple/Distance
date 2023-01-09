@@ -144,6 +144,174 @@ namespace Distance
 			set { mFiltersAreExclusive = value; }
 		}
 
+		public bool mUseDistanceBasedColor_BNpc = false;
+		public bool UseDistanceBasedColor_BNpc
+		{
+			get { return mUseDistanceBasedColor_BNpc; }
+			set { mUseDistanceBasedColor_BNpc = value; }
+		}
+
+		public bool mNearRangeTextUseNameplateColor_BNpc = false;
+		public bool NearRangeTextUseNameplateColor_BNpc
+		{
+			get { return mNearRangeTextUseNameplateColor_BNpc; }
+			set { mNearRangeTextUseNameplateColor_BNpc = value; }
+		}
+
+		public Vector4 mNearRangeTextColor_BNpc = new( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
+		public Vector4 NearRangeTextColor_BNpc
+		{
+			get { return mNearRangeTextColor_BNpc; }
+			set { mNearRangeTextColor_BNpc = value; }
+		}
+
+		public Vector4 mNearRangeTextEdgeColor_BNpc = new( (float)0x63 / 255f, (float)0x4F / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 NearRangeTextEdgeColor_BNpc
+		{
+			get { return mNearRangeTextEdgeColor_BNpc; }
+			set { mNearRangeTextEdgeColor_BNpc = value; }
+		}
+
+		public bool mMidRangeTextUseNameplateColor_BNpc = false;
+		public bool MidRangeTextUseNameplateColor_BNpc
+		{
+			get { return mMidRangeTextUseNameplateColor_BNpc; }
+			set { mMidRangeTextUseNameplateColor_BNpc = value; }
+		}
+
+		public Vector4 mMidRangeTextColor_BNpc = new( (float)0xFF / 255f, (float)0xB3 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 MidRangeTextColor_BNpc
+		{
+			get { return mMidRangeTextColor_BNpc; }
+			set { mMidRangeTextColor_BNpc = value; }
+		}
+
+		public Vector4 mMidRangeTextEdgeColor_BNpc = new( (float)0x66 / 255f, (float)0x43 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 MidRangeTextEdgeColor_BNpc
+		{
+			get { return mMidRangeTextEdgeColor_BNpc; }
+			set { mMidRangeTextEdgeColor_BNpc = value; }
+		}
+
+		public bool mFarRangeTextUseNameplateColor_BNpc = false;
+		public bool FarRangeTextUseNameplateColor_BNpc
+		{
+			get { return mFarRangeTextUseNameplateColor_BNpc; }
+			set { mFarRangeTextUseNameplateColor_BNpc = value; }
+		}
+
+		public Vector4 mFarRangeTextColor_BNpc = new( (float)0xEF / 255f, (float)0x48 / 255f, (float)0x12 / 255f, (float)0xFF / 255f );
+		public Vector4 FarRangeTextColor_BNpc
+		{
+			get { return mFarRangeTextColor_BNpc; }
+			set { mFarRangeTextColor_BNpc = value; }
+		}
+
+		public Vector4 mFarRangeTextEdgeColor_BNpc = new( (float)0x4E / 255f, (float)0x11 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 FarRangeTextEdgeColor_BNpc
+		{
+			get { return mFarRangeTextEdgeColor_BNpc; }
+			set { mFarRangeTextEdgeColor_BNpc = value; }
+		}
+
+		public float mFarThresholdDistance_BNpc_Yalms = 3.5f;
+		public float FarThresholdDistance_BNpc_Yalms
+		{
+			get { return mFarThresholdDistance_BNpc_Yalms; }
+			set { mFarThresholdDistance_BNpc_Yalms = value; }
+		}
+
+		public float mNearThresholdDistance_BNpc_Yalms = 3f;
+		public float NearThresholdDistance_BNpc_Yalms
+		{
+			get { return mNearThresholdDistance_BNpc_Yalms; }
+			set { mNearThresholdDistance_BNpc_Yalms = value; }
+		}
+
+		public bool mUseDistanceBasedColor_Party = false;
+		public bool UseDistanceBasedColor_Party
+		{
+			get { return mUseDistanceBasedColor_Party; }
+			set { mUseDistanceBasedColor_Party = value; }
+		}
+
+		public bool mNearRangeTextUseNameplateColor_Party = false;
+		public bool NearRangeTextUseNameplateColor_Party
+		{
+			get { return mNearRangeTextUseNameplateColor_Party; }
+			set { mNearRangeTextUseNameplateColor_Party = value; }
+		}
+
+		public Vector4 mNearRangeTextColor_Party = new( (float)0xB0 / 255f, (float)0xFF / 255f, (float)0xBA / 255f, (float)0xFF / 255f );
+		public Vector4 NearRangeTextColor_Party
+		{
+			get { return mNearRangeTextColor_Party; }
+			set { mNearRangeTextColor_Party = value; }
+		}
+
+		public Vector4 mNearRangeTextEdgeColor_Party = new( (float)0x00 / 255f, (float)0x63 / 255f, (float)0x0C / 255f, (float)0xFF / 255f );
+		public Vector4 NearRangeTextEdgeColor_Party
+		{
+			get { return mNearRangeTextEdgeColor_Party; }
+			set { mNearRangeTextEdgeColor_Party = value; }
+		}
+
+		public bool mMidRangeTextUseNameplateColor_Party = false;
+		public bool MidRangeTextUseNameplateColor_Party
+		{
+			get { return mMidRangeTextUseNameplateColor_Party; }
+			set { mMidRangeTextUseNameplateColor_Party = value; }
+		}
+
+		public Vector4 mMidRangeTextColor_Party = new( (float)0xFF / 255f, (float)0xB3 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 MidRangeTextColor_Party
+		{
+			get { return mMidRangeTextColor_Party; }
+			set { mMidRangeTextColor_Party = value; }
+		}
+
+		public Vector4 mMidRangeTextEdgeColor_Party = new( (float)0x66 / 255f, (float)0x43 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 MidRangeTextEdgeColor_Party
+		{
+			get { return mMidRangeTextEdgeColor_Party; }
+			set { mMidRangeTextEdgeColor_Party = value; }
+		}
+
+		public bool mFarRangeTextUseNameplateColor_Party = false;
+		public bool FarRangeTextUseNameplateColor_Party
+		{
+			get { return mFarRangeTextUseNameplateColor_Party; }
+			set { mFarRangeTextUseNameplateColor_Party = value; }
+		}
+
+		public Vector4 mFarRangeTextColor_Party = new( (float)0xEF / 255f, (float)0x48 / 255f, (float)0x12 / 255f, (float)0xFF / 255f );
+		public Vector4 FarRangeTextColor_Party
+		{
+			get { return mFarRangeTextColor_Party; }
+			set { mFarRangeTextColor_Party = value; }
+		}
+
+		public Vector4 mFarRangeTextEdgeColor_Party = new( (float)0x4E / 255f, (float)0x11 / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
+		public Vector4 FarRangeTextEdgeColor_Party
+		{
+			get { return mFarRangeTextEdgeColor_Party; }
+			set { mFarRangeTextEdgeColor_Party = value; }
+		}
+
+		public float mFarThresholdDistance_Party_Yalms = 14.5f;
+		public float FarThresholdDistance_Party_Yalms
+		{
+			get { return mFarThresholdDistance_Party_Yalms; }
+			set { mFarThresholdDistance_Party_Yalms = value; }
+		}
+
+		public float mNearThresholdDistance_Party_Yalms = 13.5f;
+		public float NearThresholdDistance_Party_Yalms
+		{
+			get { return mNearThresholdDistance_Party_Yalms; }
+			set { mNearThresholdDistance_Party_Yalms = value; }
+		}
+
 		public DistanceWidgetFiltersConfig Filters { get; protected set; } = new DistanceWidgetFiltersConfig();
 	}
 }
