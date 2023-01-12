@@ -244,6 +244,7 @@ namespace Distance
 			catch( Exception e )
 			{
 				PluginLog.LogError( $"Unknown error in nameplate draw hook.  Disabling nameplate distances.\r\n{e}" );
+				mConfiguration.NameplateDistancesConfig.ShowNameplateDistances = false;
 				DisableNameplateDistances();
 			}
 			finally
