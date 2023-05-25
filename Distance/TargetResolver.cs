@@ -19,7 +19,7 @@ namespace Distance
 			mTargetManager = targetManager;
 			mObjectTable = objectTable;
 
-			IntPtr fpUIMouseover = sigScanner.ScanText( "E8 ?? ?? ?? ?? 48 8B 6C 24 58 48 8B 5C 24 50 4C 8B 7C" );
+			IntPtr fpUIMouseover = sigScanner.ScanText( "E8 ?? ?? ?? ?? 48 8B 5C 24 40 4C 8B 74 24 58 83 FD 02" );
 			if( fpUIMouseover != IntPtr.Zero )
 			{
 				PluginLog.LogInformation( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
