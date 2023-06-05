@@ -65,7 +65,7 @@ namespace Distance
 					}
 					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
+						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID)" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
 				}
