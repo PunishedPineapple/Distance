@@ -65,8 +65,18 @@ namespace Distance
 					}
 					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because BNpcName Mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID)" );
-						mKnownAggroEntities.RemoveAt( i );
+						//	Ignore BNpc name mismatch if it's an RSV value.  There's probably not a reliable way to handle RSV'd names without shipping
+						//	manual mappings, and doing that has some issues unless they were included with Dalamud itself.  It's already extremly unlikely
+						//	that a name ID ever gets reassigned anyway, and since RSVs are only for new content so far, any issues should be quickly noticed.
+						if( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular.ToString().Contains( $"_rsv_{mKnownAggroEntities[i].BNpcID}" ) )
+						{
+							PluginLog.LogDebug( $"Aggro data entry BNpcName mismatch ignored due to RSV: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
+						}
+						else
+						{
+							PluginLog.LogDebug( $"Aggro data entry removed because BNpcName mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
+							mKnownAggroEntities.RemoveAt( i );
+						}
 					}
 				}
 			}
