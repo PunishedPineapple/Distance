@@ -18,7 +18,7 @@ namespace Distance
 			set { mSuppressCommandLineResponses = value; }
 		}
 
-		public bool mAutoUpdateAggroData = false;
+		public bool mAutoUpdateAggroData = true;
 		public bool AutoUpdateAggroData
 		{
 			get { return mAutoUpdateAggroData; }
