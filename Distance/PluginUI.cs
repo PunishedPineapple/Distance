@@ -11,6 +11,7 @@ using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 
 using FFXIVClientStructs.FFXIV.Component.GUI;
@@ -90,16 +91,20 @@ namespace Distance
 				//AddonAttachType.Nameplate.GetTranslatedUIAttachTypeEnumString(),
 			};
 
-			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", 
+			//	I'm too stupid to do anything right so we get to have this pile :D
+			float minWidth =	ImGui.GetStyle().WindowPadding.X * 2 +
+								ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetTextLineHeight() /*cheat to get checkbox width*/ + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.CalcTextSize( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) ).X +
+								ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetStyle().ItemSpacing.X + ImGui.CalcTextSize( "(?)" ).X;
+
+			ImGui.SetNextWindowSizeConstraints( new( minWidth, 0f ), new( float.MaxValue ) );
+			if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", ref mSettingsWindowVisible,
 				ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse /*| ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse*/ ) )
 			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
-				ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.mShowNameplateDistances );
-
-				if( mConfiguration.ShowAggroDistance )
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Settings", "Aggro Widget Settings" ) + "###Aggro Widget Settings Header." ) )
 				{
-					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Settings", "Aggro Widget Settings" ) + "###Aggro Widget Settings Header." ) )
+					ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.mShowAggroDistance );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
+					if( mConfiguration.ShowAggroDistance )
 					{
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Distance Rules", "Distance Rules" ) + $"###Aggro Widget Distance Rules Header." ) )
 						{
@@ -116,7 +121,7 @@ namespace Distance
 								}
 								ImGui.EndCombo();
 							}
-							
+
 							ImGui.TreePop();
 						}
 
@@ -156,40 +161,41 @@ namespace Distance
 							ImGui.SliderInt( "###AggroDistanceWarningRangeSlider", ref mConfiguration.mAggroWarningDistance_Yalms, 0, 30 );
 							ImGui.TreePop();
 						}
-
-						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc" ) + $"###Aggro Widget Arc Header." ) )
-						{
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
-							if( mConfiguration.DrawAggroArc )
-							{
-								ImGui.Text( Loc.Localize( "Config Option: Aggro Arc Length", "Length of the aggro arc (deg):" ) );
-								ImGui.SliderInt( "###AggroArcLengthSlider", ref mConfiguration.mAggroArcLength_Deg, 0, 15 );
-							}
-							ImGui.TreePop();
-						}
-					}
-
-					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
-					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Auto Update Aggro Data", "Try to automatically fetch the most recent aggro distance data on startup." ) + "###Auto Update Aggro Data.", ref mConfiguration.mAutoUpdateAggroData );
-						if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
-						{
-							Task.Run( async () =>
-							{
-								var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
-								if( downloadedFile != null ) BNpcAggroInfo.Init( mDataManager, downloadedFile );
-							} );
-						}
-						if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
-						{
-							ImGui.Text( Loc.Localize( "Config Text: Download Status Indicator", $"Status of most recent update attempt:" ) + $"\r\n{BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
-						}
 					}
 				}
 
-				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc Settings" ) + $"###Aggro Widget Arc Header." ) )
 				{
-					if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
+					ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Arc", "This is a visual representation of the distance readout shown by the aggro widget.  If you wish to change colors or which target type is used, adjust those settings for the aggro widget, and they will apply to this arc." ) );
+					if( mConfiguration.DrawAggroArc )
+					{
+						ImGui.Text( Loc.Localize( "Config Option: Aggro Arc Length", "Length of the aggro arc (deg):" ) );
+						ImGui.SliderInt( "###AggroArcLengthSlider", ref mConfiguration.mAggroArcLength_Deg, 0, 15 );
+					}
+				}
+
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
+				{
+					ImGui.Checkbox( Loc.Localize( "Config Option: Auto Update Aggro Data", "Try to automatically fetch the most recent aggro distance data on startup." ) + "###Auto Update Aggro Data.", ref mConfiguration.mAutoUpdateAggroData );
+					if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
+					{
+						Task.Run( async () =>
+						{
+							var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
+							if( downloadedFile != null ) BNpcAggroInfo.Init( mDataManager, downloadedFile );
+						} );
+					}
+					if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
+					{
+						ImGui.Text( Loc.Localize( "Config Text: Download Status Indicator", $"Status of most recent update attempt:" ) + $"\r\n{BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
+					}
+				}
+
+				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
+				{
+					ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.mShowNameplateDistances );
+					if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
 					{
 						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Distance Rules", "Distance Rules" ) + $"###Nameplate Distance Rules Header." ) )
 						{
@@ -320,9 +326,25 @@ namespace Distance
 
 				if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Miscellaneous", "Miscellaneous Options" ) + "###Misc. Options Header." ) )
 				{
-
 					ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses." ) + "###Suppress text command responses.", ref mConfiguration.mSuppressCommandLineResponses );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
+				}
+
+				ImGui.Spacing();
+
+				try
+				{
+					ImGui.PushStyleColor( ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.Button] );
+					ImGui.PushFont( UiBuilder.IconFont );
+					ImGui.Text( "\uF0C1" );
+					ImGui.PopFont();
+					ImGui.PopStyleColor();
+					ImGui.SameLine();
+					ImGuiUtils.URLLink( "https://github.com/PunishedPineapple/Distance/wiki/Distances-in-FFXIV", Loc.Localize( "Config Text: Distance Information Link", "About Distance Measurement in FFXIV" ), false, UiBuilder.IconFont );
+				}
+				catch( Exception e )
+				{
+					PluginLog.LogWarning( $"Unable to open the requested link:\r\n{e}" );
 				}
 
 				ImGui.Spacing();
@@ -742,9 +764,7 @@ namespace Distance
 			ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
 			if( ImGui.Begin( "##AggroDistanceIndicatorWindow", ImGuiUtils.OverlayWindowFlags ) )
 			{
-				if( mConfiguration.DrawAggroArc &&
-					mPlugin.ShouldDrawAggroDistanceInfo() /*&&
-					AddonIsVisible( mConfiguration.AggroDistanceUIAttachType.GetGameAddonToUse( mConfiguration.AggroDistanceApplicableTargetType ) )*/ )	//***** TODO: This is kind of a heavyweight solution, and doesn't even work well.  We probably need director information to get it right.
+				if( mConfiguration.DrawAggroArc && mPlugin.ShouldDrawAggroDistanceInfo() )
 				{
 					DrawAggroDistanceArc();
 				}
@@ -757,7 +777,7 @@ namespace Distance
 		protected void DrawOnGameUI()
 		{
 			//	Draw the aggro widget.
-			UpdateAggroDistanceTextNode( mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ), mPlugin.ShouldDrawAggroDistanceInfo() );
+			UpdateAggroDistanceTextNode( mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ), mConfiguration.ShowAggroDistance && mPlugin.ShouldDrawAggroDistanceInfo() );
 
 			//	Draw each configured distance widget.
 			for( int i = 0; i < mConfiguration.DistanceWidgetConfigs.Count; ++i )

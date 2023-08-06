@@ -10,7 +10,7 @@ namespace Distance
 {
 	internal static class BNpcAggroInfoDownloader
 	{
-		public static async Task<BNpcAggroInfoFile> DownloadUpdatedAggroDataAsync( string filePath )
+		public static async Task<BNpcAggroInfoFile> DownloadUpdatedAggroDataAsync( string filePath, UInt64 localVersionOverride = 0 )
 		{
 			//	Don't do anything if we're already running the task.
 			if( CurrentDownloadStatus == DownloadStatus.Downloading ) return null;
@@ -30,7 +30,7 @@ namespace Distance
 					if( downloadedDataFile.ReadFromString( responseBody ) )
 					{
 						PluginLog.LogInformation( $"Downloaded BNpc aggro range data version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
-						if( downloadedDataFile.FileVersion > BNpcAggroInfo.GetCurrentFileVersion() )
+						if( downloadedDataFile.FileVersion > ( localVersionOverride > 0 ? localVersionOverride : BNpcAggroInfo.GetCurrentFileVersion() ) )
 						{
 							status = DownloadStatus.FailedFileWrite;
 							downloadedDataFile.WriteFile( filePath );
@@ -39,12 +39,14 @@ namespace Distance
 						}
 						else
 						{
+							PluginLog.LogInformation( $"Downloaded file not newer than existing data file; discarding." );
 							status = DownloadStatus.OutOfDateFile;
 							downloadedDataFile = null;
 						}
 					}
 					else
 					{
+						PluginLog.LogWarning( $"Unable to load downloaded file!" );
 						status = DownloadStatus.FailedFileLoad;
 						downloadedDataFile = null;
 					}
@@ -63,7 +65,7 @@ namespace Distance
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogWarning( $"Unkown exception occurred while trying to update aggro distance data: {e}" );
+					PluginLog.LogWarning( $"Unknown exception occurred while trying to update aggro distance data: {e}" );
 					status = DownloadStatus.FailedDownload;
 					downloadedDataFile = null;
 				}
@@ -85,7 +87,7 @@ namespace Distance
 				DownloadStatus.FailedDownload	=> Loc.Localize( "Download Status Message: Failed Download", "Download failed!" ),
 				DownloadStatus.FailedFileLoad	=> Loc.Localize( "Download Status Message: Failed File Load", "The downloaded file was invalid!" ),
 				DownloadStatus.FailedFileWrite	=> Loc.Localize( "Download Status Message: Failed File Write", "The downloaded file could not be saved to disk; any updates will be lost upon reloading." ),
-				DownloadStatus.OutOfDateFile	=> Loc.Localize( "Download Status Message: Out of Date File", "The downloaded file was older than the current data, and has been discarded." ),
+				DownloadStatus.OutOfDateFile	=> Loc.Localize( "Download Status Message: Out of Date File", "The downloaded file was not newer than the current data, and has been discarded." ),
 				DownloadStatus.Completed		=> Loc.Localize( "Download Status Message: Completed", "Update Completed" ),
 				DownloadStatus.Canceled			=> Loc.Localize( "Download Status Message: Canceled", "The update operation was canceled!" ),
 				_ => "You shouldn't ever see this!",

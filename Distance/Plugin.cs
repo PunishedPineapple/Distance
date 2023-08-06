@@ -76,11 +76,12 @@ namespace Distance
 				//	Auto-updating (if desired)
 				if( mConfiguration.AutoUpdateAggroData )
 				{
-					var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
+					UInt64 highestLocalVersion = UInt64.Max( aggroFile_Assembly.FileVersion, aggroFile_Config?.FileVersion ?? 0 );
+					var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ), highestLocalVersion );
 					aggroFile_Config = downloadedFile ?? aggroFile_Config;
 				}
 				
-				var fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
+				var fileToUse = aggroFile_Config?.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
 				BNpcAggroInfo.Init( mDataManager, fileToUse );
 			} );
 
@@ -352,12 +353,12 @@ namespace Distance
 		{
 			if( mClientState.IsPvP ) return false;
 
-			//***** TODO: We probably need some director info to make it not show as curtain is coming up.  Condition and addon visibility are are failing us here.
-			return	mConfiguration.ShowAggroDistance &&
+			//***** TODO: We probably need some director info to make it not show as curtain is coming up.  Condition and addon visibility are incomplete solutions.
+			return	!mGameGui.GameUiHidden &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).IsValid &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).HasAggroRangeData &&
-					(TargetResolver.GetTarget( mConfiguration.AggroDistanceApplicableTargetType ) as BattleChara )?.CurrentHp > 0 &&
+					(TargetResolver.GetTarget( mConfiguration.AggroDistanceApplicableTargetType ) as BattleChara)?.CurrentHp > 0 &&
 					!mCondition[ConditionFlag.Unconscious] &&
 					!mCondition[ConditionFlag.InCombat];
 		}

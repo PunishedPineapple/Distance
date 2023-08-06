@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 
 using ImGuiNET;
@@ -56,6 +57,58 @@ namespace Distance
 				ImGui.PopTextWrapPos();
 				ImGui.EndTooltip();
 			}
+		}
+
+		public static void URLLink( string URL, string textToShow = "", bool showTooltip = true, ImFontPtr? iconFont = null )
+		{
+			ImGui.PushStyleColor( ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.Text] );
+			ImGui.Text( textToShow.Length > 0 ? textToShow : URL );
+			ImGui.PopStyleColor();
+
+			if( ImGui.IsItemHovered() )
+			{
+				ImGui.SetMouseCursor( ImGuiMouseCursor.Hand );
+				if( ImGui.IsMouseClicked( ImGuiMouseButton.Left ) )
+				{
+					Process.Start( new ProcessStartInfo( URL ) { UseShellExecute = true } );
+				}
+
+				AddUnderline( ImGui.GetStyle().Colors[(int)ImGuiCol.Text], 1.0f );
+
+				if( showTooltip )
+				{
+					ImGui.BeginTooltip();
+					if( iconFont != null )
+					{
+						ImGui.PushFont( iconFont.Value );
+						ImGui.Text( "\uF0C1" );
+						ImGui.PopFont();
+						ImGui.SameLine();
+					}
+					ImGui.Text( URL );
+					ImGui.EndTooltip();
+				}
+			}
+			else
+			{
+				AddUnderline( ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled], 1.0f );
+			}
+		}
+
+		public static void AddUnderline( Vector4 color, float thickness )
+		{
+			Vector2 min = ImGui.GetItemRectMin();
+			Vector2 max = ImGui.GetItemRectMax();
+			min.Y = max.Y;
+			ImGui.GetWindowDrawList().AddLine( min, max, ColorVecToUInt( color ), thickness );
+		}
+
+		public static void AddOverline( Vector4 color, float thickness )
+		{
+			Vector2 min = ImGui.GetItemRectMin();
+			Vector2 max = ImGui.GetItemRectMax();
+			max.Y = min.Y;
+			ImGui.GetWindowDrawList().AddLine( min, max, ColorVecToUInt( color ), thickness );
 		}
 
 		public const ImGuiWindowFlags OverlayWindowFlags =	ImGuiWindowFlags.NoDecoration |
