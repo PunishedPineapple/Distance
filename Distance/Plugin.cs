@@ -76,12 +76,12 @@ namespace Distance
 				//	Auto-updating (if desired)
 				if( mConfiguration.AutoUpdateAggroData )
 				{
-					UInt64 highestLocalVersion = UInt64.Max( aggroFile_Assembly.FileVersion, aggroFile_Config?.FileVersion ?? 0 );
+					UInt64 highestLocalVersion = UInt64.Max( aggroFile_Assembly.FileVersion, aggroFile_Config.FileVersion );
 					var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ), highestLocalVersion );
 					aggroFile_Config = downloadedFile ?? aggroFile_Config;
 				}
 				
-				var fileToUse = aggroFile_Config?.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
+				var fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
 				BNpcAggroInfo.Init( mDataManager, fileToUse );
 			} );
 
