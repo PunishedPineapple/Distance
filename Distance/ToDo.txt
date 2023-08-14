@@ -16,7 +16,12 @@ Priority:
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 	-Show distances on party list?
 	-Add distances to enemy list?
-	-Decouple aggro arc setting from aggro distance readout settings (allow arc without readout).
+	-On the off chance that this gets any more active work, improve the data file format and updater:
+		-Make the datafile a CSV or similar so that additional columns can be added easily (i.e., aggro type, sight cone information, etc.)
+			-Does .net CSV parser work on Linux/Mac?
+			-JSON, etc. out because duplicating the schema for every row is stupid.
+		-Make it two files: a data file, and a version file that contains only the version number and a hash of the data file for verification.
+			-Allows for only a very small file that's downloaded every time to check version, even if data size balloons.
 
 
 Cleanup:
@@ -28,7 +33,6 @@ Cleanup:
 
 Misc:
 	-Translations.
-	-Maybe add discussions regarding player to ring and ring to ring distances (your skills vs. enemy skills, etc.).
 
 
 Maybe:
@@ -46,6 +50,7 @@ Maybe:
 	-Should make a more encapsulated node (or node controller or something) class before doing the preceeding; it's just getting too much tracking floating nodes with disparate functionality to have even more to do with them.
 	-Add friends/fc member conditions for nameplates?
 	-Add option to recolor target/focus target/soft target cursors based on distance.
+	-Could maybe experiment with using depth-enabled UI nodes to draw arc beneath character?
 
 
 Rejected:
