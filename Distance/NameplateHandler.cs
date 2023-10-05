@@ -9,7 +9,8 @@ using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Gui;
 using Dalamud.Hooking;
 using Dalamud.Logging;
-
+using Dalamud.Plugin.Services;
+using Distance.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Group;
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -21,7 +22,7 @@ namespace Distance
 {
 	internal static unsafe class NameplateHandler
 	{
-		internal static void Init( SigScanner sigScanner, ClientState clientState, PartyList partyList, Condition condition, GameGui gameGui, Configuration configuration )
+		internal static void Init( ISigScanner sigScanner, IClientState clientState, IPartyList partyList, ICondition condition, IGameGui gameGui, Configuration configuration )
 		{
 			mClientState = clientState;
 			mPartyList = partyList;
@@ -40,7 +41,9 @@ namespace Distance
 				mfpOnNameplateDraw = sigScanner.ScanText( "0F B7 81 ?? ?? ?? ?? 4C 8B C1 66 C1 E0 06" );	//***** TODO: Can we hook the draw vfunc through ClientStructs?  Would that be more stable?
 				if( mfpOnNameplateDraw != IntPtr.Zero )
 				{
-					mNameplateDrawHook = Hook<NameplateDrawFuncDelegate>.FromAddress( mfpOnNameplateDraw, mdNameplateDraw );
+					mNameplateDrawHook =
+						Service.GameInteropProvider.HookFromAddress<NameplateDrawFuncDelegate>(mfpOnNameplateDraw,
+							mdNameplateDraw);
 					if( mNameplateDrawHook == null ) throw new Exception( "Unable to create nameplate draw hook." );
 					if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) mNameplateDrawHook.Enable();
 				}
@@ -613,10 +616,10 @@ namespace Distance
 		//	Members
 		private static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];
 		private static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
-		private static ClientState mClientState;
-		private static PartyList mPartyList;
-		private static Condition mCondition;
-		private static GameGui mGameGui;
+		private static IClientState mClientState;
+		private static IPartyList mPartyList;
+		private static ICondition mCondition;
+		private static IGameGui mGameGui;
 		private static Configuration mConfiguration = null;
 		private static AddonNamePlate* mpNameplateAddon = null;
 		private static readonly AtkTextNode*[] mDistanceTextNodes = new AtkTextNode*[AddonNamePlate.NumNamePlateObjects];

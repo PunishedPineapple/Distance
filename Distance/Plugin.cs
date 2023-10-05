@@ -16,39 +16,22 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using Distance.Services;
 
 namespace Distance
 {
 	public class Plugin : IDalamudPlugin
 	{
 		//	Initialization
-		public Plugin(
-			DalamudPluginInterface pluginInterface,
-			Framework framework,
-			ClientState clientState,
-			CommandManager commandManager,
-			Dalamud.Game.ClientState.Conditions.Condition condition,
-			PartyList partyList,
-			TargetManager targetManager,
-			ChatGui chatGui,
-			GameGui gameGui,
-			DataManager dataManager,
-			SigScanner sigScanner,
-			ObjectTable objectTable )
+		public Plugin(DalamudPluginInterface pluginInterface)
 		{
+			pluginInterface.Create<Service>();
 			//	API Access
 			mPluginInterface	= pluginInterface;
-			mFramework			= framework;
-			mClientState		= clientState;
-			mCommandManager		= commandManager;
-			mCondition			= condition;
-			mTargetManager		= targetManager;
-			mChatGui			= chatGui;
-			mGameGui			= gameGui;
-			mDataManager		= dataManager;
 
 			//	Initialization
-			TargetResolver.Init( sigScanner, targetManager, objectTable );
+			TargetResolver.Init( Service.SigScanner, Service.TargetManager, Service.ObjectTable );
 
 			//	Configuration
 			mConfiguration = mPluginInterface.GetPluginConfig() as Configuration;
@@ -82,37 +65,37 @@ namespace Distance
 				}
 				
 				var fileToUse = aggroFile_Config.FileVersion > aggroFile_Assembly.FileVersion ? aggroFile_Config : aggroFile_Assembly;
-				BNpcAggroInfo.Init( mDataManager, fileToUse );
+				BNpcAggroInfo.Init( Service.DataManager, fileToUse );
 			} );
 
 			//	Localization and Command Initialization
 			OnLanguageChanged( mPluginInterface.UiLanguage );
 
 			//	UI Initialization
-			mUI = new PluginUI( this, mPluginInterface, mConfiguration, mDataManager, mGameGui, mClientState, mCondition );
+			mUI = new PluginUI( this, mPluginInterface, mConfiguration, Service.DataManager, Service.GameGui, Service.ClientState, Service.Condition );
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
-			NameplateHandler.Init( sigScanner, clientState, partyList, condition, gameGui, mConfiguration );
+			NameplateHandler.Init( Service.SigScanner, Service.ClientState, Service.PartyList, Service.Condition, Service.GameGui, mConfiguration );
 
 			//	We need to disable automatic hiding, because we actually turn off our game UI nodes in the draw functions as-appropriate, so we can't skip the draw functions.
 			mPluginInterface.UiBuilder.DisableAutomaticUiHide = true;
 
 			//	Event Subscription
 			mPluginInterface.LanguageChanged += OnLanguageChanged;
-			mFramework.Update += OnGameFrameworkUpdate;
-			mClientState.TerritoryChanged += OnTerritoryChanged;
+			Service.Framework.Update += OnGameFrameworkUpdate;
+			Service.ClientState.TerritoryChanged += OnTerritoryChanged;
 		}
 
 		//	Cleanup
 		public void Dispose()
 		{
-			mFramework.Update -= OnGameFrameworkUpdate;
-			mClientState.TerritoryChanged -= OnTerritoryChanged;
+			Service.Framework.Update -= OnGameFrameworkUpdate;
+			Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
 			mPluginInterface.UiBuilder.Draw -= DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 			mPluginInterface.LanguageChanged -= OnLanguageChanged;
-			mCommandManager.RemoveHandler( mTextCommandName );
+			Service.CommandManager.RemoveHandler( mTextCommandName );
 			mUI.Dispose();
 
 			BNpcAggroInfoDownloader.CancelAllDownloads();
@@ -138,11 +121,11 @@ namespace Distance
 			}
 
 			//	Set up the command handler with the current language.
-			if( mCommandManager.Commands.ContainsKey( mTextCommandName ) )
+			if( Service.CommandManager.Commands.ContainsKey( mTextCommandName ) )
 			{
-				mCommandManager.RemoveHandler( mTextCommandName );
+				Service.CommandManager.RemoveHandler( mTextCommandName );
 			}
-			mCommandManager.AddHandler( mTextCommandName, new CommandInfo( ProcessTextCommand )
+			Service.CommandManager.AddHandler( mTextCommandName, new CommandInfo( ProcessTextCommand )
 			{
 				HelpMessage = String.Format( Loc.Localize( "Plugin Text Command Description", "Use {0} for a listing of available text commands." ), "\"/pdistance help\"" )
 			} );
@@ -211,7 +194,7 @@ namespace Distance
 			//	Send any feedback to the user.
 			if( commandResponse.Length > 0 && !suppressResponse )
 			{
-				mChatGui.Print( commandResponse );
+				Service.ChatGui.Print( commandResponse );
 			}
 		}
 
@@ -330,7 +313,7 @@ namespace Distance
 			}
 		}
 
-		public void OnGameFrameworkUpdate( Framework framework )
+		public void OnGameFrameworkUpdate( IFramework framework )
 		{
 			UpdateTargetDistanceData();
 
@@ -338,7 +321,7 @@ namespace Distance
 			else NameplateHandler.DisableNameplateDistances();
 		}
 
-		protected void OnTerritoryChanged( object sender, UInt16 ID )
+		protected void OnTerritoryChanged( UInt16 ID )
 		{
 			//	Pre-filter when we enter a zone so that we have a lower chance of stutters once we're actually in.
 			BNpcAggroInfo.FilterAggroEntities( ID );
@@ -351,31 +334,31 @@ namespace Distance
 
 		public bool ShouldDrawAggroDistanceInfo()
 		{
-			if( mClientState.IsPvP ) return false;
+			if( Service.ClientState.IsPvP ) return false;
 
 			//***** TODO: We probably need some director info to make it not show as curtain is coming up.  Condition and addon visibility are incomplete solutions.
-			return	!mGameGui.GameUiHidden &&
+			return	!Service.GameGui.GameUiHidden &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).IsValid &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
 					GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType ).HasAggroRangeData &&
 					(TargetResolver.GetTarget( mConfiguration.AggroDistanceApplicableTargetType ) as BattleChara)?.CurrentHp > 0 &&
-					!mCondition[ConditionFlag.Unconscious] &&
-					!mCondition[ConditionFlag.InCombat];
+					!Service.Condition[ConditionFlag.Unconscious] &&
+					!Service.Condition[ConditionFlag.InCombat];
 		}
 
 		//	It's tempting to put this into the config filters class, but we rely on a few things that won't know about, so just keeping it here to avoid having to pass in even more stuff.
 		public bool ShouldDrawDistanceInfo( DistanceWidgetConfig config )
 		{
-			if( mClientState.IsPvP ) return false;
+			if( Service.ClientState.IsPvP ) return false;
 			if( !config.Enabled ) return false;
-			if( config.HideInCombat && mCondition[ConditionFlag.InCombat] ) return false;
-			if( config.HideOutOfCombat && !mCondition[ConditionFlag.InCombat] ) return false;
+			if( config.HideInCombat && Service.Condition[ConditionFlag.InCombat] ) return false;
+			if( config.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) return false;
 			if( !mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].IsValid ) return false;
 
 			bool show = mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].TargetKind switch
 			{
 				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc			=> config.Filters.ShowDistanceOnBattleNpc,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player			=> config.Filters.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID != mClientState.LocalPlayer?.ObjectId,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player			=> config.Filters.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID != Service.ClientState.LocalPlayer?.ObjectId,
 				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc			=> config.Filters.ShowDistanceOnEventNpc,
 				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure			=> config.Filters.ShowDistanceOnTreasure,
 				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte			=> config.Filters.ShowDistanceOnAetheryte,
@@ -390,7 +373,7 @@ namespace Distance
 
 		protected void UpdateTargetDistanceData()
 		{
-			if( mClientState.LocalPlayer == null)
+			if( Service.ClientState.LocalPlayer == null)
 			{
 				foreach( var info in mCurrentDistanceInfoArray )
 				{
@@ -408,11 +391,11 @@ namespace Distance
 					mCurrentDistanceInfoArray[i].IsValid = true;
 					mCurrentDistanceInfoArray[i].TargetKind = target.ObjectKind;
 					mCurrentDistanceInfoArray[i].ObjectID = target.ObjectId;
-					mCurrentDistanceInfoArray[i].PlayerPosition = mClientState.LocalPlayer.Position;
+					mCurrentDistanceInfoArray[i].PlayerPosition = Service.ClientState.LocalPlayer.Position;
 					mCurrentDistanceInfoArray[i].TargetPosition = target.Position;
 					mCurrentDistanceInfoArray[i].TargetRadius_Yalms = target.HitboxRadius;
 					mCurrentDistanceInfoArray[i].BNpcID = ( target as Dalamud.Game.ClientState.Objects.Types.BattleNpc )?.NameId ?? 0;
-					float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcID, mClientState.TerritoryType );
+					float? aggroRange = BNpcAggroInfo.GetAggroRange( mCurrentDistanceInfoArray[i].BNpcID, Service.ClientState.TerritoryType );
 					mCurrentDistanceInfoArray[i].HasAggroRangeData = aggroRange.HasValue;
 					mCurrentDistanceInfoArray[i].AggroRange_Yalms = aggroRange ?? 0;
 				}
@@ -438,14 +421,6 @@ namespace Distance
 
 		protected readonly DistanceInfo[] mCurrentDistanceInfoArray = new DistanceInfo[Enum.GetNames(typeof(TargetType)).Length];
 		protected DalamudPluginInterface mPluginInterface;
-		protected Framework mFramework;
-		protected ClientState mClientState;
-		protected CommandManager mCommandManager;
-		protected Dalamud.Game.ClientState.Conditions.Condition mCondition;
-		protected TargetManager mTargetManager;
-		protected ChatGui mChatGui;
-		protected GameGui mGameGui;
-		protected DataManager mDataManager;
 		protected Configuration mConfiguration;
 		protected PluginUI mUI;
 	}
