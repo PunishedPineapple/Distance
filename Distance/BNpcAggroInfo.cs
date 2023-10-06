@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 using Dalamud.Data;
 using Dalamud.Logging;
-
+using Dalamud.Plugin.Services;
+using Distance.Services;
 using Lumina.Excel;
 
 namespace Distance
 {
 	internal static class BNpcAggroInfo
 	{
-		public static void Init( DataManager dataManager, string filePath  )
+		public static void Init( IDataManager dataManager, string filePath  )
 		{
 			Task.Run( () =>
 			{
@@ -20,24 +21,24 @@ namespace Distance
 				var file = new BNpcAggroInfoFile();
 				try
 				{
-					PluginLog.LogDebug( $"Trying to read aggro info file at {filePath}" );
+					Service.PluginLog.Debug( $"Trying to read aggro info file at {filePath}" );
 					if( file.ReadFromFile( filePath ) )
 					{
 						Init( dataManager, file );
 					}
 					else
 					{
-						PluginLog.LogWarning( $"Unable to read BNpc aggro file." );
+						Service.PluginLog.Warning( $"Unable to read BNpc aggro file." );
 					}
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogWarning( $"Unable to read BNpc aggro file:\r\n{e}" );
+					Service.PluginLog.Warning( $"Unable to read BNpc aggro file:\r\n{e}" );
 				}
 			} );
 		}
 
-		public static void Init( DataManager dataManager, BNpcAggroInfoFile file )
+		public static void Init( IDataManager dataManager, BNpcAggroInfoFile file )
 		{
 			if( !file.FileLoaded ) return;
 

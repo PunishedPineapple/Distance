@@ -11,9 +11,10 @@ using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Logging;
 using Dalamud.Plugin;
-
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 using ImGuiNET;
@@ -26,7 +27,7 @@ namespace Distance
 	public class PluginUI : IDisposable
 	{
 		//	Construction
-		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, DataManager dataManager, GameGui gameGui, ClientState clientState, Dalamud.Game.ClientState.Conditions.Condition condition )
+		public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration, IDataManager dataManager, IGameGui gameGui, IClientState clientState, ICondition condition )
 		{
 			mPlugin = plugin;
 			mPluginInterface = pluginInterface;
@@ -1089,10 +1090,10 @@ namespace Distance
 		protected Plugin mPlugin;
 		protected DalamudPluginInterface mPluginInterface;
 		protected Configuration mConfiguration;
-		protected DataManager mDataManager;
-		protected GameGui mGameGui;
-		protected Dalamud.Game.ClientState.Conditions.Condition mCondition;
-		protected ClientState mClientState;
+		protected IDataManager mDataManager;
+		protected IGameGui mGameGui;
+		protected ICondition mCondition;
+		protected IClientState mClientState;
 
 		//	Need a real backing field on the following properties for use with ImGui.
 		protected bool mSettingsWindowVisible = false;

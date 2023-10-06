@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<Platforms>AnyCPU</Platforms>
-		<Version>1.0.1.4</Version>
+		<Version>1.0.1.5</Version>
 		<Authors>PunishedPineapple</Authors>
 		<Product />
 		<Copyright>Copyright © PunishedPineapple 2022-2023</Copyright>
@@ -24,7 +24,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="2.1.10" />
+		<PackageReference Include="DalamudPackager" Version="2.1.12" />
 	</ItemGroup>
 
 	<PropertyGroup>

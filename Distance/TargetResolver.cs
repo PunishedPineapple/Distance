@@ -9,12 +9,14 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
+using Distance.Services;
 
 namespace Distance
 {
 	internal static unsafe class TargetResolver
 	{
-		public static void Init( SigScanner sigScanner, TargetManager targetManager, ObjectTable objectTable )
+		public static void Init( ISigScanner sigScanner, ITargetManager targetManager, IObjectTable objectTable )
 		{
 			mTargetManager = targetManager;
 			mObjectTable = objectTable;
@@ -22,8 +24,8 @@ namespace Distance
 			IntPtr fpUIMouseover = sigScanner.ScanText( "E8 ?? ?? ?? ?? 48 8B 5C 24 40 4C 8B 74 24 58 83 FD 02" );
 			if( fpUIMouseover != IntPtr.Zero )
 			{
-				PluginLog.LogInformation( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
-				mUIMouseoverHook = Hook<UIMouseoverDelegate>.FromAddress( fpUIMouseover, new( UIMouseoverDetour ) );
+				Service.PluginLog.Information( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
+				mUIMouseoverHook = Service.GameInteropProvider.HookFromAddress<UIMouseoverDelegate>(fpUIMouseover, UIMouseoverDetour);
 				mUIMouseoverHook.Enable();
 			}
 			else
@@ -84,8 +86,8 @@ namespace Distance
 			}
 		}
 
-		private static TargetManager mTargetManager;
-		private static ObjectTable mObjectTable;
+		private static ITargetManager mTargetManager;
+		private static IObjectTable mObjectTable;
 
 		private delegate void UIMouseoverDelegate( IntPtr pThis, IntPtr pActor );
 		private static Hook<UIMouseoverDelegate> mUIMouseoverHook;

@@ -66,7 +66,7 @@ namespace Distance
 				pNewNode->Ctor();
 
 				pNewNode->AtkResNode.Type = NodeType.Text;
-				pNewNode->AtkResNode.Flags = (short)( NodeFlags.AnchorLeft | NodeFlags.AnchorTop );
+				pNewNode->AtkResNode.NodeFlags = NodeFlags.AnchorLeft | NodeFlags.AnchorTop;
 				pNewNode->AtkResNode.DrawFlags = 0;
 				pNewNode->AtkResNode.SetPositionShort( 0, 0 );
 				pNewNode->AtkResNode.SetWidth( DefaultTextNodeWidth );
