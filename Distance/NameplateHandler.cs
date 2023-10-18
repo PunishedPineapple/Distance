@@ -171,16 +171,7 @@ namespace Distance
 
 			if( distanceInfo.ObjectID == mClientState?.LocalPlayer.ObjectId ) return false;
 
-			bool filtersPermitShowing = false;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnPlayers ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnBattleNpc ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventNpc ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnTreasure ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnAetheryte ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnGatheringNode ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventObj ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnCompanion ) filtersPermitShowing = true;
-			if( distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing && mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnHousing ) filtersPermitShowing = true;
+			bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnObjectKind( distanceInfo.TargetKind );
 
 			if( mConfiguration.NameplateDistancesConfig.ShowAll )
 			{

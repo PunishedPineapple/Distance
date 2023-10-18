@@ -4,6 +4,30 @@
 		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
+	-Make sure that nameplate nodes use thin text when nameplates use thin text.
+	-Update PluginLog calls.
+
+
+Arbitrary Arcs:
+	-Allow user to configure based on the following:
+		-Target Type (Soft, Focus, etc.)
+		-Allow special target type of "self" that is always on, or maybe make it just a checkbox to not pollute the enum?  Unsure what is best.
+			-Always points directly in front of the player?
+			-Or an option to be behind for rpr egress?
+			-Just make arc center angle a config option.
+		-Special target types of all enemies, all aggressive enemies, all unagressive enemies.
+		-In or out of combat
+		-In or out of instance
+		-Class job
+		-Target aggressive status (see if we can figure out the nameplate flag instead of the enemy list)
+		-The usual filters
+	-Improve arcs to have radial lines for cones at the appropriate point, and maybe add an option to have those lines and the circle outside of the arc be dotted when not near enough angle to them for the configured arc length to show normally.
+	-Make sure that arc calcs/drawing have divide by zero protection and handle negative numbers smaller than target radius gracefully.
+	-Option to hide arc when further than a distance from it (both inward and outward).
+	-Option to fade arc when further than a distance from it (both inward and outward).
+		-Make this a gradient? (which would cover both the fade and hide cases)
+	-Option to limit BNpc target category to show only those within a certain range.
+		-An option to base culling distance on either actual BNpc position, or on hitring distance.
 
 
 Priority:

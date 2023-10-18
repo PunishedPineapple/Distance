@@ -8,4 +8,12 @@
 			Exclude="latest.zip;previous.zip;loc.log;$(ProjectName).pdb;$(ProjectName).deps.json;$(ProjectName)_Localizable.json"
 			MakeZip="true"/>
 		</Target>
+	<Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+		<DalamudPackager
+            ProjectDir="$(ProjectDir)"
+            OutputPath="$(OutputPath)"
+            AssemblyName="$(AssemblyName)"
+			Exclude="latest.zip;previous.zip;loc.log;$(ProjectName).pdb;$(ProjectName).deps.json;$(ProjectName)_Localizable.json"
+			MakeZip="false"/>
+	</Target>
 </Project>

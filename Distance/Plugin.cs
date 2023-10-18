@@ -26,9 +26,9 @@ namespace Distance
 		//	Initialization
 		public Plugin(DalamudPluginInterface pluginInterface)
 		{
-			pluginInterface.Create<Service>();
 			//	API Access
-			mPluginInterface	= pluginInterface;
+			pluginInterface.Create<Service>();
+			mPluginInterface = pluginInterface;
 
 			//	Initialization
 			TargetResolver.Init( Service.SigScanner, Service.TargetManager, Service.ObjectTable );

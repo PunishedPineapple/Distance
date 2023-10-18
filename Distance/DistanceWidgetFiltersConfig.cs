@@ -2,6 +2,23 @@
 {
 	public class DistanceWidgetFiltersConfig
 	{
+		public bool ShowDistanceOnObjectKind( Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+		{
+			return objectKind switch
+			{
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player => ShowDistanceOnPlayers,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc => ShowDistanceOnBattleNpc,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc => ShowDistanceOnEventNpc,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure => ShowDistanceOnTreasure,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte => ShowDistanceOnAetheryte,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint => ShowDistanceOnGatheringNode,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj => ShowDistanceOnEventObj,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion => ShowDistanceOnCompanion,
+				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing => ShowDistanceOnHousing,
+				_ => false,
+			};
+		}
+
 		public bool mShowDistanceOnPlayers = true;
 		public bool ShowDistanceOnPlayers
 		{

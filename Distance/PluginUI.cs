@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,8 @@ using System.Numerics;
 using System.Threading.Tasks;
 
 using CheapLoc;
+
+using Distance.Services;
 
 using Dalamud.Data;
 using Dalamud.Game.ClientState;
@@ -19,6 +22,8 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 
 using ImGuiNET;
 
+using Lumina.Excel.GeneratedSheets;
+using Dalamud.Utility;
 
 namespace Distance
 {
@@ -222,7 +227,7 @@ namespace Distance
 							}
 							ImGui.TreePop();
 						}
-						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Filters", "Filters" ) + $"###Nameplate Filters Header." ) )
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Filters", "Object Type Filters" ) + $"###Nameplate Filters Header." ) )
 						{
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnPlayers );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + $"###Show distance to BattleNpc (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.mShowDistanceOnBattleNpc );
@@ -404,7 +409,7 @@ namespace Distance
 							ImGui.TreePop();
 						}
 
-						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Filters", "Target Filters" ) + $"###Distance Widget Filters Header {i}." ) )
+						if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Filters", "Object Type Filters" ) + $"###Distance Widget Filters Header {i}." ) )
 						{
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players {i}.", ref filters.mShowDistanceOnPlayers );
 							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + $"###Show distance to BattleNpc {i}.", ref filters.mShowDistanceOnBattleNpc );
@@ -499,6 +504,16 @@ namespace Distance
 				ImGui.Spacing();
 				ImGui.Spacing();
 
+				ImGui.Separator();
+
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+				ImGui.Spacing();
+
+				DrawSettingsWindow_CustomArcs();
+
 				if( ImGui.Button( Loc.Localize( "Button: Save", "Save" ) + "###Save Button" ) )
 				{
 					mConfiguration.Save();
@@ -512,6 +527,208 @@ namespace Distance
 			}
 
 			ImGui.End();
+		}
+
+		public void DrawSettingsWindow_CustomArcs()
+		{
+			if( ImGui.Button( Loc.Localize( "Button: Add Distance Arc", "Add Arc" ) + $"###Add Arc Button." ) )
+			{
+				mConfiguration.DistanceArcConfigs.Add( new() );
+			}
+
+			int arcIndexToDelete = -1;
+			for( int i = 0; i < mConfiguration.DistanceArcConfigs.Count; ++i )
+			{
+				var config = mConfiguration.DistanceArcConfigs[i];
+				var filters = config.Filters;
+				string defaultName = config.ApplicableTargetCategory == TargetCategory.Targets ? config.ApplicableTargetType.GetTranslatedName() : config.ApplicableTargetCategory.GetTranslatedName();
+				string name = config.mArcName.Length > 0 ? config.mArcName : defaultName;
+				if( ImGui.CollapsingHeader( String.Format( Loc.Localize( "Config Section Header: Distance Arc", "Distance Arc ({0})" ), name ) + $"###Distance Arc Header {i}." ) )
+				{
+					ImGui.Text( Loc.Localize( "Config Option: Arc Name", "Arc Name:" ) );
+					ImGui.SameLine();
+					string nameHint = config.ApplicableTargetCategory == TargetCategory.Targets ? config.ApplicableTargetType.GetTranslatedName() : config.ApplicableTargetCategory.GetTranslatedName();
+					ImGui.InputTextWithHint( $"###ArcNameInputBox {i}", nameHint, ref config.mArcName, 50 );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Name", "This is used to give a customized name to this Arc for use with certain text commands.  If you leave it blank, the type of target for this Arc will be used in the header above, but it will not have a name for use in text commands." ) );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Arc Enabled", "Enabled" ) + $"###Arc Enabled Checkbox {i}.", ref config.mEnabled );
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Rules", "Distance Rules" ) + $"###Distance Arc Rules Header {i}." ) )
+					{
+						ImGui.Text( Loc.Localize( "Config Option: Object Type", "Object Type:" ) );
+						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Object Type", "The basic category of object(s) for which this Arc will show distance." ) );
+						if( ImGui.BeginCombo( $"###ArcObjectCategoryDropdown {i}", config.ApplicableTargetCategory.GetTranslatedName() ) )
+						{
+							foreach( var item in Enum.GetValues<TargetCategory>() )
+							{
+								if( ImGui.Selectable( item.GetTranslatedName(), config.ApplicableTargetCategory == item ) )
+								{
+									config.ApplicableTargetCategory = item;
+								}
+							}
+							ImGui.EndCombo();
+						}
+
+						if( config.ApplicableTargetCategory == TargetCategory.Targets )
+						{
+							ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this Arc will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
+							if( ImGui.BeginCombo( $"###ArcTargetTypeDropdown {i}", config.ApplicableTargetType.GetTranslatedName() ) )
+							{
+								foreach( var item in TargetDropdownMenuItems )
+								{
+									if( ImGui.Selectable( item.GetTranslatedName(), config.ApplicableTargetType == item ) )
+									{
+										config.ApplicableTargetType = item;
+									}
+								}
+								ImGui.EndCombo();
+							}
+						}
+						else if( config.ApplicableTargetCategory == TargetCategory.Self )
+						{
+							ImGui.Text( Loc.Localize( "Config Option: Arc Self Azimuth", "Arc Centerpoint Azimuth:" ) );
+							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Self Azimuth", "Direction relative to your character to display the arc.  0 is in front, 90 is to the right, 180 is behind, 270 is to the left." ) );
+							ImGui.DragInt( $"###ArcSelfAzimuthSlider {i}", ref config.mSelfTargetedArcAzimuth_Deg, 1f, 0, 359, "%d", ImGuiSliderFlags.AlwaysClamp );
+						}
+						else if( config.ApplicableTargetCategory == TargetCategory.AllBNpc )
+						{
+							//	Checkbox for enaged.
+							//	Checkbox for enengaged.
+							//	Checkbox for friendly?
+						}
+
+						ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Use distance to target ring, not target center." ) + $"###Arc Distance is to ring {i}.", ref config.mDistanceIsToRing );
+						ImGui.Text( Loc.Localize( "Config Option: Arc Radius", "The radius of the arc (y):" ) );
+						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Radius", "This distance is relative to either the object's center, or to its hitring, as configured above." ) );
+						ImGui.DragFloat( $"###ArcDistanceSlider {i}", ref config.mArcRadius_Yalms, 0.1f, -30f, 30f );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Combat", "Hide when in combat." ) + $"###Arc Hide In Combat {i}.", ref config.mHideInCombat );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Combat", "Hide when out of combat." ) + $"###Arc Hide Out Of Combat {i}.", ref config.mHideOutOfCombat );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Instance", "Hide when in an instance." ) + $"###Arc Hide In Instance {i}.", ref config.mHideInInstance );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Instance", "Hide when out of an instance." ) + $"###Arc Hide Out Of Instance {i}.", ref config.mHideOutOfInstance );
+						ImGui.TreePop();
+					}
+
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Filters", "Object Type Filters" ) + $"###Distance Arc Filters Header {i}." ) )
+					{
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Players", "Show the arc on players." ) + $"###Show arc on players {i}.", ref filters.mShowDistanceOnPlayers );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on BattleNpc", "Show the arc on combatant NPCs." ) + $"###Show arc on BattleNpc {i}.", ref filters.mShowDistanceOnBattleNpc );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on EventNpc", "Show the arc on non-combatant NPCs." ) + $"###Show arc on EventNpc {i}.", ref filters.mShowDistanceOnEventNpc );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Treasure", "Show the arc on treasure chests." ) + $"###Show arc on treasure {i}.", ref filters.mShowDistanceOnTreasure );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Aetheryte", "Show the arc on aetherytes." ) + $"###Show arc on aetheryte {i}.", ref filters.mShowDistanceOnAetheryte );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Gathering Node", "Show the arc on gathering nodes." ) + $"###Show arc on gathering node {i}.", ref filters.mShowDistanceOnGatheringNode );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on EventObj", "Show the arc on interactable objects." ) + $"###Show arc on EventObj {i}.", ref filters.mShowDistanceOnEventObj );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Companion", "Show the arc on companions." ) + $"###Show arc on companion {i}.", ref filters.mShowDistanceOnCompanion );
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Housing", "Show the arc on housing items." ) + $"###Show arc on housing {i}.", ref filters.mShowDistanceOnHousing );
+						ImGui.TreePop();
+					}
+
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Classjobs", "Job Filters" ) + $"###Distance Arc Classjobs Header {i}." ) )
+					{
+						float maxJobTextWidth = 0;
+						float currentJobTextWidth = 0;
+						float checkboxWidth = 0;
+						float leftMarginPos = 0;
+						var classJobDict = DistanceWidgetClassJobConfig.ClassJobDict;
+						foreach( var entry in classJobDict )
+						{
+							if( !entry.Value.Abbreviation.IsNullOrEmpty() )
+							{
+								maxJobTextWidth = Math.Max( maxJobTextWidth, ImGui.CalcTextSize( entry.Value.Abbreviation ).X );
+							}
+						}
+						foreach( var sortCategory in Enum.GetValues<DistanceWidgetClassJobConfig.ClassJobData.ClassJobSortCategory>() )
+						{
+							int displayedJobsCount = 0;
+							int rowLength = sortCategory < DistanceWidgetClassJobConfig.ClassJobData.ClassJobSortCategory.Class ? 6 : 4;
+							for( uint j = 1; j < config.ClassJobs.ApplicableClassJobsArray.Length; ++j )
+							{
+								if( classJobDict.ContainsKey( j ) && classJobDict[j].SortCategory == sortCategory && !classJobDict[j].Abbreviation.IsNullOrEmpty() )
+								{
+									int colNum = (int) displayedJobsCount % rowLength;
+									currentJobTextWidth = ImGui.CalcTextSize( classJobDict[j].Abbreviation ).X;
+									if( displayedJobsCount != 0 && colNum != 0 ) ImGui.SameLine( leftMarginPos + ( checkboxWidth + maxJobTextWidth + ImGui.GetStyle().FramePadding.X + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.GetStyle().ItemSpacing.X ) * colNum );
+									ImGui.Checkbox( $"{classJobDict[j].Abbreviation}###Arc{i}Classjob{j}Checkbox", ref config.ClassJobs.ApplicableClassJobsArray[j] );
+
+									//	Big kludges, but I'm stupid and don't know a better way.
+									if( displayedJobsCount == 0 )
+									{
+										checkboxWidth = ImGui.GetItemRectSize().Y;
+										leftMarginPos = ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X;
+									}
+
+									++displayedJobsCount;
+								}
+							}
+						}
+						ImGui.TreePop();
+					}
+
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Appearance", "Appearance" ) + $"###Distance Arc Appearance Header {i}." ) )
+					{
+						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc Pip", "Show Pip." ) + $"###Arc Show Pip {i}.", ref config.mShowPip );
+						ImGui.Text( Loc.Localize( "Config Option: Arc Length", "Length of the arc:" ) );
+						if( ImGui.RadioButton( Loc.Localize( "Unit String: Degrees Short Lower", "deg" ), !config.ArcLengthIsYalms ) ) config.ArcLengthIsYalms = false;
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Unit String: Yalms Lower", "yalms" ), config.ArcLengthIsYalms ) ) config.ArcLengthIsYalms = true;
+						ImGui.SliderFloat( $"###ArcLengthSlider {i}", ref config.mArcLength, 0, 30 );
+						ImGui.TreePop();
+					}
+
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Colors", "Colors" ) + $"###Distance Arc Colors Header {i}." ) )
+					{
+						ImGui.Checkbox( Loc.Localize( "Config Option: Distance Arc Use Distance-based Colors", "Use distance-based arc colors." ) + $"###Distance Arc Use distance-based colors {i}.", ref config.mUseDistanceBasedColor );
+						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Arc Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" colors if past that distance, otherwise the \"Near\" colors if past that distance, otherwise uses the base color specified above." ) );
+						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color", "Distance text color" ) + $"###ArcColorPicker {i}", ref config.mColor, ImGuiColorEditFlags.NoInputs );
+						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color", "Distance text glow color" ) + $"###ArcEdgeColorPicker {i}", ref config.mEdgeColor, ImGuiColorEditFlags.NoInputs );
+						if( config.UseDistanceBasedColor )
+						{
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside near)" ) + $"###ArcColorPicker Inner Near {i}", ref config.mInnerNearThresholdColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Far", "Arc glow color (inside near)" ) + $"###ArcEdgeColorPicker Inner Near {i}", ref config.mInnerNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside far)" ) + $"###ArcColorPicker Inner Far {i}", ref config.mInnerFarThresholdColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Far", "Arc glow color (inside far)" ) + $"###ArcEdgeColorPicker Inner Far {i}", ref config.mInnerFarThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Near Range", "Distance \"inside near\" range (y):" ) );
+							ImGui.DragFloat( $"###ArcDistanceNearInsideRangeSlider {i}", ref config.mInnerNearThresholdDistance_Yalms, 0.5f, 0f, 30f );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Far Range", "Distance \"inside far\" range (y):" ) );
+							ImGui.DragFloat( $"###ArcDistanceFarInsideRangeSlider {i}", ref config.mInnerFarThresholdDistance_Yalms, 0.5f, 0f, 30f );
+
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Outside Far", "Arc color (outside near)" ) + $"###ArcColorPicker Outer Near {i}", ref config.mOuterNearThresholdColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Outside Far", "Arc glow color (outside near)" ) + $"###ArcEdgeColorPicker Outer Near {i}", ref config.mOuterNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Outside Far", "Arc color (outside far)" ) + $"###ArcColorPicker Outer Far {i}", ref config.mOuterFarThresholdColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Outside Far", "Arc glow color (outside far)" ) + $"###ArcEdgeColorPicker Outer Far {i}", ref config.mOuterFarThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Near Range", "Distance \"outside near\" range (y):" ) );
+							ImGui.DragFloat( $"###ArcDistanceNearOutsideRangeSlider {i}", ref config.mOuterNearThresholdDistance_Yalms, 0.5f, 0f, 30f );
+							ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Far Range", "Distance \"outside far\" range (y):" ) );
+							ImGui.DragFloat( $"###ArcDistanceFarOutsideRangeSlider {i}", ref config.mOuterFarThresholdDistance_Yalms, 0.5f, 0f, 30f );
+						}
+						ImGui.TreePop();
+					}
+
+					if( ImGui.Button( Loc.Localize( "Button: Delete Arc", "Delete Arc" ) + $"###Delete Arc Button {i}." ) )
+					{
+						mArcIndexWantToDelete = i;
+					}
+					if( mArcIndexWantToDelete == i )
+					{
+						ImGui.PushStyleColor( ImGuiCol.Text, 0xee4444ff );
+						ImGui.Text( Loc.Localize( "Settings Window Text: Confirm Delete Label", "Confirm delete: " ) );
+						ImGui.SameLine();
+						if( ImGui.Button( Loc.Localize( "Button: Yes", "Yes" ) + $"###Delete Arc Yes Button {i}" ) )
+						{
+							arcIndexToDelete = mArcIndexWantToDelete;
+						}
+						ImGui.PopStyleColor();
+						ImGui.SameLine();
+						if( ImGui.Button( Loc.Localize( "Button: No", "No" ) + $"###Delete Arc No Button {i}" ) )
+						{
+							mArcIndexWantToDelete = -1;
+						}
+					}
+				}
+			}
+			if( arcIndexToDelete > -1 && arcIndexToDelete < mConfiguration.DistanceArcConfigs.Count )
+			{
+				mConfiguration.DistanceArcConfigs.RemoveAt( arcIndexToDelete );
+				mArcIndexWantToDelete = -1;
+			}
 		}
 
 		public static bool IsUsableAggroDistanceFormatString( string str )
@@ -703,22 +920,23 @@ namespace Distance
 			return arcPoints;
 		}
 
-		protected void DrawAggroDistanceArc()
+		protected void DrawArc( Vector3 targetPosition, Vector3 playerPosition, float radius_Yalms, float length, bool lengthIsYalms, bool drawPip, Vector4 arcColor, Vector4 arcEdgeColor )
 		{
-			var distanceInfo = mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType );
-			float lineLength = distanceInfo.DistanceFromTarget_Yalms;
-			float distance_Norm = ( distanceInfo.AggroRange_Yalms + distanceInfo.TargetRadius_Yalms ) / lineLength;
+			double arcLength_Deg = lengthIsYalms ? length / radius_Yalms * 180f / Math.PI : length;
+
+			float lineLength_Yalms = Vector2.Distance( new( targetPosition.X, targetPosition.Z ), new( playerPosition.X, playerPosition.Z ) );
+			float distance_Norm = lineLength_Yalms < 0.5f ? 0f : radius_Yalms / lineLength_Yalms;
 			if( distance_Norm > 0 )
 			{
-				//	Get the point at the aggro distance on the line between the player and the target.
+				//	Get the point at the arc distance on the line between the player and the target.
 				Vector3 worldCoords = new()
 				{
-					X = distance_Norm * ( distanceInfo.PlayerPosition.X - distanceInfo.TargetPosition.X ) + distanceInfo.TargetPosition.X,
-					Y = distance_Norm * ( distanceInfo.PlayerPosition.Y - distanceInfo.TargetPosition.Y ) + distanceInfo.TargetPosition.Y,
-					Z = distance_Norm * ( distanceInfo.PlayerPosition.Z - distanceInfo.TargetPosition.Z ) + distanceInfo.TargetPosition.Z
+					X = distance_Norm * ( playerPosition.X - targetPosition.X ) + targetPosition.X,
+					Y = distance_Norm * ( playerPosition.Y - targetPosition.Y ) + targetPosition.Y,
+					Z = distance_Norm * ( playerPosition.Z - targetPosition.Z ) + targetPosition.Z
 				};
 
-				var arcPoints = GetArcPoints( distanceInfo.TargetPosition, worldCoords, mConfiguration.AggroArcLength_Deg, worldCoords.Y );
+				var arcPoints = GetArcPoints( targetPosition, worldCoords, arcLength_Deg, worldCoords.Y );
 				var arcScreenPoints = new Vector2[arcPoints.Length];
 
 				bool isScreenPosValid = true;
@@ -728,32 +946,131 @@ namespace Distance
 					isScreenPosValid &= mGameGui.WorldToScreen( arcPoints[i], out arcScreenPoints[i] );
 				}
 
-				//***** TODO: Maybe grab the alpha off of the focus target addon when aggro node is attached to focus target bar to make things make sense.
-				UInt32 color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextColor );
-				UInt32 edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceTextEdgeColor );
-				if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
-				{
-					color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceWarningTextColor );
-					edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceWarningTextEdgeColor );
-				}
-				else if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroCautionDistance_Yalms )
-				{
-					color = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceCautionTextColor );
-					edgeColor = ImGuiUtils.ColorVecToUInt( mConfiguration.AggroDistanceCautionTextEdgeColor );
-				}
+				UInt32 color = ImGuiUtils.ColorVecToUInt( arcColor );
+				UInt32 edgeColor = ImGuiUtils.ColorVecToUInt( arcEdgeColor);
 
-				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColor, 36, 5 );
+				if( drawPip ) ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, edgeColor, 36, 5 );
 				for( int i = 1; i < arcScreenPoints.Length; ++i )
 				{
-					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i-1], arcScreenPoints[i], edgeColor, 5 );
+					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i - 1], arcScreenPoints[i], edgeColor, 5 );
 				}
 
-				ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, color, 36, 3 );
+				if( drawPip ) ImGui.GetWindowDrawList().AddCircle( screenPos, 5.0f, color, 36, 3 );
 				for( int i = 1; i < arcScreenPoints.Length; ++i )
 				{
-					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i-1], arcScreenPoints[i], color, 3 );
+					ImGui.GetWindowDrawList().AddLine( arcScreenPoints[i - 1], arcScreenPoints[i], color, 3 );
 				}
 			}
+		}
+
+		protected void DrawAggroDistanceArc()
+		{
+			var distanceInfo = mPlugin.GetDistanceInfo( mConfiguration.AggroDistanceApplicableTargetType );
+			if( !distanceInfo.IsValid ) return;
+
+			//***** TODO: Maybe grab the alpha off of the focus target addon when aggro node is attached to focus target bar to make things make sense.
+			Vector4 color = mConfiguration.AggroDistanceTextColor;
+			Vector4 edgeColor = mConfiguration.AggroDistanceTextEdgeColor;
+			if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroWarningDistance_Yalms )
+			{
+				color = mConfiguration.AggroDistanceWarningTextColor;
+				edgeColor = mConfiguration.AggroDistanceWarningTextEdgeColor;
+			}
+			else if( distanceInfo.DistanceFromTargetAggro_Yalms < mConfiguration.AggroCautionDistance_Yalms )
+			{
+				color = mConfiguration.AggroDistanceCautionTextColor;
+				edgeColor = mConfiguration.AggroDistanceCautionTextEdgeColor;
+			}
+
+			DrawArc(	distanceInfo.TargetPosition,
+						distanceInfo.PlayerPosition,
+						distanceInfo.AggroRange_Yalms + distanceInfo.TargetRadius_Yalms,
+						mConfiguration.AggroArcLength_Deg,
+						false,
+						true,
+						color,
+						edgeColor );
+		}
+
+		protected void DrawCustomArcs()
+		{
+			if( Service.ClientState.IsPvP ) return;
+
+			foreach( var config in mConfiguration.DistanceArcConfigs )
+			{
+				if( !config.Enabled ) continue;
+
+				if( Service.ClientState.LocalPlayer == null ||
+					Service.ClientState.LocalPlayer.ClassJob.Id == 0 ||
+					Service.ClientState.LocalPlayer.ClassJob.Id >= config.ClassJobs.mApplicableClassJobsArray.Length ||
+					config.ClassJobs.mApplicableClassJobsArray[Service.ClientState.LocalPlayer.ClassJob.Id] == false ) continue;
+				
+				if( config.ApplicableTargetCategory == TargetCategory.Targets ) DrawCustomArc_Targets( config );
+				else if( config.ApplicableTargetCategory == TargetCategory.Self ) DrawCustomArc_Self( config );
+				else if( config.ApplicableTargetCategory == TargetCategory.AllBNpc ) DrawCustomArc_AllBNpc( config );
+			}
+		}
+
+		protected void DrawCustomArc_Targets( DistanceArcConfig config )
+		{
+			var distanceInfo = mPlugin.GetDistanceInfo( config.ApplicableTargetType );
+			if( !distanceInfo.IsValid ) return;
+			if( !config.Filters.ShowDistanceOnObjectKind( distanceInfo.TargetKind ) ) return;
+
+			float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? distanceInfo.TargetRadius_Yalms : 0 );
+			float distanceFromArc_Yalms = distanceInfo.DistanceFromTarget_Yalms - trueArcRadius_Yalms;
+
+			Vector4 color = config.Color;
+			Vector4 edgeColor = config.EdgeColor;
+
+			if( config.UseDistanceBasedColor )
+			{
+				if( distanceFromArc_Yalms < 0 )
+				{
+					if( distanceFromArc_Yalms <= -config.mInnerFarThresholdDistance_Yalms )
+					{
+						color = config.mInnerFarThresholdColor;
+						edgeColor = config.mInnerFarThresholdEdgeColor;
+					}
+					else if( distanceFromArc_Yalms <= -config.mInnerNearThresholdDistance_Yalms )
+					{
+						color = config.mInnerNearThresholdColor;
+						edgeColor = config.mInnerNearThresholdEdgeColor;
+					}
+				}
+				else
+				{
+					if( distanceFromArc_Yalms >= config.mOuterFarThresholdDistance_Yalms )
+					{
+						color = config.mOuterFarThresholdColor;
+						edgeColor = config.mOuterFarThresholdEdgeColor;
+					}
+					else if( distanceFromArc_Yalms >= config.mOuterNearThresholdDistance_Yalms )
+					{
+						color = config.mOuterNearThresholdColor;
+						edgeColor = config.mOuterNearThresholdEdgeColor;
+					}
+				}
+			}
+
+			DrawArc( distanceInfo.TargetPosition,
+						distanceInfo.PlayerPosition,
+						trueArcRadius_Yalms,
+						config.ArcLength,
+						config.ArcLengthIsYalms,
+						config.ShowPip,
+						color,
+						edgeColor );
+		}
+
+		protected void DrawCustomArc_Self( DistanceArcConfig config )
+		{
+			//***** TODO *****
+		}
+
+		protected void DrawCustomArc_AllBNpc( DistanceArcConfig config )
+		{
+			//***** TODO *****
 		}
 
 		protected void DrawOverlay()
@@ -769,6 +1086,8 @@ namespace Distance
 				{
 					DrawAggroDistanceArc();
 				}
+				//***** TODO: Need to have the equivalent of a ShouldDrawDistanceInfo() for the arcs. *****
+				DrawCustomArcs();
 				//ImGuiUtils.DrawTextWithShadow( "Test Text", new( 1 ), new( 0, 0, 0, 1 ), 1, 1f / ImGuiHelpers.GlobalScale );
 			}
 
@@ -1125,6 +1444,7 @@ namespace Distance
 		}
 
 		protected int mWidgetIndexWantToDelete = -1;
+		protected int mArcIndexWantToDelete = -1;
 
 		//	Do this to control the order of dropdown items.
 		protected static readonly TargetType[] TargetDropdownMenuItems =

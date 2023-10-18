@@ -173,6 +173,7 @@ namespace Distance
 
 		public NameplateConfig NameplateDistancesConfig { get; protected set; } = new();
 		public List<DistanceWidgetConfig> DistanceWidgetConfigs { get; protected set; } = new();
+		public List<DistanceArcConfig> DistanceArcConfigs { get; protected set; } = new();
 
 		[NonSerialized]
 		protected DalamudPluginInterface mPluginInterface;
