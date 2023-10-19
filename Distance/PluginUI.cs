@@ -19,11 +19,13 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using ImGuiNET;
 
 using Lumina.Excel.GeneratedSheets;
 using Dalamud.Utility;
+using Dalamud.Game.ClientState.Conditions;
 
 namespace Distance
 {
@@ -588,6 +590,7 @@ namespace Distance
 							ImGui.Text( Loc.Localize( "Config Option: Arc Self Azimuth", "Arc Centerpoint Azimuth:" ) );
 							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Self Azimuth", "Direction relative to your character to display the arc.  0 is in front, 90 is to the right, 180 is behind, 270 is to the left." ) );
 							ImGui.DragInt( $"###ArcSelfAzimuthSlider {i}", ref config.mSelfTargetedArcAzimuth_Deg, 1f, 0, 359, "%d", ImGuiSliderFlags.AlwaysClamp );
+							ImGui.Checkbox( Loc.Localize( "Config Option: Camera-relative Self Arc", "Camera Relative" ) + $"###ArcSelfCameraRelativeCheckbox {i}", ref config.mSelfTargetedArcCameraRelative );
 						}
 						else if( config.ApplicableTargetCategory == TargetCategory.AllBNpc )
 						{
@@ -607,7 +610,7 @@ namespace Distance
 						ImGui.TreePop();
 					}
 
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Filters", "Object Type Filters" ) + $"###Distance Arc Filters Header {i}." ) )
+					if( config.ApplicableTargetCategory != TargetCategory.Self && ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Filters", "Object Type Filters" ) + $"###Distance Arc Filters Header {i}." ) )
 					{
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on Players", "Show the arc on players." ) + $"###Show arc on players {i}.", ref filters.mShowDistanceOnPlayers );
 						ImGui.Checkbox( Loc.Localize( "Config Option: Show Arc on BattleNpc", "Show the arc on combatant NPCs." ) + $"###Show arc on BattleNpc {i}.", ref filters.mShowDistanceOnBattleNpc );
@@ -675,11 +678,14 @@ namespace Distance
 
 					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Colors", "Colors" ) + $"###Distance Arc Colors Header {i}." ) )
 					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Distance Arc Use Distance-based Colors", "Use distance-based arc colors." ) + $"###Distance Arc Use distance-based colors {i}.", ref config.mUseDistanceBasedColor );
+						if( config.ApplicableTargetCategory != TargetCategory.Self )
+						{
+							ImGui.Checkbox( Loc.Localize( "Config Option: Distance Arc Use Distance-based Colors", "Use distance-based arc colors." ) + $"###Distance Arc Use distance-based colors {i}.", ref config.mUseDistanceBasedColor );
+						}
 						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Arc Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" colors if past that distance, otherwise the \"Near\" colors if past that distance, otherwise uses the base color specified above." ) );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color", "Distance text color" ) + $"###ArcColorPicker {i}", ref config.mColor, ImGuiColorEditFlags.NoInputs );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color", "Distance text glow color" ) + $"###ArcEdgeColorPicker {i}", ref config.mEdgeColor, ImGuiColorEditFlags.NoInputs );
-						if( config.UseDistanceBasedColor )
+						if( config.UseDistanceBasedColor && config.ApplicableTargetCategory != TargetCategory.Self )
 						{
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside near)" ) + $"###ArcColorPicker Inner Near {i}", ref config.mInnerNearThresholdColor, ImGuiColorEditFlags.NoInputs );
 							ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Far", "Arc glow color (inside near)" ) + $"###ArcEdgeColorPicker Inner Near {i}", ref config.mInnerNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
@@ -741,7 +747,7 @@ namespace Distance
 			return true;
 		}
 
-		protected void DrawDebugWindow()
+		protected unsafe void DrawDebugWindow()
 		{
 			if( !DebugWindowVisible )
 			{
@@ -995,15 +1001,15 @@ namespace Distance
 		protected void DrawCustomArcs()
 		{
 			if( Service.ClientState.IsPvP ) return;
+			if( Service.ClientState.LocalPlayer == null ) return;
 
 			foreach( var config in mConfiguration.DistanceArcConfigs )
 			{
 				if( !config.Enabled ) continue;
-
-				if( Service.ClientState.LocalPlayer == null ||
-					Service.ClientState.LocalPlayer.ClassJob.Id == 0 ||
-					Service.ClientState.LocalPlayer.ClassJob.Id >= config.ClassJobs.mApplicableClassJobsArray.Length ||
-					config.ClassJobs.mApplicableClassJobsArray[Service.ClientState.LocalPlayer.ClassJob.Id] == false ) continue;
+				if( config.HideInCombat && Service.Condition[ConditionFlag.InCombat] || config.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) continue;
+				if( config.HideInInstance && Service.Condition[ConditionFlag.BoundByDuty] || config.HideOutOfInstance && !Service.Condition[ConditionFlag.BoundByDuty] ) continue;
+				if( !config.ClassJobs.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 ) ) continue;
+				//	Note that we cannot evaluate the object type filters here, because they may behave differently by target category.
 				
 				if( config.ApplicableTargetCategory == TargetCategory.Targets ) DrawCustomArc_Targets( config );
 				else if( config.ApplicableTargetCategory == TargetCategory.Self ) DrawCustomArc_Self( config );
@@ -1015,7 +1021,7 @@ namespace Distance
 		{
 			var distanceInfo = mPlugin.GetDistanceInfo( config.ApplicableTargetType );
 			if( !distanceInfo.IsValid ) return;
-			if( !config.Filters.ShowDistanceOnObjectKind( distanceInfo.TargetKind ) ) return;
+			if( !config.Filters.ShowDistanceForObjectKind( distanceInfo.TargetKind ) ) return;
 
 			float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? distanceInfo.TargetRadius_Yalms : 0 );
 			float distanceFromArc_Yalms = distanceInfo.DistanceFromTarget_Yalms - trueArcRadius_Yalms;
@@ -1053,7 +1059,7 @@ namespace Distance
 				}
 			}
 
-			DrawArc( distanceInfo.TargetPosition,
+			DrawArc(	distanceInfo.TargetPosition,
 						distanceInfo.PlayerPosition,
 						trueArcRadius_Yalms,
 						config.ArcLength,
@@ -1063,9 +1069,57 @@ namespace Distance
 						edgeColor );
 		}
 
-		protected void DrawCustomArc_Self( DistanceArcConfig config )
+		protected unsafe void DrawCustomArc_Self( DistanceArcConfig config )
 		{
-			//***** TODO *****
+			double playerRelativeArcAngle_Rad = config.SelfTargetedArcAzimuth_Deg * Math.PI / 180.0;
+			double absoluteArcAngle_Rad = -Service.ClientState.LocalPlayer.Rotation - Math.PI / 2.0 + playerRelativeArcAngle_Rad;
+
+			bool cameraValid = CameraManager.Instance() != null && CameraManager.Instance()->CurrentCamera != null;
+			if( config.SelfTargetedArcCameraRelative && cameraValid )
+			{
+				Vector3 cameraDirection = CameraManager.Instance()->CurrentCamera->LookAtVector - CameraManager.Instance()->CurrentCamera->Object.Position;
+				double cameraAngle_Rad = -Math.Atan2( cameraDirection.Z, cameraDirection.X ) + Math.PI / 2.0;
+				double cameraOffset_Rad = Service.ClientState.LocalPlayer.Rotation - cameraAngle_Rad;
+				absoluteArcAngle_Rad += cameraOffset_Rad;
+			}
+
+			Wrap( ref absoluteArcAngle_Rad, -Math.PI, Math.PI );
+
+			float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? 0.5f : 0f );
+			Vector3 arcMidpoint = new Vector3
+			{
+				X = (float)Math.Cos( absoluteArcAngle_Rad ) * trueArcRadius_Yalms,
+				Y = 0f,
+				Z = (float)Math.Sin( absoluteArcAngle_Rad ) * trueArcRadius_Yalms,
+			};
+			arcMidpoint += Service.ClientState.LocalPlayer.Position;
+
+			DrawArc(	Service.ClientState.LocalPlayer.Position,
+						arcMidpoint,
+						trueArcRadius_Yalms,
+						config.ArcLength,
+						config.ArcLengthIsYalms,
+						config.ShowPip,
+						config.Color,
+						config.EdgeColor );
+		}
+
+		protected void Wrap( ref double value, double min, double max )
+		{
+			if( min == max ) return;
+			if( max < min )
+			{
+				var temp = min;
+				min = max;
+				max = temp;
+			}
+			value = value % ( max - min ) + min;
+		}
+
+		protected double Wrap( double value, double min, double max )
+		{
+			Wrap( ref value, min, max );
+			return value;
 		}
 
 		protected void DrawCustomArc_AllBNpc( DistanceArcConfig config )

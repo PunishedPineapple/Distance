@@ -171,7 +171,7 @@ namespace Distance
 
 			if( distanceInfo.ObjectID == mClientState?.LocalPlayer.ObjectId ) return false;
 
-			bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnObjectKind( distanceInfo.TargetKind );
+			bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForObjectKind( distanceInfo.TargetKind );
 
 			if( mConfiguration.NameplateDistancesConfig.ShowAll )
 			{

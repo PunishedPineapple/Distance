@@ -14,6 +14,13 @@ namespace Distance;
 
 public class DistanceWidgetClassJobConfig
 {
+	public bool ShowDistanceForClassJob( UInt32 classJob )
+	{
+		return	classJob > 0 &&
+				classJob < mApplicableClassJobsArray.Length &&
+				mApplicableClassJobsArray[classJob] == true;
+	}
+
 	internal bool[] ApplicableClassJobsArray => mApplicableClassJobsArray;
 	
 	internal static SortedDictionary<UInt32, ClassJobData> ClassJobDict
@@ -72,7 +79,7 @@ public class DistanceWidgetClassJobConfig
 			catch( Exception e )
 			{
 				for( int i = 0; i < mApplicableClassJobsArray.Length; ++i ) newArray[i] = ClassJobDict[(uint)i].DefaultSelected;
-				Service.PluginLog.Warning( $"Exception while validating ClassJob filters; defaulting to all ClassJobs:\r\n{e}" );
+				Service.PluginLog.Warning( $"Exception while validating ClassJob filters; using defaults for all ClassJobs:\r\n{e}" );
 			}
 			mApplicableClassJobsArray = newArray;
 		}

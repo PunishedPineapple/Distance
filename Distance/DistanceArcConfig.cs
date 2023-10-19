@@ -113,6 +113,13 @@ namespace Distance
 			set { mSelfTargetedArcAzimuth_Deg = value; }
 		}
 
+		public bool mSelfTargetedArcCameraRelative = false;
+		public bool SelfTargetedArcCameraRelative
+		{
+			get { return mSelfTargetedArcCameraRelative; }
+			set { mSelfTargetedArcCameraRelative = value; }
+		}
+
 		public Vector4 mColor = new( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
 		public Vector4 Color
 		{

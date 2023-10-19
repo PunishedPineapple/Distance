@@ -2,7 +2,7 @@
 {
 	public class DistanceWidgetFiltersConfig
 	{
-		public bool ShowDistanceOnObjectKind( Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+		public bool ShowDistanceForObjectKind( Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
 		{
 			return objectKind switch
 			{
