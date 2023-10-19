@@ -13,6 +13,63 @@ namespace Distance
 {
 	public class DistanceArcConfig
 	{
+		public bool WithinDisplayRangeOfArc( float distanceFromArc_Yalms )
+		{
+			return	distanceFromArc_Yalms > -( FadeoutThresholdInner_Yalms + FadeoutIntervalInner_Yalms ) &&
+					distanceFromArc_Yalms < FadeoutThresholdOuter_Yalms + FadeoutIntervalOuter_Yalms;
+		}
+
+		public (Vector4,Vector4) GetColors( float distanceFromArc_Yalms )
+		{
+			Vector4 color = Color;
+			Vector4 edgeColor = EdgeColor;
+
+			if( UseDistanceBasedColor )
+			{
+				if( distanceFromArc_Yalms < 0 )
+				{
+					if( distanceFromArc_Yalms <= -InnerFarThresholdDistance_Yalms )
+					{
+						color = InnerFarThresholdColor;
+						edgeColor = InnerFarThresholdEdgeColor;
+					}
+					else if( distanceFromArc_Yalms <= -InnerNearThresholdDistance_Yalms )
+					{
+						color = InnerNearThresholdColor;
+						edgeColor = InnerNearThresholdEdgeColor;
+					}
+				}
+				else
+				{
+					if( distanceFromArc_Yalms >= OuterFarThresholdDistance_Yalms )
+					{
+						color = OuterFarThresholdColor;
+						edgeColor = OuterFarThresholdEdgeColor;
+					}
+					else if( distanceFromArc_Yalms >= OuterNearThresholdDistance_Yalms )
+					{
+						color = mOuterNearThresholdColor;
+						edgeColor = mOuterNearThresholdEdgeColor;
+					}
+				}
+			}
+
+			float fadeAlphaGain = 1f;
+			if( distanceFromArc_Yalms < 0 )
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( -FadeoutThresholdInner_Yalms - FadeoutIntervalInner_Yalms, 0f, -FadeoutThresholdInner_Yalms, 1f, distanceFromArc_Yalms );
+			}
+			else
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( FadeoutThresholdOuter_Yalms, 1f, FadeoutThresholdOuter_Yalms + FadeoutIntervalOuter_Yalms, 0f, distanceFromArc_Yalms );
+			}
+			
+			color.W *= fadeAlphaGain; ;
+			edgeColor.W *= fadeAlphaGain;
+
+			return ( color, edgeColor );
+		}
+
 		public string mArcName = "";
 		public string ArcName
 		{
@@ -83,6 +140,34 @@ namespace Distance
 		{
 			get { return mArcRadius_Yalms; }
 			set { mArcRadius_Yalms = value; }
+		}
+
+		public float mFadeoutThresholdInner_Yalms = 5f;
+		public float FadeoutThresholdInner_Yalms
+		{
+			get { return mFadeoutThresholdInner_Yalms; }
+			set { mFadeoutThresholdInner_Yalms = value; }
+		}
+
+		public float mFadeoutIntervalInner_Yalms = 3f;
+		public float FadeoutIntervalInner_Yalms
+		{
+			get { return mFadeoutIntervalInner_Yalms; }
+			set { mFadeoutIntervalInner_Yalms = value; }
+		}
+
+		public float mFadeoutThresholdOuter_Yalms = 15f;
+		public float FadeoutThresholdOuter_Yalms
+		{
+			get { return mFadeoutThresholdOuter_Yalms; }
+			set { mFadeoutThresholdOuter_Yalms = value; }
+		}
+
+		public float mFadeoutIntervalOuter_Yalms = 5f;
+		public float FadeoutIntervalOuter_Yalms
+		{
+			get { return mFadeoutIntervalOuter_Yalms; }
+			set { mFadeoutIntervalOuter_Yalms = value; }
 		}
 
 		public bool mShowPip = true;

@@ -26,6 +26,7 @@ using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using Dalamud.Utility;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Enums;
 
 namespace Distance
 {
@@ -1026,38 +1027,9 @@ namespace Distance
 			float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? distanceInfo.TargetRadius_Yalms : 0 );
 			float distanceFromArc_Yalms = distanceInfo.DistanceFromTarget_Yalms - trueArcRadius_Yalms;
 
-			Vector4 color = config.Color;
-			Vector4 edgeColor = config.EdgeColor;
+			if( !config.WithinDisplayRangeOfArc( distanceFromArc_Yalms ) ) return;
 
-			if( config.UseDistanceBasedColor )
-			{
-				if( distanceFromArc_Yalms < 0 )
-				{
-					if( distanceFromArc_Yalms <= -config.mInnerFarThresholdDistance_Yalms )
-					{
-						color = config.mInnerFarThresholdColor;
-						edgeColor = config.mInnerFarThresholdEdgeColor;
-					}
-					else if( distanceFromArc_Yalms <= -config.mInnerNearThresholdDistance_Yalms )
-					{
-						color = config.mInnerNearThresholdColor;
-						edgeColor = config.mInnerNearThresholdEdgeColor;
-					}
-				}
-				else
-				{
-					if( distanceFromArc_Yalms >= config.mOuterFarThresholdDistance_Yalms )
-					{
-						color = config.mOuterFarThresholdColor;
-						edgeColor = config.mOuterFarThresholdEdgeColor;
-					}
-					else if( distanceFromArc_Yalms >= config.mOuterNearThresholdDistance_Yalms )
-					{
-						color = config.mOuterNearThresholdColor;
-						edgeColor = config.mOuterNearThresholdEdgeColor;
-					}
-				}
-			}
+			var colors = config.GetColors( distanceFromArc_Yalms );
 
 			DrawArc(	distanceInfo.TargetPosition,
 						distanceInfo.PlayerPosition,
@@ -1065,8 +1037,8 @@ namespace Distance
 						config.ArcLength,
 						config.ArcLengthIsYalms,
 						config.ShowPip,
-						color,
-						edgeColor );
+						colors.Item1,
+						colors.Item2 );
 		}
 
 		protected unsafe void DrawCustomArc_Self( DistanceArcConfig config )
@@ -1083,7 +1055,7 @@ namespace Distance
 				absoluteArcAngle_Rad += cameraOffset_Rad;
 			}
 
-			Wrap( ref absoluteArcAngle_Rad, -Math.PI, Math.PI );
+			MathUtils.Wrap( ref absoluteArcAngle_Rad, -Math.PI, Math.PI );
 
 			float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? 0.5f : 0f );
 			Vector3 arcMidpoint = new Vector3
@@ -1104,27 +1076,36 @@ namespace Distance
 						config.EdgeColor );
 		}
 
-		protected void Wrap( ref double value, double min, double max )
-		{
-			if( min == max ) return;
-			if( max < min )
-			{
-				var temp = min;
-				min = max;
-				max = temp;
-			}
-			value = value % ( max - min ) + min;
-		}
-
-		protected double Wrap( double value, double min, double max )
-		{
-			Wrap( ref value, min, max );
-			return value;
-		}
-
 		protected void DrawCustomArc_AllBNpc( DistanceArcConfig config )
 		{
-			//***** TODO *****
+			var relevantBNpcs = Service.ObjectTable.Where( x =>
+										x != null &&
+										x.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
+										x.SubKind == (byte)BattleNpcSubKind.Enemy &&
+										!x.IsDead &&
+										x.IsTargetable &&
+										( x.Position - Service.ClientState.LocalPlayer.Position ).Length_XZ() < 50f
+										);
+
+			foreach( var bnpc in relevantBNpcs )
+			{
+				float bnpcDistance_Yalms = ( bnpc.Position - Service.ClientState.LocalPlayer.Position ).Length_XZ();
+				float trueArcRadius_Yalms = config.ArcRadius_Yalms + ( config.DistanceIsToRing ? bnpc.HitboxRadius : 0 );
+				float distanceFromArc_Yalms = bnpcDistance_Yalms - trueArcRadius_Yalms;
+
+				if( !config.WithinDisplayRangeOfArc( distanceFromArc_Yalms ) ) continue;
+
+				var colors = config.GetColors( distanceFromArc_Yalms );
+
+				DrawArc( bnpc.Position,
+						Service.ClientState.LocalPlayer.Position,
+						trueArcRadius_Yalms,
+						config.ArcLength,
+						config.ArcLengthIsYalms,
+						config.ShowPip,
+						colors.Item1,
+						colors.Item2 );
+			}
 		}
 
 		protected void DrawOverlay()
@@ -1140,7 +1121,7 @@ namespace Distance
 				{
 					DrawAggroDistanceArc();
 				}
-				//***** TODO: Need to have the equivalent of a ShouldDrawDistanceInfo() for the arcs. *****
+
 				DrawCustomArcs();
 				//ImGuiUtils.DrawTextWithShadow( "Test Text", new( 1 ), new( 0, 0, 0, 1 ), 1, 1f / ImGuiHelpers.GlobalScale );
 			}
