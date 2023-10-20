@@ -46,7 +46,7 @@ namespace Distance
 				mNameplateDrawHook?.Disable();
 				mNameplateDrawHook?.Dispose();
 				mNameplateDrawHook = null;
-				PluginLog.LogError( $"Error in \"NameplateHandler.Init()\" while searching for required function signatures; this probably means that the plugin needs to be updated due to changes in Final Fantasy XIV.\r\n{e}" );
+				Service.PluginLog.Error( $"Error in \"NameplateHandler.Init()\" while searching for required function signatures; this probably means that the plugin needs to be updated due to changes in Final Fantasy XIV.\r\n{e}" );
 				return;
 			}
 		}
@@ -74,7 +74,7 @@ namespace Distance
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogError( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
+					Service.PluginLog.Error( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
 				}
 			}
 		}
@@ -93,7 +93,7 @@ namespace Distance
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogError( $"Unknown error while trying to disable nameplate distances:\r\n{e}" );
+					Service.PluginLog.Error( $"Unknown error while trying to disable nameplate distances:\r\n{e}" );
 				}
 			}
 		}
@@ -224,7 +224,7 @@ namespace Distance
 			{
 				if( mpNameplateAddon != pThis )
 				{
-					PluginLog.LogDebug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
+					Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
 					//DestroyNameplateDistanceNodes();	//***** TODO: I'm assuming that the game cleans up the whole node tree including our stuff automatically if the UI gets reinitialized?
 					for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
 					mpNameplateAddon = pThis;
@@ -236,7 +236,7 @@ namespace Distance
 			}
 			catch( Exception e )
 			{
-				PluginLog.LogError( $"Unknown error in nameplate draw hook.  Disabling nameplate distances.\r\n{e}" );
+				Service.PluginLog.Error( $"Unknown error in nameplate draw hook.  Disabling nameplate distances.\r\n{e}" );
 				mConfiguration.NameplateDistancesConfig.ShowNameplateDistances = false;
 				DisableNameplateDistances();
 			}
@@ -489,7 +489,7 @@ namespace Distance
 				var nameplateObject = GetNameplateObject( i );
 				if( nameplateObject == null )
 				{
-					PluginLog.LogWarning( $"Unable to obtain nameplate object for index {i}" );
+					Service.PluginLog.Warning( $"Unable to obtain nameplate object for index {i}" );
 					continue;
 				}
 				var pNameplateResNode = nameplateObject.Value.ResNode;

@@ -46,7 +46,7 @@ namespace Distance
 				mKnownAggroEntities.Clear();
 				mKnownAggroEntities.InsertRange( 0, file.GetEntries() );
 				mLoadedInfoFile = file;
-				PluginLog.LogInformation( $"Loaded BNpc aggro range data version {GetCurrentFileVersionAsString()} ({GetCurrentFileVersion()})" );
+				Service.PluginLog.Information( $"Loaded BNpc aggro range data version {GetCurrentFileVersionAsString()} ({GetCurrentFileVersion()})" );
 
 				//	Verify entries against the english name in the sheet as a sanity check.  Remove those that no longer match, or have invalid TerritoryType.
 				ExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType> territorySheet = dataManager.GetExcelSheet<Lumina.Excel.GeneratedSheets.TerritoryType>();
@@ -55,12 +55,12 @@ namespace Distance
 				{
 					if( mKnownAggroEntities[i].TerritoryType < 1 || territorySheet.GetRow( mKnownAggroEntities[i].TerritoryType ) == null )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
+						Service.PluginLog.Debug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
 					else if( mKnownAggroEntities[i].BNpcID < 1 || BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ) == null )
 					{
-						PluginLog.LogDebug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
+						Service.PluginLog.Debug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 						mKnownAggroEntities.RemoveAt( i );
 					}
 					else if( !mKnownAggroEntities[i].EnglishName.Equals( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular, StringComparison.InvariantCultureIgnoreCase ) )
@@ -70,11 +70,11 @@ namespace Distance
 						//	that a name ID ever gets reassigned anyway, and since RSVs are only for new content so far, any issues should be quickly noticed.
 						if( BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular.ToString().Contains( $"_rsv_{mKnownAggroEntities[i].BNpcID}" ) )
 						{
-							PluginLog.LogDebug( $"Aggro data entry BNpcName mismatch ignored due to RSV: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
+							Service.PluginLog.Debug( $"Aggro data entry BNpcName mismatch ignored due to RSV: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
 						}
 						else
 						{
-							PluginLog.LogDebug( $"Aggro data entry removed because BNpcName mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
+							Service.PluginLog.Debug( $"Aggro data entry removed because BNpcName mismatch: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName} (The game says \"{BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular}\" is the name for this ID.)" );
 							mKnownAggroEntities.RemoveAt( i );
 						}
 					}

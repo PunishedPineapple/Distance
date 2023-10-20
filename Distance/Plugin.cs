@@ -102,7 +102,7 @@ namespace Distance
 			//***** TODO *****
 			var allowedLang = new List<string>{ /*"de", "ja", "fr", "it", "es"*/ };
 
-			PluginLog.Information( "Trying to set up Loc for culture {0}", langCode );
+			Service.PluginLog.Information( "Trying to set up Loc for culture {0}", langCode );
 
 			if( allowedLang.Contains( langCode ) )
 			{

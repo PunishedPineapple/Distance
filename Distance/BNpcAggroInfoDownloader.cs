@@ -29,43 +29,43 @@ namespace Distance
 
 					if( downloadedDataFile.ReadFromString( responseBody ) )
 					{
-						PluginLog.LogInformation( $"Downloaded BNpc aggro range data version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
+						Service.PluginLog.Information( $"Downloaded BNpc aggro range data version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
 						if( downloadedDataFile.FileVersion > ( localVersionOverride > 0 ? localVersionOverride : BNpcAggroInfo.GetCurrentFileVersion() ) )
 						{
 							status = DownloadStatus.FailedFileWrite;
 							downloadedDataFile.WriteFile( filePath );
-							PluginLog.LogInformation( $"Wrote BNpc aggro range data to disk: Version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
+							Service.PluginLog.Information( $"Wrote BNpc aggro range data to disk: Version {downloadedDataFile.GetFileVersionAsString()} ({downloadedDataFile.FileVersion})" );
 							status = DownloadStatus.Completed;
 						}
 						else
 						{
-							PluginLog.LogInformation( $"Downloaded file not newer than existing data file; discarding." );
+							Service.PluginLog.Information( $"Downloaded file not newer than existing data file; discarding." );
 							status = DownloadStatus.OutOfDateFile;
 							downloadedDataFile = null;
 						}
 					}
 					else
 					{
-						PluginLog.LogWarning( $"Unable to load downloaded file!" );
+						Service.PluginLog.Warning( $"Unable to load downloaded file!" );
 						status = DownloadStatus.FailedFileLoad;
 						downloadedDataFile = null;
 					}
 				}
 				catch( HttpRequestException e )
 				{
-					PluginLog.LogWarning( $"Exception occurred while trying to update aggro distance data: {e}" );
+					Service.PluginLog.Warning( $"Exception occurred while trying to update aggro distance data: {e}" );
 					status = DownloadStatus.FailedDownload;
 					downloadedDataFile = null;
 				}
 				catch( TaskCanceledException )
 				{
-					PluginLog.LogInformation( "Aggro distance data update http request was canceled." );
+					Service.PluginLog.Information( "Aggro distance data update http request was canceled." );
 					status = DownloadStatus.Canceled;
 					downloadedDataFile = null;
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogWarning( $"Unknown exception occurred while trying to update aggro distance data: {e}" );
+					Service.PluginLog.Warning( $"Unknown exception occurred while trying to update aggro distance data: {e}" );
 					status = DownloadStatus.FailedDownload;
 					downloadedDataFile = null;
 				}

@@ -381,7 +381,7 @@ namespace Distance
 				}
 				catch( Exception e )
 				{
-					PluginLog.LogWarning( $"Unable to open the requested link:\r\n{e}" );
+					Service.PluginLog.Warning( $"Unable to open the requested link:\r\n{e}" );
 				}
 
 				ImGui.Spacing();
