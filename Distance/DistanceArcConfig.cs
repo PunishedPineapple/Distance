@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-
-using Distance.Services;
-
-using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
-using System.Linq;
-using System.Runtime.Serialization;
+﻿using System.Numerics;
 
 namespace Distance
 {
@@ -128,6 +119,48 @@ namespace Distance
 			set { mApplicableTargetType = (int)value; }
 		}
 
+		public bool mAllEnemiesShowAggressive = false;
+		public bool AllEnemiesShowAggressive
+		{
+			get { return mAllEnemiesShowAggressive; }
+			set { mAllEnemiesShowAggressive = value; }
+		}
+
+		public bool mAllEnemiesShowUnaggressive = false;
+		public bool AllEnemiesShowUnaggressive
+		{
+			get { return mAllEnemiesShowUnaggressive; }
+			set { mAllEnemiesShowUnaggressive = value; }
+		}
+
+		public bool mAllPlayersShowParty = true;
+		public bool AllPlayersShowParty
+		{
+			get { return mAllPlayersShowParty; }
+			set { mAllPlayersShowParty = value; }
+		}
+
+		public bool mAllPlayersShowAlliance = false;
+		public bool AllPlayersShowAlliance
+		{
+			get { return mAllPlayersShowAlliance; }
+			set { mAllPlayersShowAlliance = value; }
+		}
+
+		public bool mAllPlayersShowOthers = false;
+		public bool AllPlayersShowOthers
+		{
+			get { return mAllPlayersShowOthers; }
+			set { mAllPlayersShowOthers = value; }
+		}
+
+		public bool mShowDeadObjects = false;
+		public bool ShowDeadObjects
+		{
+			get { return mShowDeadObjects; }
+			set { mShowDeadObjects = value; }
+		}
+
 		public bool mDistanceIsToRing = true;
 		public bool DistanceIsToRing
 		{
@@ -142,7 +175,7 @@ namespace Distance
 			set { mArcRadius_Yalms = value; }
 		}
 
-		public float mFadeoutThresholdInner_Yalms = 5f;
+		public float mFadeoutThresholdInner_Yalms = 3f;
 		public float FadeoutThresholdInner_Yalms
 		{
 			get { return mFadeoutThresholdInner_Yalms; }
@@ -156,7 +189,7 @@ namespace Distance
 			set { mFadeoutIntervalInner_Yalms = value; }
 		}
 
-		public float mFadeoutThresholdOuter_Yalms = 15f;
+		public float mFadeoutThresholdOuter_Yalms = 10f;
 		public float FadeoutThresholdOuter_Yalms
 		{
 			get { return mFadeoutThresholdOuter_Yalms; }
@@ -311,6 +344,5 @@ namespace Distance
 		}
 
 		public DistanceWidgetFiltersConfig Filters { get; protected set; } = new();
-		public DistanceWidgetClassJobConfig ClassJobs { get; protected set; } = new();
 	}
 }

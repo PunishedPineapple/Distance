@@ -2,15 +2,16 @@
 
 ## Purpose
 
-This is a plugin for [XIVLauncher/Dalamud](https://github.com/goatcorp/FFXIVQuickLauncher) that shows basic distance information in a movable game UI element.
+This is a plugin for [XIVLauncher/Dalamud](https://github.com/goatcorp/FFXIVQuickLauncher) that shows basic distance information in a variety of customizable UI elements.
 
 ## Usage
 This plugin comes with the following defaults:
-- A distance widget on the target bar, showing the distance to the target's hitring.
-- A widget to show distance until aggroing the boss (for supported bosses).
-- Distances on player and combatant nameplates.
+- A distance readout on the target bar, showing the distance to the target's hitring.
+- A visual arc to show distance until aggroing the boss (for supported bosses).
+- Distance readouts on player and enemy nameplates.
+- Automatic checking for aggro data updates (from [this site](https://punishedpineapple.github.io/DalamudPlugins/Distance/Support/index.html)).
 
-You can add other widgets, change settings for distances shown, nameplates, etc. in the plugin settings window (`/pdistance config`).
+You can change or remove the defaults, add custom readouts (widgets), add custom arcs, change how distances are displayed, nameplate settings, disable checking for aggro updates, etc. in the plugin settings window (`/pdistance config`).
 
 ## Contributing
 If you would like to contribute boss aggro range data, please create an issue with the following information:

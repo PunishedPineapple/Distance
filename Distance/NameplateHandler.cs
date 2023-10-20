@@ -3,20 +3,13 @@ using System.Diagnostics;
 using System.Numerics;
 
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Party;
-using Dalamud.Game.Gui;
 using Dalamud.Hooking;
 using Dalamud.Logging;
 using Dalamud.Plugin.Services;
-using Distance.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Group;
-using FFXIVClientStructs.FFXIV.Client.System.Memory;
+
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-
-using ImGuiNET;
 
 namespace Distance
 {
@@ -167,11 +160,17 @@ namespace Distance
 			if( mConfiguration == null ) return false;
 			if( !mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) return false;
 
+			if( mConfiguration.NameplateDistancesConfig.HideInCombat && Service.Condition[ConditionFlag.InCombat] ) return false;
+			if( mConfiguration.NameplateDistancesConfig.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) return false;
+			if( mConfiguration.NameplateDistancesConfig.HideInInstance && Service.Condition[ConditionFlag.BoundByDuty] ) return false;
+			if( mConfiguration.NameplateDistancesConfig.HideOutOfInstance && !Service.Condition[ConditionFlag.BoundByDuty] ) return false;
+
 			var distanceInfo = mNameplateDistanceInfoArray[i];
 
 			if( distanceInfo.ObjectID == mClientState?.LocalPlayer.ObjectId ) return false;
 
-			bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForObjectKind( distanceInfo.TargetKind );
+			bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForObjectKind( distanceInfo.TargetKind ) &&
+										mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 );
 
 			if( mConfiguration.NameplateDistancesConfig.ShowAll )
 			{
@@ -202,10 +201,10 @@ namespace Distance
 					ObjectIsAggressive( distanceInfo.ObjectID ) ) return true;
 				if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
 					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
-					ObjectIsPartyMember( distanceInfo.ObjectID ) ) return true;
+					PartyUtils.ObjectIsPartyMember( distanceInfo.ObjectID ) ) return true;
 				if( mConfiguration.NameplateDistancesConfig.ShowAllianceMembers &&
 					distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
-					ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;	//	Make sure this comes after party check, because alliance check is exclusive of party members.
+					PartyUtils.ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;	//	Make sure this comes after party check, because alliance check is exclusive of party members.
 
 				return false;
 			}
@@ -322,7 +321,7 @@ namespace Distance
 
 			if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party &&
 				objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
-				ObjectIsPartyMember( objectID ) )
+				PartyUtils.ObjectIsPartyMember( objectID ) )
 			{
 				if( distance > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms )
 				{
@@ -424,23 +423,6 @@ namespace Distance
 			}
 
 			return false;
-		}
-
-		private static bool ObjectIsPartyMember( uint objectID )
-		{
-			if( objectID is 0 or 0xE0000000 ) return false;
-			if( mPartyList.Length < 1 ) return false;
-			foreach( var member in mPartyList ) if( member?.ObjectId == objectID ) return true;
-			return false;
-		}
-
-		private static bool ObjectIsAllianceMember( uint objectID )
-		{
-			if( objectID is 0 or 0xE0000000 ) return false;
-			if( GroupManager.Instance() == null ) return false;
-			//if( !GroupManager.Instance()->IsAlliance ) return false;	//***** TODO: IsAlliance always returns false; why?
-			if( GroupManager.Instance()->IsObjectIDInParty( objectID ) ) return false;
-			return GroupManager.Instance()->IsObjectIDInAlliance( objectID );
 		}
 
 		private static TextNodeDrawData GetNameplateNodeDrawData( int i )

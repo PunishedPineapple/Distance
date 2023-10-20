@@ -5,19 +5,12 @@ using System.Threading.Tasks;
 
 using CheapLoc;
 
-using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Party;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Distance.Services;
 
 namespace Distance
 {
@@ -72,7 +65,7 @@ namespace Distance
 			OnLanguageChanged( mPluginInterface.UiLanguage );
 
 			//	UI Initialization
-			mUI = new PluginUI( this, mPluginInterface, mConfiguration, Service.DataManager, Service.GameGui, Service.ClientState, Service.Condition );
+			mUI = new PluginUI( this, mPluginInterface, mConfiguration );
 			mPluginInterface.UiBuilder.Draw += DrawUI;
 			mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 			mUI.Initialize();
@@ -346,29 +339,19 @@ namespace Distance
 					!Service.Condition[ConditionFlag.InCombat];
 		}
 
-		//	It's tempting to put this into the config filters class, but we rely on a few things that won't know about, so just keeping it here to avoid having to pass in even more stuff.
 		public bool ShouldDrawDistanceInfo( DistanceWidgetConfig config )
 		{
 			if( Service.ClientState.IsPvP ) return false;
 			if( !config.Enabled ) return false;
 			if( config.HideInCombat && Service.Condition[ConditionFlag.InCombat] ) return false;
 			if( config.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) return false;
+			if( config.HideInInstance && Service.Condition[ConditionFlag.BoundByDuty] ) return false;
+			if( config.HideOutOfInstance && !Service.Condition[ConditionFlag.BoundByDuty] ) return false;
 			if( !mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].IsValid ) return false;
+			if( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID == Service.ClientState.LocalPlayer?.ObjectId ) return false;
 
-			bool show = mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].TargetKind switch
-			{
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc			=> config.Filters.ShowDistanceOnBattleNpc,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player			=> config.Filters.ShowDistanceOnPlayers && mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID != Service.ClientState.LocalPlayer?.ObjectId,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc			=> config.Filters.ShowDistanceOnEventNpc,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure			=> config.Filters.ShowDistanceOnTreasure,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Aetheryte			=> config.Filters.ShowDistanceOnAetheryte,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint	=> config.Filters.ShowDistanceOnGatheringNode,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj			=> config.Filters.ShowDistanceOnEventObj,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion			=> config.Filters.ShowDistanceOnCompanion,
-				Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing			=> config.Filters.ShowDistanceOnHousing,
-				_ => false,
-			};
-			return show;
+			return	config.Filters.ShowDistanceForObjectKind( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].TargetKind ) &&
+					config.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 );
 		}
 
 		protected void UpdateTargetDistanceData()

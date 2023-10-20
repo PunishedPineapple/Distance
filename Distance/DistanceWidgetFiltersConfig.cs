@@ -1,4 +1,7 @@
-﻿namespace Distance
+﻿using System;
+using System.Runtime.Serialization;
+
+namespace Distance
 {
 	public class DistanceWidgetFiltersConfig
 	{
@@ -18,6 +21,15 @@
 				_ => false,
 			};
 		}
+
+		public bool ShowDistanceForClassJob( UInt32 classJob )
+		{
+			return	classJob > 0 &&
+					classJob < mApplicableClassJobsArray.Length &&
+					mApplicableClassJobsArray[classJob] == true;
+		}
+
+		#region Object Types
 
 		public bool mShowDistanceOnPlayers = true;
 		public bool ShowDistanceOnPlayers
@@ -81,5 +93,40 @@
 			get { return mShowDistanceOnHousing; }
 			set { mShowDistanceOnHousing = value; }
 		}
+
+		#endregion
+
+		#region ClassJobs
+
+		internal bool[] ApplicableClassJobsArray => mApplicableClassJobsArray;
+
+		public DistanceWidgetFiltersConfig()
+		{
+			mApplicableClassJobsArray = new bool[ClassJobUtils.ClassJobDict.Count];
+			for( int i = 0; i < mApplicableClassJobsArray.Length; ++i ) mApplicableClassJobsArray[i] = ClassJobUtils.ClassJobDict[(uint)i].DefaultSelected;
+		}
+
+		[OnDeserialized]
+		internal void ValidateClassJobData( StreamingContext s )
+		{
+			if( mApplicableClassJobsArray?.Length != ClassJobUtils.ClassJobDict.Count )
+			{
+				bool[] newArray = new bool[ClassJobUtils.ClassJobDict.Count];
+				try
+				{
+					mApplicableClassJobsArray?.CopyTo( newArray, 0 );
+				}
+				catch( Exception e )
+				{
+					for( int i = 0; i < mApplicableClassJobsArray.Length; ++i ) newArray[i] = ClassJobUtils.ClassJobDict[(uint)i].DefaultSelected;
+					Service.PluginLog.Warning( $"Exception while validating ClassJob filters; using defaults for all ClassJobs:\r\n{e}" );
+				}
+				mApplicableClassJobsArray = newArray;
+			}
+		}
+
+		public bool[] mApplicableClassJobsArray = null;
+
+		#endregion
 	}
 }

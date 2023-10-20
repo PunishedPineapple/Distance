@@ -67,6 +67,34 @@ namespace Distance
 			set { mShowAllianceMembers = value; }
 		}
 
+		public bool mHideInCombat = false;
+		public bool HideInCombat
+		{
+			get { return mHideInCombat; }
+			set { mHideInCombat = value; }
+		}
+
+		public bool mHideOutOfCombat = false;
+		public bool HideOutOfCombat
+		{
+			get { return mHideOutOfCombat; }
+			set { mHideOutOfCombat = value; }
+		}
+
+		public bool mHideInInstance = false;
+		public bool HideInInstance
+		{
+			get { return mHideInInstance; }
+			set { mHideInInstance = value; }
+		}
+
+		public bool mHideOutOfInstance = false;
+		public bool HideOutOfInstance
+		{
+			get { return mHideOutOfInstance; }
+			set { mHideOutOfInstance = value; }
+		}
+
 		public bool mDistanceIsToRing = true;
 		public bool DistanceIsToRing
 		{

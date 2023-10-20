@@ -30,7 +30,7 @@ namespace Distance
 			AggroRange_Yalms = 0;
 		}
 
-		public float DistanceFromTarget_Yalms => Vector2.Distance( new Vector2( PlayerPosition.X, PlayerPosition.Z ), new Vector2( TargetPosition.X, TargetPosition.Z ) );
+		public float DistanceFromTarget_Yalms => PlayerPosition.DistanceTo_XZ( TargetPosition );
 		public float DistanceFromTargetRing_Yalms => DistanceFromTarget_Yalms - TargetRadius_Yalms;
 		public float EffectiveRangeFromTarget_Yalms => DistanceFromTarget_Yalms - TargetRadius_Yalms - PlayerHitRingRadius;
 		public float DistanceFromTargetAggro_Yalms => DistanceFromTargetRing_Yalms - AggroRange_Yalms;

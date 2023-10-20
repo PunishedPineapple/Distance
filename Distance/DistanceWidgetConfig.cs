@@ -32,6 +32,20 @@ namespace Distance
 			set { mHideOutOfCombat = value; }
 		}
 
+		public bool mHideInInstance = false;
+		public bool HideInInstance
+		{
+			get { return mHideInInstance; }
+			set { mHideInInstance = value; }
+		}
+
+		public bool mHideOutOfInstance = false;
+		public bool HideOutOfInstance
+		{
+			get { return mHideOutOfInstance; }
+			set { mHideOutOfInstance = value; }
+		}
+
 		public Vector2 mTextPosition = new( -AtkNodeHelpers.DefaultTextNodeWidth, 30 );
 		public Vector2 TextPosition
 		{
