@@ -146,7 +146,7 @@ namespace Distance
 			set { mAggroWarningDistance_Yalms = value; }
 		}
 
-		public bool mDrawAggroArc = false;
+		public bool mDrawAggroArc = true;
 		public bool DrawAggroArc
 		{
 			get { return mDrawAggroArc; }
