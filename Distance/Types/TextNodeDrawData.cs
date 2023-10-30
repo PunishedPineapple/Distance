@@ -30,7 +30,8 @@ public struct TextNodeDrawData
 	public byte EdgeColorB;
 
 	public byte FontSize;
-	public byte AlignmentFontType;
+	public AlignmentType Alignment;
+	public FontType Font;
 	public byte LineSpacing;
 	public byte CharSpacing;
 
@@ -54,7 +55,8 @@ public struct TextNodeDrawData
 		EdgeColorG = 255,
 		EdgeColorB = 255,
 		FontSize = 12,
-		AlignmentFontType = (byte)AlignmentType.TopLeft,
+		Alignment = AlignmentType.TopLeft,
+		Font = FontType.Axis,
 		LineSpacing = 24,
 		CharSpacing = 1
 	};

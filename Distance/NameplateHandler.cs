@@ -31,7 +31,8 @@ internal static unsafe class NameplateHandler
 			{
 				mNameplateDrawHook = Service.GameInteropProvider.HookFromAddress<NameplateDrawFuncDelegate>(fpOnNameplateDraw, mdNameplateDraw);
 				if( mNameplateDrawHook == null ) throw new Exception( "Unable to create nameplate draw hook." );
-				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) mNameplateDrawHook.Enable();	//***** TODO: Always enable if we change how enable/disable nameplate distances works.
+				mNameplateDistancesEnabled = mConfiguration.NameplateDistancesConfig.ShowNameplateDistances;
+				mNameplateDrawHook.Enable();
 			}
 		}
 		catch( Exception e )
@@ -50,36 +51,25 @@ internal static unsafe class NameplateHandler
 		mNameplateDrawHook?.Dispose();
 		mNameplateDrawHook = null;
 
+		DisableNameplateDistances();
 		DestroyNameplateDistanceNodes();
-		mpNameplateAddon = null;
 
+		mpNameplateAddon = null;
 		mConfiguration = null;
 	}
 
 	internal static void EnableNameplateDistances()
 	{
-		if( mNameplateDrawHook == null ) return;
-		if( !mNameplateDrawHook.IsEnabled )
-		{
-			try
-			{
-				mNameplateDrawHook.Enable();
-			}
-			catch( Exception e )
-			{
-				Service.PluginLog.Error( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
-			}
-		}
+		mNameplateDistancesEnabled = true;
 	}
 
 	internal static void DisableNameplateDistances()
 	{
-		if( mNameplateDrawHook == null ) return;
-		if( mNameplateDrawHook.IsEnabled )
+		if( mNameplateDistancesEnabled )
 		{
 			try
 			{
-				mNameplateDrawHook.Disable();
+				mNameplateDistancesEnabled = false;
 				mNodeUpdateTimer.Reset();
 				mDistanceUpdateTimer.Reset();
 				HideAllNameplateDistanceNodes();
@@ -178,13 +168,13 @@ internal static unsafe class NameplateHandler
 				if( filtersPermitShowing ) return true;
 			}
 
-			if( mConfiguration.NameplateDistancesConfig.mShowTarget &&
+			if( mConfiguration.NameplateDistancesConfig.ShowTarget &&
 				TargetResolver.GetTarget( TargetType.Target ).IsSameObject( distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
-			if( mConfiguration.NameplateDistancesConfig.mShowSoftTarget &&
+			if( mConfiguration.NameplateDistancesConfig.ShowSoftTarget &&
 				TargetResolver.GetTarget( TargetType.SoftTarget ).IsSameObject( distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
-			if( mConfiguration.NameplateDistancesConfig.mShowFocusTarget &&
+			if( mConfiguration.NameplateDistancesConfig.ShowFocusTarget &&
 				TargetResolver.GetTarget( TargetType.FocusTarget ).IsSameObject( distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
-			if( mConfiguration.NameplateDistancesConfig.mShowMouseoverTarget &&
+			if( mConfiguration.NameplateDistancesConfig.ShowMouseoverTarget &&
 				TargetResolver.GetTarget( TargetType.MouseOverTarget ).IsSameObject( distanceInfo.ObjectID, distanceInfo.ObjectAddress ) ) return true;
 
 			if( mConfiguration.NameplateDistancesConfig.ShowAggressive &&
@@ -203,20 +193,22 @@ internal static unsafe class NameplateHandler
 
 	private static void NameplateDrawDetour( AddonNamePlate* pThis )
 	{
-		//***** TODO: It might be better to never disable the hook while we're loaded, and just use an enabled flag that we track to decide whether to display/update/hide our nodes.  This would lower the risk of losing track of the addon address and state to the point that we can probably confidently always *attempt* proper cleanup when unloading.
 		try
 		{
 			if( mpNameplateAddon != pThis )
 			{
 				Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
-				//DestroyNameplateDistanceNodes();	//***** TODO: I'm assuming that the game cleans up the whole node tree including our stuff automatically if the UI gets reinitialized?
+				//	I don't know how to safely clean up our own nodes when the addon reloads.  The addon might take care of our inserted nodes when it cleans itself up anyway.
 				for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
 				mpNameplateAddon = pThis;
 				if( mpNameplateAddon != null ) CreateNameplateDistanceNodes();
 			}
 
-			UpdateNameplateEntityDistanceData();
-			UpdateNameplateDistanceNodes();
+			if( mNameplateDistancesEnabled )
+			{
+				UpdateNameplateEntityDistanceData();
+				UpdateNameplateDistanceNodes();
+			}
 		}
 		catch( Exception e )
 		{
@@ -255,16 +247,16 @@ internal static unsafe class NameplateHandler
 
 			int textPositionX = 0;
 			int textPositionY = 0;
-			int textAlignment = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment;
+			AlignmentType textAlignment = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment;
 
 			var nameplateObject = GetNameplateObject( i );
 			if( nameplateObject != null && mConfiguration.NameplateDistancesConfig.AutomaticallyAlignText )
 			{
 				textPositionX = mConfiguration.NameplateDistancesConfig.DistanceFontAlignment switch
 				{
-					6 => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
-					7 => drawData.Width / 2 - (int)( AtkNodeHelpers.DefaultTextNodeWidth * drawData.ScaleX ) / 2,
-					8 => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - (int)( AtkNodeHelpers.DefaultTextNodeWidth * drawData.ScaleX ),
+					AlignmentType.BottomLeft => drawData.Width / 2 - nameplateObject.Value.TextW / 2,
+					AlignmentType.Bottom => drawData.Width / 2 - (int)( AtkNodeHelpers.DefaultTextNodeWidth * drawData.ScaleX ) / 2,
+					AlignmentType.BottomRight => drawData.Width / 2 + nameplateObject.Value.TextW / 2 - (int)( AtkNodeHelpers.DefaultTextNodeWidth * drawData.ScaleX ),
 					_ => 0,
 				};
 
@@ -279,14 +271,15 @@ internal static unsafe class NameplateHandler
 
 				//	Change the node to be top aligned (instead of bottom) if placing below name.
 				if( mConfiguration.NameplateDistancesConfig.PlaceTextBelowName ) textAlignment -= 6;
-				textAlignment = Math.Max( 0, Math.Min( textAlignment, 8 ) );
+				textAlignment = (AlignmentType)Math.Max( 0, Math.Min( (int)textAlignment, 8 ) );
 			}
 
 			drawData.PositionX = (short)( textPositionX + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.X );
 			drawData.PositionY = (short)( textPositionY + mConfiguration.NameplateDistancesConfig.DistanceTextOffset.Y );
 			drawData.UseDepth = !ObjectIsNonDepthTarget( mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].ObjectAddress ); //Ideally we would just read this from the nameplate text node, but ClientStructs doesn't seem to have a way to do that.
 			drawData.FontSize = (byte)( mConfiguration.NameplateDistancesConfig.DistanceFontSize * 1f / drawData.ScaleY );
-			drawData.AlignmentFontType = (byte)( textAlignment | ( mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? 0x10 : 0 ) );
+			drawData.Alignment = textAlignment;
+			drawData.Font = mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? FontType.MiedingerMed : FontType.Axis;
 
 			float distance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
 			SetDistanceBasedColor( ref drawData, distance, mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].TargetKind );
@@ -367,6 +360,7 @@ internal static unsafe class NameplateHandler
 		}
 	}
 
+	//***** TODO: It would be strongly preferable to pull the depth flag off of the nameplate node itself if we can find it, rather than maintaining this logic.
 	private static bool ObjectIsNonDepthTarget( uint objectID, IntPtr pObject )
 	{
 		if( objectID == 0 )
@@ -400,27 +394,29 @@ internal static unsafe class NameplateHandler
 		{
 			return new TextNodeDrawData()
 			{
-				Show = ( (AtkResNode*)pNameplateIconNode )->IsVisible || ( pNameplateResNode->IsVisible && ( (AtkResNode*)pNameplateTextNode )->IsVisible ),
+				Show = pNameplateIconNode->AtkResNode.IsVisible || ( pNameplateResNode->IsVisible && pNameplateTextNode->AtkResNode.IsVisible ),
 				PositionX = (short)pNameplateResNode->X,
 				PositionY = (short)pNameplateResNode->Y,
 				Width = pNameplateResNode->Width,
 				Height = pNameplateResNode->Height,
 				ScaleX = pNameplateTextNode->AtkResNode.ScaleX,
 				ScaleY = pNameplateTextNode->AtkResNode.ScaleY,
-				TextColorA = ( (AtkTextNode*)pNameplateTextNode )->TextColor.A,
-				TextColorR = ( (AtkTextNode*)pNameplateTextNode )->TextColor.R,
-				TextColorG = ( (AtkTextNode*)pNameplateTextNode )->TextColor.G,
-				TextColorB = ( (AtkTextNode*)pNameplateTextNode )->TextColor.B,
-				EdgeColorA = ( (AtkTextNode*)pNameplateTextNode )->EdgeColor.A,
-				EdgeColorR = ( (AtkTextNode*)pNameplateTextNode )->EdgeColor.R,
-				EdgeColorG = ( (AtkTextNode*)pNameplateTextNode )->EdgeColor.G,
-				EdgeColorB = ( (AtkTextNode*)pNameplateTextNode )->EdgeColor.B,
-				FontSize = ( (AtkTextNode*)pNameplateTextNode )->FontSize,
-				AlignmentFontType = ( (AtkTextNode*)pNameplateTextNode )->AlignmentFontType,
-				LineSpacing = ( (AtkTextNode*)pNameplateTextNode )->LineSpacing,
-				CharSpacing = ( (AtkTextNode*)pNameplateTextNode )->CharSpacing,
+				TextColorA = pNameplateTextNode->TextColor.A,
+				TextColorR = pNameplateTextNode->TextColor.R,
+				TextColorG = pNameplateTextNode->TextColor.G,
+				TextColorB = pNameplateTextNode->TextColor.B,
+				EdgeColorA = pNameplateTextNode->EdgeColor.A,
+				EdgeColorR = pNameplateTextNode->EdgeColor.R,
+				EdgeColorG = pNameplateTextNode->EdgeColor.G,
+				EdgeColorB = pNameplateTextNode->EdgeColor.B,
+				FontSize = pNameplateTextNode->FontSize,
+				Alignment = pNameplateTextNode->AlignmentType,
+				Font = pNameplateTextNode-> FontType,
+				LineSpacing = pNameplateTextNode->LineSpacing,
+				CharSpacing = pNameplateTextNode->CharSpacing,
+				//***** TODO
 				/*UseNewNameplateStyle = mConfiguration.NameplateDistancesConfig.NameplateStyle == NameplateStyle.MatchGame &&
-										( ( (AtkTextNode*)pNameplateTextNode )->TextFlags2 & 0x80 ) != 0 ||
+										( pNameplateTextNode->TextFlags2 & 0x80 ) != 0 ||
 										mConfiguration.NameplateDistancesConfig.NameplateStyle == NameplateStyle.New,*/
 			};
 		}
@@ -490,8 +486,8 @@ internal static unsafe class NameplateHandler
 
 	private static void DestroyNameplateDistanceNodes()
 	{
-		//	If the addon has moved since disabling the hook, it's unlikely that our node pointers are valid anymore, and it is possible
-		//	that they could even be pointing to other valid objects, so we have to just let our nodes leak if we can't be certain.
+		//	If the addon has moved since disabling the hook, it's impossible to know whether our
+		//	node pointers are valid anymore, so we have to just let them leak in that case.
 		var pCurrentNameplateAddon = (AddonNamePlate*)Service.GameGui.GetAddonByName( "NamePlate", 1 );
 		if( mpNameplateAddon == null || mpNameplateAddon != pCurrentNameplateAddon )
 		{
@@ -515,13 +511,9 @@ internal static unsafe class NameplateHandler
 					mDistanceTextNodes[i] = null;
 					Service.PluginLog.Verbose( $"Cleanup of nameplate {i} complete." );
 				}
-				catch( AccessViolationException )
-				{
-					Service.PluginLog.Error( $"Invalid node pointer while removing text node 0x{(IntPtr)pTextNode:X} for nameplate {i} on component node 0x{(IntPtr)pNameplateNode:X}." );
-				}
 				catch( Exception e )
 				{
-					Service.PluginLog.Error( $"Unknown error while removing text node 0x{(IntPtr)pTextNode:X} for nameplate {i}:\r\n{e}" );
+					Service.PluginLog.Error( $"Unknown error while removing text node 0x{(IntPtr)pTextNode:X} for nameplate {i} on component node 0x{(IntPtr)pNameplateNode:X}:\r\n{e}" );
 				}
 			}
 		}
@@ -532,7 +524,7 @@ internal static unsafe class NameplateHandler
 		var pNode = mDistanceTextNodes[i];
 		if( pNode != null )
 		{
-			( (AtkResNode*)pNode )->ToggleVisibility( false );
+			pNode->AtkResNode.ToggleVisibility( false );
 		}
 	}
 
@@ -541,7 +533,7 @@ internal static unsafe class NameplateHandler
 		var pNode = mDistanceTextNodes[i];
 		if( pNode != null )
 		{
-			( (AtkResNode*)pNode )->ToggleVisibility( show && drawData.Show );
+			pNode->AtkResNode.ToggleVisibility( show && drawData.Show );
 			if( show && drawData.Show )
 			{
 				pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
@@ -559,7 +551,8 @@ internal static unsafe class NameplateHandler
 				pNode->EdgeColor.B = drawData.EdgeColorB;
 
 				pNode->FontSize = drawData.FontSize;
-				pNode->AlignmentFontType = drawData.AlignmentFontType;
+				pNode->AlignmentType = drawData.Alignment;
+				pNode->FontType = drawData.Font;
 				pNode->LineSpacing = drawData.LineSpacing;
 				pNode->CharSpacing = drawData.CharSpacing;
 
@@ -590,6 +583,7 @@ internal static unsafe class NameplateHandler
 	private static Hook<NameplateDrawFuncDelegate> mNameplateDrawHook;
 
 	//	Members
+	private static bool mNameplateDistancesEnabled = false;
 	private static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];
 	private static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 	private static Configuration mConfiguration = null;

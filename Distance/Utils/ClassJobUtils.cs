@@ -20,14 +20,14 @@ internal class ClassJobUtils
 					var row = classJobSheet.GetRow( i );
 					if( row != null )
 					{
-						ClassJobData.ClassJobSortCategory sortCategory;
-						if( row.UIPriority == 0 ) sortCategory = ClassJobData.ClassJobSortCategory.Other;
-						else if( row.UIPriority <= 10 ) sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.Job_Tank : ClassJobData.ClassJobSortCategory.Class;
-						else if( row.UIPriority <= 20 ) sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.Job_Healer : ClassJobData.ClassJobSortCategory.Class;
-						else if( row.UIPriority <= 30 ) sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.Job_Melee : ClassJobData.ClassJobSortCategory.Class;
-						else if( row.UIPriority <= 40 ) sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.Job_Ranged : ClassJobData.ClassJobSortCategory.Class;
-						else if( row.UIPriority <= 50 ) sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.Job_Caster : ClassJobData.ClassJobSortCategory.Class;
-						else sortCategory = row.JobIndex > 0 ? ClassJobData.ClassJobSortCategory.HandLand : ClassJobData.ClassJobSortCategory.HandLand;
+						ClassJobSortCategory sortCategory;
+						if( row.UIPriority == 0 ) sortCategory = ClassJobSortCategory.Other;
+						else if( row.UIPriority <= 10 ) sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.Job_Tank : ClassJobSortCategory.Class;
+						else if( row.UIPriority <= 20 ) sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.Job_Healer : ClassJobSortCategory.Class;
+						else if( row.UIPriority <= 30 ) sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.Job_Melee : ClassJobSortCategory.Class;
+						else if( row.UIPriority <= 40 ) sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.Job_Ranged : ClassJobSortCategory.Class;
+						else if( row.UIPriority <= 50 ) sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.Job_Caster : ClassJobSortCategory.Class;
+						else sortCategory = row.JobIndex > 0 ? ClassJobSortCategory.HandLand : ClassJobSortCategory.HandLand;
 
 						mClassJobDict.TryAdd( i,
 							new ClassJobData

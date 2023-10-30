@@ -96,6 +96,7 @@ internal static unsafe class AtkNodeHelpers
 		if( pNode != null ) ( (AtkResNode*)pNode )->ToggleVisibility( false );
 	}
 
+
 	internal const ushort DefaultTextNodeWidth = 200;
 	internal const ushort DefaultTextNodeHeight = 14;
 }

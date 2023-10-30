@@ -24,12 +24,12 @@ internal sealed class PluginUI_AggroArcs : IDisposable
 	{
 		if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc Settings" ) + $"###Aggro Widget Arc Header." ) )
 		{
-			ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.mDrawAggroArc );
+			ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Arc", "Show an arc indicating aggro range." ) + "###Show aggro arc.", ref mConfiguration.DrawAggroArc );
 			ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Arc", "This is a visual representation of the distance readout shown by the aggro widget.  If you wish to change colors or which target type is used, adjust those settings for the aggro widget, and they will apply to this arc." ) );
 			if( mConfiguration.DrawAggroArc )
 			{
 				ImGui.Text( Loc.Localize( "Config Option: Aggro Arc Length", "Length of the aggro arc (deg):" ) );
-				ImGui.SliderInt( "###AggroArcLengthSlider", ref mConfiguration.mAggroArcLength_Deg, 0, 15 );
+				ImGui.SliderInt( "###AggroArcLengthSlider", ref mConfiguration.AggroArcLength_Deg, 0, 15 );
 			}
 		}
 	}
