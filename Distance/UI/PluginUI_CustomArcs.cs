@@ -16,7 +16,7 @@ namespace Distance;
 
 internal sealed class PluginUI_CustomArcs : IDisposable
 {
-	public PluginUI_CustomArcs( Plugin plugin, PluginUI ui, Configuration configuration )
+	internal PluginUI_CustomArcs( Plugin plugin, PluginUI ui, Configuration configuration )
 	{
 		mPlugin = plugin;
 		mUI = ui;
@@ -27,7 +27,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 	{
 	}
 
-	public void DrawConfigOptions()
+	internal void DrawConfigOptions()
 	{
 		if( ImGui.Button( Loc.Localize( "Button: Add Distance Arc", "Add Arc" ) + $"###AddArcButton." ) )
 		{
@@ -109,10 +109,44 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 						ImGui.Text( Loc.Localize( "Config Option: Arc Radius", "The radius of the arc (y):" ) );
 						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Radius", "This distance is relative to either the object's center, or to its hitring, as configured above." ) );
 						ImGui.DragFloat( "###ArcDistanceSlider", ref config.mArcRadius_Yalms, 0.1f, -30f, 30f );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Combat", "Hide when in combat." ) + "###ArcHideInCombat", ref config.mHideInCombat );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Combat", "Hide when out of combat." ) + "###ArcHideOutOfCombat", ref config.mHideOutOfCombat );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Instance", "Hide when in an instance." ) + "###ArcHideInInstance", ref config.mHideInInstance );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Instance", "Hide when out of an instance." ) + "###ArcHideOutOfInstance", ref config.mHideOutOfInstance );
+						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Combat", "Out of Combat" ) + "###HideOutOfCombatButton", config.HideOutOfCombat ) )
+						{
+							config.HideOutOfCombat = true;
+							config.HideInCombat = false;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Combat", "In Combat" ) + "###HideInCombatButton", config.HideInCombat ) )
+						{
+							config.HideOutOfCombat = false;
+							config.HideInCombat = true;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInCombatButton", !config.HideOutOfCombat && !config.HideInCombat ) )
+						{
+							config.HideOutOfCombat = false;
+							config.HideInCombat = false;
+						}
+						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Instance", "Out of Instance" ) + "###HideOutOfInstanceButton", config.HideOutOfInstance ) )
+						{
+							config.HideOutOfInstance = true;
+							config.HideInInstance = false;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Instance", "In Instance" ) + "###HideInInstanceButton", config.HideInInstance ) )
+						{
+							config.HideOutOfInstance = false;
+							config.HideInInstance = true;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInInstanceButton", !config.HideOutOfInstance && !config.HideInInstance ) )
+						{
+							config.HideOutOfInstance = false;
+							config.HideInInstance = false;
+						}
 						ImGui.TreePop();
 					}
 
@@ -259,7 +293,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 		}
 	}
 
-	public void DrawOnOverlay()
+	internal void DrawOnOverlay()
 	{
 		if( Service.ClientState.IsPvP ) return;
 		if( Service.ClientState.LocalPlayer == null ) return;
@@ -346,7 +380,8 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 										x.SubKind == (byte)BattleNpcSubKind.Enemy &&
 										x.IsTargetable &&
 										( !x.IsDead || config.ShowDeadObjects ) &&
-										x.Position.DistanceTo_XZ( Service.ClientState.LocalPlayer.Position ) < 50f
+										x.Position.DistanceTo_XZ( Service.ClientState.LocalPlayer.Position ) < 50f &&
+										( x.IsAggressive() && config.AllEnemiesShowAggressive || !x.IsAggressive() && config.AllEnemiesShowUnaggressive )
 										);
 
 		foreach( var bnpc in relevantBNpcs )

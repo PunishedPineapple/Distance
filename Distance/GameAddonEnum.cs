@@ -1,10 +1,9 @@
-﻿namespace Distance
+﻿namespace Distance;
+
+internal enum GameAddonEnum : int
 {
-	public enum GameAddonEnum : int
-	{
-		ScreenText,
-		TargetBar,
-		FocusTargetBar,
-		//TargetCursor,
-	}
+	ScreenText,
+	TargetBar,
+	FocusTargetBar,
+	//TargetCursor,
 }

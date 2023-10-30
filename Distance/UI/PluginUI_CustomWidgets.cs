@@ -12,7 +12,7 @@ namespace Distance;
 
 internal sealed class PluginUI_CustomWidgets : IDisposable
 {
-	public PluginUI_CustomWidgets( Plugin plugin, PluginUI ui, Configuration configuration )
+	internal PluginUI_CustomWidgets( Plugin plugin, PluginUI ui, Configuration configuration )
 	{
 		mPlugin = plugin;
 		mUI = ui;
@@ -23,7 +23,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 	{
 	}
 
-	public void DrawConfigOptions()
+	internal void DrawConfigOptions()
 	{
 		if( ImGui.Button( Loc.Localize( "Button: Add Distance Widget", "Add Widget" ) + "###AddWidgetButton" ) )
 		{
@@ -65,10 +65,44 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 						ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
 						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 						ImGui.DragFloat( "###DistanceOffsetSlider", ref config.mDistanceOffset_Yalms, 0.1f, -30f, 30f );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Combat", "Hide when in combat." ) + "###HideInCombat", ref config.mHideInCombat );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Combat", "Hide when out of combat." ) + "###HideOutOfCombat", ref config.mHideOutOfCombat );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide In Instance", "Hide when in an instance." ) + "###HideInInstance", ref config.mHideInInstance );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Hide Out Of Instance", "Hide when out of an instance." ) + "###HideOutOfInstance", ref config.mHideOutOfInstance );
+						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Combat", "Out of Combat" ) + "###HideOutOfCombatButton", config.HideOutOfCombat ) )
+						{
+							config.HideOutOfCombat = true;
+							config.HideInCombat = false;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Combat", "In Combat" ) + "###HideInCombatButton", config.HideInCombat ) )
+						{
+							config.HideOutOfCombat = false;
+							config.HideInCombat = true;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInCombatButton", !config.HideOutOfCombat && !config.HideInCombat ) )
+						{
+							config.HideOutOfCombat = false;
+							config.HideInCombat = false;
+						}
+						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Instance", "Out of Instance" ) + "###HideOutOfInstanceButton", config.HideOutOfInstance ) )
+						{
+							config.HideOutOfInstance = true;
+							config.HideInInstance = false;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Instance", "In Instance" ) + "###HideInInstanceButton", config.HideInInstance ) )
+						{
+							config.HideOutOfInstance = false;
+							config.HideInInstance = true;
+						}
+						ImGui.SameLine();
+						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInInstanceButton", !config.HideOutOfInstance && !config.HideInInstance ) )
+						{
+							config.HideOutOfInstance = false;
+							config.HideInInstance = false;
+						}
 						ImGui.TreePop();
 					}
 

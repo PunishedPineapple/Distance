@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Numerics;
 
 using CheapLoc;
-
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Utility;
-
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using ImGuiNET;
 
@@ -16,7 +9,7 @@ namespace Distance;
 
 internal sealed class PluginUI_AggroArcs : IDisposable
 {
-	public PluginUI_AggroArcs( Plugin plugin, PluginUI ui, Configuration configuration )
+	internal PluginUI_AggroArcs( Plugin plugin, PluginUI ui, Configuration configuration )
 	{
 		mPlugin = plugin;
 		mUI = ui;
@@ -27,7 +20,7 @@ internal sealed class PluginUI_AggroArcs : IDisposable
 	{
 	}
 
-	public void DrawConfigOptions()
+	internal void DrawConfigOptions()
 	{
 		if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc Settings" ) + $"###Aggro Widget Arc Header." ) )
 		{
@@ -41,7 +34,7 @@ internal sealed class PluginUI_AggroArcs : IDisposable
 		}
 	}
 
-	public void DrawOnOverlay()
+	internal void DrawOnOverlay()
 	{
 		if( mConfiguration.DrawAggroArc && mPlugin.ShouldDrawAggroDistanceInfo() )
 		{
