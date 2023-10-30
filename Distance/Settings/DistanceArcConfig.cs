@@ -65,10 +65,6 @@ public class DistanceArcConfig
 
 	public string ArcName = "";
 	public bool Enabled = true;
-	public bool HideInCombat = false;
-	public bool HideOutOfCombat = false;
-	public bool HideInInstance = false;
-	public bool HideOutOfInstance = false;
 	public bool AllEnemiesShowAggressive = true;
 	public bool AllEnemiesShowUnaggressive = true;
 	public bool AllPlayersShowParty = true;

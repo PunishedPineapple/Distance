@@ -29,6 +29,7 @@ public sealed class PluginUI : IDisposable
 		mAggroArcsUI = new( plugin, this, configuration );
 		mCustomWidgetsUI = new( plugin, this, configuration );
 		mCustomArcsUI = new( plugin, this, configuration );
+		mNameplatesUI = new( plugin, this, configuration );
 	}
 
 	public unsafe void Dispose()
@@ -45,6 +46,7 @@ public sealed class PluginUI : IDisposable
 		mAggroArcsUI.Dispose();
 		mCustomWidgetsUI.Dispose();
 		mCustomArcsUI.Dispose();
+		mNameplatesUI.Dispose();
 	}
 
 	public void Initialize()
@@ -151,14 +153,17 @@ public sealed class PluginUI : IDisposable
 				}
 			}
 
-			ImGui.PushID( "AggroArcOptions" );
-			try
+			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc Settings" ) + $"###Aggro Widget Arc Header." ) )
 			{
-				mAggroArcsUI.DrawConfigOptions();
-			}
-			finally
-			{
-				ImGui.PopID();
+				ImGui.PushID( "AggroArcOptions" );
+				try
+				{
+					mAggroArcsUI.DrawConfigOptions();
+				}
+				finally
+				{
+					ImGui.PopID();
+				}
 			}
 
 			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
@@ -180,218 +185,14 @@ public sealed class PluginUI : IDisposable
 
 			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
 			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Show Nameplate Distances", "Show distances on nameplates." ) + "###Show nameplate distances.", ref mConfiguration.NameplateDistancesConfig.ShowNameplateDistances );
-				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
+				ImGui.PushID( "NameplateOptions" );
+				try
 				{
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Distance Rules", "Distance Rules" ) + $"###Nameplate Distance Rules Header." ) )
-					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring (nameplates).", ref mConfiguration.NameplateDistancesConfig.DistanceIsToRing );
-						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Combat", "Out of Combat" ) + "###HideOutOfCombatButton", mConfiguration.NameplateDistancesConfig.HideOutOfCombat ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfCombat = true;
-							mConfiguration.NameplateDistancesConfig.HideInCombat = false;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Combat", "In Combat" ) + "###HideInCombatButton", mConfiguration.NameplateDistancesConfig.HideInCombat ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfCombat = false;
-							mConfiguration.NameplateDistancesConfig.HideInCombat = true;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInCombatButton", !mConfiguration.NameplateDistancesConfig.HideOutOfCombat && !mConfiguration.NameplateDistancesConfig.HideInCombat ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfCombat = false;
-							mConfiguration.NameplateDistancesConfig.HideInCombat = false;
-						}
-						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Instance", "Out of Instance" ) + "###HideOutOfInstanceButton", mConfiguration.NameplateDistancesConfig.HideOutOfInstance ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfInstance = true;
-							mConfiguration.NameplateDistancesConfig.HideInInstance = false;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Instance", "In Instance" ) + "###HideInInstanceButton", mConfiguration.NameplateDistancesConfig.HideInInstance ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfInstance = false;
-							mConfiguration.NameplateDistancesConfig.HideInInstance = true;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInInstanceButton", !mConfiguration.NameplateDistancesConfig.HideOutOfInstance && !mConfiguration.NameplateDistancesConfig.HideInInstance ) )
-						{
-							mConfiguration.NameplateDistancesConfig.HideOutOfInstance = false;
-							mConfiguration.NameplateDistancesConfig.HideInInstance = false;
-						}
-						ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show All", "Show distance on all nameplates." ) + $"###Show distance to all nameplates.", ref mConfiguration.NameplateDistancesConfig.ShowAll );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show All", "Shows distance on all nameplates for any objects that match the object type filters in the next section.  If this is unchecked, additional options will appear below." ) );
-						if( !mConfiguration.NameplateDistancesConfig.ShowAll )
-						{
-							ImGui.Indent();
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Target", "Show distance on target." ) + $"###Show distance to Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowTarget );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Soft Target", "Show distance on soft target." ) + $"###Show distance to Soft Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowSoftTarget );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Focus Target", "Show distance on focus target." ) + $"###Show distance to Focus Target (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowFocusTarget );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Mouseover Target", "Show distance on mouseover target." ) + $"###Show distance to mouseover target (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowMouseoverTarget );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Aggro", "Show distance on enemies aggressive to you." ) + $"###Show distance to aggro (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowAggressive );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Aggro", "This only applies to targets shown in the enemy list.  Distances for additional enemies aggressive to you will not be shown." ) );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Party", "Show distance on party members." ) + $"###Show distance to party (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowPartyMembers );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Party", "This does not apply to cross-world party members." ) );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Alliance", "Show distance on alliance members." ) + $"###Show distance to alliance (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowAllianceMembers );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Alliance", "This does not apply to cross-world alliance members." ) );
-							ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exclusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.FiltersAreExclusive );
-							ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Filters are Exclusive", "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria." ) );
-							ImGui.Unindent();
-						}
-						ImGui.TreePop();
-					}
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Filters", "Object Type Filters" ) + $"###Nameplate Filters Header." ) )
-					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + $"###Show distance to players (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnPlayers );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + $"###Show distance to BattleNpc (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnBattleNpc );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventNpc", "Show the distance to non-combatant NPCs." ) + $"###Show distance to EventNpc (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventNpc );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Treasure", "Show the distance to treasure chests." ) + $"###Show distance to treasure (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnTreasure );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Aetheryte", "Show the distance to aetherytes." ) + $"###Show distance to aetheryte (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnAetheryte );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Gathering Node", "Show the distance to gathering nodes." ) + $"###Show distance to gathering node (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnGatheringNode );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventObj", "Show the distance to interactable objects." ) + $"###Show distance to EventObj (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnEventObj );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Companion", "Show the distance to companions." ) + $"###Show distance to companion (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnCompanion );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Housing", "Show the distance to housing items." ) + $"###Show distance to housing (nameplates).", ref mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceOnHousing );
-						ImGui.TreePop();
-					}
-
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Classjobs", "Job Filters" ) + "###NameplateClassjobsHeader" ) )
-					{
-						float maxJobTextWidth = 0;
-						float currentJobTextWidth = 0;
-						float checkboxWidth = 0;
-						float leftMarginPos = 0;
-						var classJobDict = ClassJobUtils.ClassJobDict;
-						foreach( var entry in classJobDict )
-						{
-							if( !entry.Value.Abbreviation.IsNullOrEmpty() )
-							{
-								maxJobTextWidth = Math.Max( maxJobTextWidth, ImGui.CalcTextSize( entry.Value.Abbreviation ).X );
-							}
-						}
-						foreach( var sortCategory in Enum.GetValues<ClassJobSortCategory>() )
-						{
-							int displayedJobsCount = 0;
-							int rowLength = sortCategory < ClassJobSortCategory.Class ? 6 : 4;
-							for( uint j = 1; j < mConfiguration.NameplateDistancesConfig.Filters.ApplicableClassJobsArray.Length; ++j )
-							{
-								if( classJobDict.ContainsKey( j ) && classJobDict[j].SortCategory == sortCategory && !classJobDict[j].Abbreviation.IsNullOrEmpty() )
-								{
-									int colNum = (int) displayedJobsCount % rowLength;
-									currentJobTextWidth = ImGui.CalcTextSize( classJobDict[j].Abbreviation ).X;
-									if( displayedJobsCount != 0 && colNum != 0 ) ImGui.SameLine( leftMarginPos + ( checkboxWidth + maxJobTextWidth + ImGui.GetStyle().FramePadding.X + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.GetStyle().ItemSpacing.X ) * colNum );
-									ImGui.Checkbox( $"{classJobDict[j].Abbreviation}###NameplateClassjob{j}Checkbox", ref mConfiguration.NameplateDistancesConfig.Filters.ApplicableClassJobsArray[j] );
-
-									//	Big kludges, but I'm stupid and don't know a better way.
-									if( displayedJobsCount == 0 )
-									{
-										checkboxWidth = ImGui.GetItemRectSize().Y;
-										leftMarginPos = ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X;
-									}
-
-									++displayedJobsCount;
-								}
-							}
-						}
-						ImGui.TreePop();
-					}
-
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Appearance", "Appearance" ) + $"###Nameplate Appearance Header." ) )
-					{
-						Vector2 sliderLimits = new( -300, 300 );
-						ImGui.Text( Loc.Localize( "Config Option: Nameplates - Text Offset", "Distance text position offset (X,Y):" ) );
-						ImGui.DragFloat2( "###NameplateDistanceTextOffsetSlider", ref mConfiguration.NameplateDistancesConfig.DistanceTextOffset, 1f, sliderLimits.X, sliderLimits.Y, "%g", ImGuiSliderFlags.AlwaysClamp );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Automatic Alignment", "Automatically position distance text." ) + $"###automatic alignment (nameplates).", ref mConfiguration.NameplateDistancesConfig.AutomaticallyAlignText );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Automatic Alignment", "If this is checked, the distance text will automatically right, center, or left align to the nameplate text (subject to the offset above).  If unchecked, the distance text will always be at a fixed location, regardless of name length." ) );
-						if( mConfiguration.NameplateDistancesConfig.AutomaticallyAlignText )
-						{
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Place Below Name", "Place distance below nameplate." ) + $"###align below name (nameplates).", ref mConfiguration.NameplateDistancesConfig.PlaceTextBelowName );
-						}
-						ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Heavy Font", "Use heavy font for distance text." ) + $"###Distance font heavy  (nameplates).", ref mConfiguration.NameplateDistancesConfig.DistanceFontHeavy );
-						//ImGui.RadioButton( Loc.Localize( "Config Option: Nameplate Style - Match Game", "Match Game" ) + "###NameplateStyleMatchGameButton", ref mConfiguration.NameplateDistancesConfig.mNameplateStyle, (int)NameplateStyle.MatchGame );
-						//ImGui.SameLine();
-						//ImGui.RadioButton( Loc.Localize( "Config Option: Nameplate Style - Old", "Old" ) + "###NameplateStyleOldButton", ref mConfiguration.NameplateDistancesConfig.mNameplateStyle, (int)NameplateStyle.Old );
-						//ImGui.SameLine();
-						//ImGui.RadioButton( Loc.Localize( "Config Option: Nameplate Style - New", "New" ) + "###NameplateStyleNewButton", ref mConfiguration.NameplateDistancesConfig.mNameplateStyle, (int)NameplateStyle.New );
-						ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Size", "Distance text font size:" ) );
-						ImGui.SliderInt( $"###DistanceTextFontSizeSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.DistanceFontSize, 6, 36 );
-						ImGui.Text( Loc.Localize( "Config Option: Distance Text Font Alignment", "Text alignment:" ) );
-						ImGui.SliderInt( "###DistanceTextFontAlignmentSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.mDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + $"###Show distance units (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Allow Negative Distances", "Allow negative distances." ) + $"###Allow negative distances (nameplates).", ref mConfiguration.NameplateDistancesConfig.AllowNegativeDistances );
-						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
-						ImGui.SliderInt( $"###DistancePrecisionSlider (nameplates)", ref mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision, 0, 3 );
-
-						ImGui.TreePop();
-					}
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Colors", "Colors" ) + $"###Nameplate Colors Header." ) )
-					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Distance-based Colors (Party)", "Use distance-based text colors for party members." ) + $"###Distance Text Use distance-based colors (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplate Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, the \"Mid\" color if between far and near thresholds, and the \"Near\" color if within that distance." ) );
-						if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party )
-						{
-							ImGui.Indent();
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Near", "Use default nameplate color when near." ) + $"###Distance Text Use nameplate color (near) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_Party );
-							if( !mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_Party )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Near", "Distance text color (near)" ) + $"###DistanceTextColorPicker Near (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.NearRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + $"###DistanceTextEdgeColorPicker Near (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.NearRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Mid", "Use default nameplate color when mid." ) + $"###Distance Text Use nameplate color (mid) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_Party );
-							if( !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_Party )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Mid", "Distance text color (mid)" ) + $"###DistanceTextColorPicker Mid (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.MidRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Mid", "Distance text glow color (mid)" ) + $"###DistanceTextEdgeColorPicker Mid (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.MidRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Far", "Use default nameplate color when far." ) + $"###Distance Text Use nameplate color (far) (Nameplates - Party).", ref mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_Party );
-							if( !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_Party )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
-							ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.NearThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
-							ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
-							ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
-							ImGui.Unindent();
-							ImGui.Spacing();
-						}
-
-						ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Distance-based Colors (BNpc)", "Use distance-based text colors for battle NPCs." ) + $"###Distance Text Use distance-based colors (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_BNpc );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplate Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, the \"Mid\" color if between far and near thresholds, and the \"Near\" color if within that distance." ) );
-						if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_BNpc )
-						{
-							ImGui.Indent();
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Near", "Use default nameplate color when near." ) + $"###Distance Text Use nameplate color (near) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_BNpc );
-							if( !mConfiguration.NameplateDistancesConfig.NearRangeTextUseNameplateColor_BNpc )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Near", "Distance text color (near)" ) + $"###DistanceTextColorPicker Near (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.NearRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + $"###DistanceTextEdgeColorPicker Near (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.NearRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Mid", "Use default nameplate color when mid." ) + $"###Distance Text Use nameplate color (mid) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_BNpc );
-							if( !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_BNpc )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Mid", "Distance text color (mid)" ) + $"###DistanceTextColorPicker Mid (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.MidRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Mid", "Distance text glow color (mid)" ) + $"###DistanceTextEdgeColorPicker Mid (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.MidRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Checkbox( Loc.Localize( "Config Option: Nameplate Distance Text Use Nameplate Color Far", "Use default nameplate color when far." ) + $"###Distance Text Use nameplate color (far) (Nameplates - BNpc).", ref mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_BNpc );
-							if( !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_BNpc )
-							{
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
-								ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
-							}
-							ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
-							ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.NearThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
-							ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
-							ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
-							ImGui.Unindent();
-						}
-						ImGui.TreePop();
-					}
+					mNameplatesUI.DrawConfigOptions();
+				}
+				finally
+				{
+					ImGui.PopID();
 				}
 			}
 
@@ -1024,6 +825,7 @@ public sealed class PluginUI : IDisposable
 	private readonly PluginUI_AggroArcs mAggroArcsUI;
 	private readonly PluginUI_CustomWidgets mCustomWidgetsUI;
 	private readonly PluginUI_CustomArcs mCustomArcsUI;
+	private readonly PluginUI_Nameplates mNameplatesUI;
 
 	//	Need a real backing field on the following properties for use with ImGui.
 	private bool mSettingsWindowVisible = false;

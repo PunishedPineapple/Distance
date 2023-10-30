@@ -31,8 +31,7 @@ internal static unsafe class NameplateHandler
 			{
 				mNameplateDrawHook = Service.GameInteropProvider.HookFromAddress<NameplateDrawFuncDelegate>(fpOnNameplateDraw, mdNameplateDraw);
 				if( mNameplateDrawHook == null ) throw new Exception( "Unable to create nameplate draw hook." );
-				mNameplateDistancesEnabled = mConfiguration.NameplateDistancesConfig.ShowNameplateDistances;
-				mNameplateDrawHook.Enable();
+				if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) mNameplateDrawHook.Enable();
 			}
 		}
 		catch( Exception e )
@@ -51,8 +50,10 @@ internal static unsafe class NameplateHandler
 		mNameplateDrawHook?.Dispose();
 		mNameplateDrawHook = null;
 
-		DisableNameplateDistances();
 		DestroyNameplateDistanceNodes();
+
+		mNodeUpdateTimer.Reset();
+		mDistanceUpdateTimer.Reset();
 
 		mpNameplateAddon = null;
 		mConfiguration = null;
@@ -60,16 +61,28 @@ internal static unsafe class NameplateHandler
 
 	internal static void EnableNameplateDistances()
 	{
-		mNameplateDistancesEnabled = true;
+		if( mNameplateDrawHook == null ) return;
+		if( !mNameplateDrawHook.IsEnabled )
+		{
+			try
+			{
+				mNameplateDrawHook.Enable();
+			}
+			catch( Exception e )
+			{
+				Service.PluginLog.Error( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
+			}
+		}
 	}
 
 	internal static void DisableNameplateDistances()
 	{
-		if( mNameplateDistancesEnabled )
+		if( mNameplateDrawHook == null ) return;
+		if( mNameplateDrawHook.IsEnabled )
 		{
 			try
 			{
-				mNameplateDistancesEnabled = false;
+				mNameplateDrawHook.Disable();
 				mNodeUpdateTimer.Reset();
 				mDistanceUpdateTimer.Reset();
 				HideAllNameplateDistanceNodes();
@@ -140,11 +153,7 @@ internal static unsafe class NameplateHandler
 		if( i < 0 || i >= mNameplateDistanceInfoArray.Length ) return false;
 		if( mConfiguration == null ) return false;
 		if( !mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) return false;
-
-		if( mConfiguration.NameplateDistancesConfig.HideInCombat && Service.Condition[ConditionFlag.InCombat] ) return false;
-		if( mConfiguration.NameplateDistancesConfig.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) return false;
-		if( mConfiguration.NameplateDistancesConfig.HideInInstance && Service.Condition[ConditionFlag.BoundByDuty] ) return false;
-		if( mConfiguration.NameplateDistancesConfig.HideOutOfInstance && !Service.Condition[ConditionFlag.BoundByDuty] ) return false;
+		if( !mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForConditions( Service.Condition[ConditionFlag.InCombat], Service.Condition[ConditionFlag.BoundByDuty] ) ) return false;
 
 		var distanceInfo = mNameplateDistanceInfoArray[i];
 
@@ -197,18 +206,15 @@ internal static unsafe class NameplateHandler
 		{
 			if( mpNameplateAddon != pThis )
 			{
-				Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{new IntPtr( mpNameplateAddon ):X} -> 0x{new IntPtr( pThis ):X}" );
+				Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{(IntPtr)mpNameplateAddon:X} -> 0x{(IntPtr)pThis:X}" );
 				//	I don't know how to safely clean up our own nodes when the addon reloads.  The addon might take care of our inserted nodes when it cleans itself up anyway.
 				for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
 				mpNameplateAddon = pThis;
 				if( mpNameplateAddon != null ) CreateNameplateDistanceNodes();
 			}
 
-			if( mNameplateDistancesEnabled )
-			{
-				UpdateNameplateEntityDistanceData();
-				UpdateNameplateDistanceNodes();
-			}
+			UpdateNameplateEntityDistanceData();
+			UpdateNameplateDistanceNodes();
 		}
 		catch( Exception e )
 		{
@@ -583,7 +589,6 @@ internal static unsafe class NameplateHandler
 	private static Hook<NameplateDrawFuncDelegate> mNameplateDrawHook;
 
 	//	Members
-	private static bool mNameplateDistancesEnabled = false;
 	private static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];
 	private static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 	private static Configuration mConfiguration = null;

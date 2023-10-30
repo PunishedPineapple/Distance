@@ -342,15 +342,12 @@ public sealed class Plugin : IDalamudPlugin
 	{
 		if( Service.ClientState.IsPvP ) return false;
 		if( !config.Enabled ) return false;
-		if( config.HideInCombat && Service.Condition[ConditionFlag.InCombat] ) return false;
-		if( config.HideOutOfCombat && !Service.Condition[ConditionFlag.InCombat] ) return false;
-		if( config.HideInInstance && Service.Condition[ConditionFlag.BoundByDuty] ) return false;
-		if( config.HideOutOfInstance && !Service.Condition[ConditionFlag.BoundByDuty] ) return false;
 		if( !mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].IsValid ) return false;
 		if( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID == Service.ClientState.LocalPlayer?.ObjectId ) return false;
 
 		return	config.Filters.ShowDistanceForObjectKind( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].TargetKind ) &&
-				config.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 );
+				config.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 ) &&
+				config.Filters.ShowDistanceForConditions( Service.Condition[ConditionFlag.InCombat], Service.Condition[ConditionFlag.BoundByDuty] );
 	}
 
 	private void UpdateTargetDistanceData()

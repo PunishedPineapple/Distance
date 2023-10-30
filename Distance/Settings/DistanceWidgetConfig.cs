@@ -1,6 +1,10 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
+using System.Runtime.Serialization;
 
 using FFXIVClientStructs.FFXIV.Component.GUI;
+
+using Newtonsoft.Json;
 
 namespace Distance;
 
@@ -8,10 +12,6 @@ public class DistanceWidgetConfig
 {
 	public string WidgetName = "";
 	public bool Enabled = true;
-	public bool HideInCombat = false;
-	public bool HideOutOfCombat = false;
-	public bool HideInInstance = false;
-	public bool HideOutOfInstance = false;
 	public Vector2 TextPosition = new( -AtkNodeHelpers.DefaultTextNodeWidth, 30f );
 	public bool DistanceIsToRing = true;
 	public float DistanceOffset_Yalms = 0;
@@ -52,6 +52,28 @@ public class DistanceWidgetConfig
 		get { return (AlignmentType)mFontAlignment; }
 		set { mFontAlignment = (int)value; }
 	}
+
+	#region Old Setting Migration
+
+	[Obsolete("Use the corresponding \"Show\" flag instead.  Only exists for old config migration.")]
+	[JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+	public bool HideInCombat = false;
+	[Obsolete("Use the corresponding \"Show\" flag instead.  Only exists for old config migration.")]
+	[JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+	public bool HideOutOfCombat = false;
+
+	[OnDeserialized]
+	protected void MigrateOldSettings( StreamingContext s )
+	{
+		#pragma warning disable CS0618 // Type or member is obsolete
+		if( HideInCombat ) Filters.ShowInCombat = false;
+		if( HideOutOfCombat ) Filters.ShowOutOfCombat = false;
+		HideInCombat = false;
+		HideOutOfCombat = false;
+		#pragma warning restore CS0618 // Type or member is obsolete
+	}
+
+	#endregion
 
 	public DistanceWidgetFiltersConfig Filters { get; protected set; } = new DistanceWidgetFiltersConfig();
 }

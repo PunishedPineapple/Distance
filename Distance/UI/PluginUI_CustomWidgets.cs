@@ -37,7 +37,6 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 			try
 			{
 				var config = mConfiguration.DistanceWidgetConfigs[i];
-				var filters = config.Filters;
 				string name = config.WidgetName.Length > 0 ? config.WidgetName : config.ApplicableTargetType.GetTranslatedName();
 				if( ImGui.CollapsingHeader( String.Format( Loc.Localize( "Config Section Header: Distance Widget", "Distance Widget ({0})" ), name ) + "###DistanceWidgetHeader" ) )
 				{
@@ -65,99 +64,24 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 						ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
 						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 						ImGui.DragFloat( "###DistanceOffsetSlider", ref config.DistanceOffset_Yalms, 0.1f, -30f, 30f );
-						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Combat", "Out of Combat" ) + "###HideOutOfCombatButton", config.HideOutOfCombat ) )
-						{
-							config.HideOutOfCombat = true;
-							config.HideInCombat = false;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Combat", "In Combat" ) + "###HideInCombatButton", config.HideInCombat ) )
-						{
-							config.HideOutOfCombat = false;
-							config.HideInCombat = true;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInCombatButton", !config.HideOutOfCombat && !config.HideInCombat ) )
-						{
-							config.HideOutOfCombat = false;
-							config.HideInCombat = false;
-						}
-						ImGui.Text( Loc.Localize( "Config Option: Hide", "Hide:" ) );
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Out Of Instance", "Out of Instance" ) + "###HideOutOfInstanceButton", config.HideOutOfInstance ) )
-						{
-							config.HideOutOfInstance = true;
-							config.HideInInstance = false;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide In Instance", "In Instance" ) + "###HideInInstanceButton", config.HideInInstance ) )
-						{
-							config.HideOutOfInstance = false;
-							config.HideInInstance = true;
-						}
-						ImGui.SameLine();
-						if( ImGui.RadioButton( Loc.Localize( "Config Option: Hide Neither", "Neither" ) + "###HideNeitherInInstanceButton", !config.HideOutOfInstance && !config.HideInInstance ) )
-						{
-							config.HideOutOfInstance = false;
-							config.HideInInstance = false;
-						}
 						ImGui.TreePop();
 					}
 
 					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Filters", "Object Type Filters" ) + "###DistanceWidgetFiltersHeader" ) )
 					{
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Players", "Show the distance to players." ) + "###Show distance to players", ref filters.ShowDistanceOnPlayers );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on BattleNpc", "Show the distance to combatant NPCs." ) + "###Show distance to BattleNpc", ref filters.ShowDistanceOnBattleNpc );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventNpc", "Show the distance to non-combatant NPCs." ) + "###Show distance to EventNpc", ref filters.ShowDistanceOnEventNpc );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Treasure", "Show the distance to treasure chests." ) + "###Show distance to treasure", ref filters.ShowDistanceOnTreasure );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Aetheryte", "Show the distance to aetherytes." ) + "###Show distance to aetheryte", ref filters.ShowDistanceOnAetheryte );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Gathering Node", "Show the distance to gathering nodes." ) + "###Show distance to gathering node", ref filters.ShowDistanceOnGatheringNode );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on EventObj", "Show the distance to interactable objects." ) + "###Show distance to EventObj", ref filters.ShowDistanceOnEventObj );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Companion", "Show the distance to companions." ) + "###Show distance to companion", ref filters.ShowDistanceOnCompanion );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance on Housing", "Show the distance to housing items." ) + "###Show distance to housing", ref filters.ShowDistanceOnHousing );
+						config.Filters.DrawObjectKindOptions();
+						ImGui.TreePop();
+					}
+
+					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Classjobs", "Condition Filters" ) + "###DistanceWidgetConditionsHeader" ) )
+					{
+						config.Filters.DrawConditionOptions();
 						ImGui.TreePop();
 					}
 
 					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Classjobs", "Job Filters" ) + "###DistanceWidgetClassjobsHeader" ) )
 					{
-						float maxJobTextWidth = 0;
-						float currentJobTextWidth = 0;
-						float checkboxWidth = 0;
-						float leftMarginPos = 0;
-						var classJobDict = ClassJobUtils.ClassJobDict;
-						foreach( var entry in classJobDict )
-						{
-							if( !entry.Value.Abbreviation.IsNullOrEmpty() )
-							{
-								maxJobTextWidth = Math.Max( maxJobTextWidth, ImGui.CalcTextSize( entry.Value.Abbreviation ).X );
-							}
-						}
-						foreach( var sortCategory in Enum.GetValues<ClassJobSortCategory>() )
-						{
-							int displayedJobsCount = 0;
-							int rowLength = sortCategory < ClassJobSortCategory.Class ? 6 : 4;
-							for( uint j = 1; j < config.Filters.ApplicableClassJobsArray.Length; ++j )
-							{
-								if( classJobDict.ContainsKey( j ) && classJobDict[j].SortCategory == sortCategory && !classJobDict[j].Abbreviation.IsNullOrEmpty() )
-								{
-									int colNum = (int) displayedJobsCount % rowLength;
-									currentJobTextWidth = ImGui.CalcTextSize( classJobDict[j].Abbreviation ).X;
-									if( displayedJobsCount != 0 && colNum != 0 ) ImGui.SameLine( leftMarginPos + ( checkboxWidth + maxJobTextWidth + ImGui.GetStyle().FramePadding.X + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.GetStyle().ItemSpacing.X ) * colNum );
-									ImGui.Checkbox( $"{classJobDict[j].Abbreviation}###WidgetClassjob{j}Checkbox", ref config.Filters.ApplicableClassJobsArray[j] );
-
-									//	Big kludges, but I'm stupid and don't know a better way.
-									if( displayedJobsCount == 0 )
-									{
-										checkboxWidth = ImGui.GetItemRectSize().Y;
-										leftMarginPos = ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X;
-									}
-
-									++displayedJobsCount;
-								}
-							}
-						}
+						config.Filters.DrawClassJobOptions();
 						ImGui.TreePop();
 					}
 
