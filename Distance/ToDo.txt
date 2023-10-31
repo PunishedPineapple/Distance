@@ -5,42 +5,25 @@
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
 	-Make sure that nameplate nodes use thin text when nameplates use thin text.
-	-Update PluginLog calls.
+	-Try to fix nameplate node initial positions so that they do not jump on first use.
 
 
 Arbitrary Arcs:
-	-Allow user to configure based on the following:
-		-Target Type (Soft, Focus, etc.)
-		-Allow special target type of "self" that is always on, or maybe make it just a checkbox to not pollute the enum?  Unsure what is best.
-			-Always points directly in front of the player?
-			-Or an option to be behind for rpr egress?
-			-Just make arc center angle a config option.
-		-Special target types of all enemies, all aggressive enemies, all unagressive enemies.
-		-In or out of combat
-		-In or out of instance
-		-Class job
-		-Target aggressive status (see if we can figure out the nameplate flag instead of the enemy list)
-		-The usual filters
+	-Target Aggressive status options.
 	-Improve arcs to have radial lines for cones at the appropriate point, and maybe add an option to have those lines and the circle outside of the arc be dotted when not near enough angle to them for the configured arc length to show normally.
 	-Make sure that arc calcs/drawing have divide by zero protection and handle negative numbers smaller than target radius gracefully.
-	-Option to hide arc when further than a distance from it (both inward and outward).
-	-Option to fade arc when further than a distance from it (both inward and outward).
-		-Make this a gradient? (which would cover both the fade and hide cases)
-	-Option to limit BNpc target category to show only those within a certain range.
-		-An option to base culling distance on either actual BNpc position, or on hitring distance.
 
 
 Priority:
+	-Add text commands for arcs.
+	-Improve aggressive/unaggressive detection.
 	-Rate limit download attempts.
 		-Github does this for us, no?
-	-Offset ring distance by player ring distance too.
-		-This will cause confusion when using distance to make decisions on aoe skills, since those are from player center.
-		-Maybe the better path forward is to provide an option to offset by ring, and have a help entry that is a discussion of this.
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 	-Show distances on party list?
 	-Add distances to enemy list?
-	-On the off chance that this gets any more active work, improve the data file format and updater:
+	-Improve the data file format and updater:
 		-Make the datafile a CSV or similar so that additional columns can be added easily (i.e., aggro type, sight cone information, etc.)
 			-Does .net CSV parser work on Linux/Mac?
 			-JSON, etc. out because duplicating the schema for every row is stupid.
@@ -53,6 +36,7 @@ Cleanup:
 	-Make nameplate sig(s) optional.
 		-Implemented; just needs testing.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
+	-Change BNpcID to BNpcNameID to be more accurate.
 
 
 Misc:
@@ -60,9 +44,10 @@ Misc:
 
 
 Maybe:
+	-Add an option to export and import widget/arc configs, but the config options might not be the most stable things ever, so how much of a mess could this end up being?
+	-Add icon/text nodes to nameplates to show aggro type(s) and ranges (when available).
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 		-Could also have other neat icons like the auto attack one (ui/uld/TargetCursor_hr1.tex) that people could attach.
-	-Allow the user to set custom colors for different distance values, like in the aggro widget.
 	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
 		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
 	-Provide IPC for others to get aggro data?
