@@ -3,14 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 using CheapLoc;
 
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin;
-using Dalamud.Utility;
 
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
@@ -26,10 +24,11 @@ public sealed class PluginUI : IDisposable
 		mPluginInterface = pluginInterface;
 		mConfiguration = configuration;
 
-		mAggroArcsUI = new( plugin, this, configuration );
-		mCustomWidgetsUI = new( plugin, this, configuration );
-		mCustomArcsUI = new( plugin, this, configuration );
-		mNameplatesUI = new( plugin, this, configuration );
+		AggroArcsUI = new( plugin, this, configuration );
+		CustomWidgetsUI = new( plugin, this, configuration );
+		CustomArcsUI = new( plugin, this, configuration );
+		GeneralSettingsUI = new( plugin, this, configuration );
+		NameplatesUI = new( plugin, this, configuration );
 	}
 
 	public unsafe void Dispose()
@@ -43,10 +42,11 @@ public sealed class PluginUI : IDisposable
 
 		HideTextNode( mAggroDistanceNodeID );
 
-		mAggroArcsUI.Dispose();
-		mCustomWidgetsUI.Dispose();
-		mCustomArcsUI.Dispose();
-		mNameplatesUI.Dispose();
+		AggroArcsUI.Dispose();
+		CustomWidgetsUI.Dispose();
+		CustomArcsUI.Dispose();
+		GeneralSettingsUI.Dispose();
+		NameplatesUI.Dispose();
 	}
 
 	public void Initialize()
@@ -80,130 +80,46 @@ public sealed class PluginUI : IDisposable
 			return;
 		}
 
-		//	I'm too stupid to do anything right so we get to have this pile :D
-		float minWidth =	ImGui.GetStyle().WindowPadding.X * 2 +
-							ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetTextLineHeight() /*cheat to get checkbox width*/ + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.CalcTextSize( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) ).X +
-							ImGui.GetStyle().FramePadding.X * 2 + ImGui.GetStyle().ItemSpacing.X + ImGui.CalcTextSize( "(?)" ).X;
-
-		ImGui.SetNextWindowSizeConstraints( new( minWidth, 0f ), new( float.MaxValue ) );
+		ImGui.SetNextWindowSizeConstraints( new Vector2( 800f, 500f ) * ImGui.GetIO().FontGlobalScale, new( float.MaxValue ) );
 		if( ImGui.Begin( Loc.Localize( "Window Title: Config", "Distance Settings" ) + "###Distance Settings", ref mSettingsWindowVisible,
-			ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse /*| ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse*/ ) )
+			ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse ) )
 		{
-			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Settings", "Aggro Widget Settings" ) + "###Aggro Widget Settings Header." ) )
+			if( ImGui.BeginTabBar( "###DistanceSettingsTabBar" ) )
 			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Show Aggro Distance", "Show the remaining distance from the enemy before they will detect you." ) + "###Show aggro distance.", ref mConfiguration.ShowAggroDistance );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Show Aggro Distance", "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat." ) );
-				if( mConfiguration.ShowAggroDistance )
+				if( ImGui.BeginTabItem( Loc.Localize( "Settings Tab: General", "General Settings" ) + "###GeneralSettingsTab" ) )
 				{
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Distance Rules", "Distance Rules" ) + $"###Aggro Widget Distance Rules Header." ) )
-					{
-						ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
-						if( ImGui.BeginCombo( $"###AggroDistanceTypeDropdown", mConfiguration.AggroDistanceApplicableTargetType.GetTranslatedName() ) )
-						{
-							foreach( var item in TargetDropdownMenuItems )
-							{
-								if( ImGui.Selectable( item.GetTranslatedName(), mConfiguration.AggroDistanceApplicableTargetType == item ) )
-								{
-									mConfiguration.AggroDistanceApplicableTargetType = item;
-								}
-							}
-							ImGui.EndCombo();
-						}
-
-						ImGui.TreePop();
-					}
-
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Appearance", "Appearance" ) + $"###Aggro Widget Appearance Header." ) )
-					{
-						ImGui.Text( Loc.Localize( "Config Option: UI Attach Point", "UI Binding:" ) );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: UI Attach Point", "This is the UI element to which you wish to attach this widget.  \"Automatic\" tries to infer the best choice based on the target type you've selected for this widget.  \"Screen Space\" does not attach to a specific UI element, but floats above everything.  The others should be self-explanatory.  Note: Attaching to the mouse cursor can look odd if you use the hardware cursor; switch to the software cursor in the game options if necessary." ) );
-						ImGui.Combo( $"###AggroDistanceUIAttachTypeDropdown", ref mConfiguration.mAggroDistanceUIAttachType, UIAttachDropdownOptions, UIAttachDropdownOptions.Length );
-						bool useScreenText = mConfiguration.AggroDistanceUIAttachType.GetGameAddonToUse( mConfiguration.AggroDistanceApplicableTargetType ) == GameAddonEnum.ScreenText;
-						Vector2 sliderLimits = new( useScreenText ? 0 : -1000, useScreenText ? Math.Max( ImGuiHelpers.MainViewport.Size.X, ImGuiHelpers.MainViewport.Size.Y ) : 1000 );
-						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Position", "Position of the aggro widget (X,Y):" ) );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Position", "This is an offset relative to the UI element if it is attached to one, or is an absolute position on the screen if not." ) );
-						ImGui.DragFloat2( "###AggroDistanceTextPositionSlider", ref mConfiguration.AggroDistanceTextPosition, 1f, sliderLimits.X, sliderLimits.Y, "%g", ImGuiSliderFlags.AlwaysClamp );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Aggro Distance Text Use Heavy Font", "Use heavy font for aggro widget." ) + "###Aggro Distance font heavy.", ref mConfiguration.AggroDistanceFontHeavy );
-						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Font Size", "Aggro widget font size:" ) );
-						ImGui.SliderInt( "###AggroDistanceTextFontSizeSlider", ref mConfiguration.AggroDistanceFontSize, 6, 36 );
-						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Text Alignment", "Text alignment:" ) );
-						ImGui.SliderInt( "###AggroDistanceTextFontAlignmentSlider", ref mConfiguration.mAggroDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
-						ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.ShowUnitsOnAggroDistance );
-						ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distance:" ) );
-						ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
-						ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.AggroDistanceDecimalPrecision, 0, 3 );
-						ImGui.TreePop();
-					}
-
-					if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Aggro Widget Colors", "Colors" ) + $"###Aggro Widget Colors Header." ) )
-					{
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color", "Aggro widget text color" ) + "###AggroDistanceTextColorPicker", ref mConfiguration.AggroDistanceTextColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color", "Aggro widget text glow color" ) + "###AggroDistanceTextEdgeColorPicker", ref mConfiguration.AggroDistanceTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Caution", "Aggro widget text color (caution range)" ) + "###AggroDistanceCautionTextColorPicker", ref mConfiguration.AggroDistanceCautionTextColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Caution", "Aggro widget text glow color (caution range)" ) + "###AggroDistanceCautionTextEdgeColorPicker", ref mConfiguration.AggroDistanceCautionTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Warning", "Aggro widget text color (warning range)" ) + "###AggroDistanceWarningTextColorPicker", ref mConfiguration.AggroDistanceWarningTextColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Warning", "Aggro widget text glow color (warning range)" ) + "###AggroDistanceWarningTextEdgeColorPicker", ref mConfiguration.AggroDistanceWarningTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range (y):" ) );
-						ImGui.SliderFloat( "###AggroDistanceCautionRangeSlider", ref mConfiguration.AggroCautionDistance_Yalms, 0, 30 );
-						ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
-						ImGui.SliderFloat( "###AggroDistanceWarningRangeSlider", ref mConfiguration.AggroWarningDistance_Yalms, 0, 30 );
-						ImGui.TreePop();
-					}
+					GeneralSettingsUI.DrawSettingsTab();
+					ImGui.EndTabItem();
 				}
+				if( ImGui.BeginTabItem( Loc.Localize( "Settings Tab: Custom Widgets", "Custom Widgets" ) + "###CustomWidgetsSettingsTab" ) )
+				{
+					CustomWidgetsUI.DrawSettingsTab();
+					ImGui.EndTabItem();
+				}
+				if( ImGui.BeginTabItem( Loc.Localize( "Settings Tab: Custom Arcs", "Custom Arcs" ) + "###CustomArcsSettingsTab" ) )
+				{
+					CustomArcsUI.DrawSettingsTab();
+					ImGui.EndTabItem();
+				}
+				ImGui.EndTabBar();
 			}
 
-			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Widget Arc", "Aggro Arc Settings" ) + $"###Aggro Widget Arc Header." ) )
+			if( ImGui.Button( Loc.Localize( "Button: Save", "Save" ) + "###Save Button" ) )
 			{
-				ImGui.PushID( "AggroArcOptions" );
-				try
-				{
-					mAggroArcsUI.DrawConfigOptions();
-				}
-				finally
-				{
-					ImGui.PopID();
-				}
+				mConfiguration.Save();
 			}
-
-			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Aggro Distance Data", "Aggro Distance Data" ) + "###Aggro Distance Data Header." ) )
+			ImGui.SameLine();
+			if( ImGui.Button( Loc.Localize( "Button: Save and Close", "Save and Close" ) + "###Save and Close Button" ) )
 			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Auto Update Aggro Data", "Try to automatically fetch the most recent aggro distance data on startup." ) + "###Auto Update Aggro Data.", ref mConfiguration.AutoUpdateAggroData );
-				if( ImGui.Button( Loc.Localize( "Button: Download Aggro Distances", "Check for Updated Aggro Distances" ) + "###Download updated aggro distances." ) )
-				{
-					Task.Run( async () =>
-					{
-						var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ) );
-						if( downloadedFile != null ) BNpcAggroInfo.Init( Service.DataManager, downloadedFile );
-					} );
-				}
-				if( BNpcAggroInfoDownloader.CurrentDownloadStatus != BNpcAggroInfoDownloader.DownloadStatus.None )
-				{
-					ImGui.Text( Loc.Localize( "Config Text: Download Status Indicator", $"Status of most recent update attempt:" ) + $"\r\n{BNpcAggroInfoDownloader.GetCurrentDownloadStatusMessage()}" );
-				}
+				mConfiguration.Save();
+				SettingsWindowVisible = false;
 			}
-
-			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Nameplate Settings", "Nameplate Settings" ) + "###Nameplate Settings Header." ) )
-			{
-				ImGui.PushID( "NameplateOptions" );
-				try
-				{
-					mNameplatesUI.DrawConfigOptions();
-				}
-				finally
-				{
-					ImGui.PopID();
-				}
-			}
-
-			if( ImGui.CollapsingHeader( Loc.Localize( "Config Section Header: Miscellaneous", "Miscellaneous Options" ) + "###Misc. Options Header." ) )
-			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Suppress Text Command Responses", "Suppress text command responses." ) + "###Suppress text command responses.", ref mConfiguration.SuppressCommandLineResponses );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Suppress Text Command Responses", "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed." ) );
-			}
-
-			ImGui.Spacing();
-
+			float linkTextWidth = ImGui.CalcTextSize( Loc.Localize( "Config Text: Distance Information Link", "About Distance Measurement in FFXIV" ) ).X;
+			ImGui.PushFont( UiBuilder.IconFont );
+			linkTextWidth += ImGui.CalcTextSize( "\uF0C1" ).X;
+			ImGui.PopFont();
+			linkTextWidth += ImGui.GetStyle().ItemSpacing.X;
+			ImGui.SameLine( ImGui.GetContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - linkTextWidth + ImGui.GetStyle().WindowPadding.X );
 			try
 			{
 				ImGui.PushStyleColor( ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.Button] );
@@ -217,65 +133,6 @@ public sealed class PluginUI : IDisposable
 			catch( Exception e )
 			{
 				Service.PluginLog.Warning( $"Unable to open the requested link:\r\n{e}" );
-			}
-
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-
-			ImGui.Separator();
-
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-
-			ImGui.PushID( "CustomWidgetOptions" );
-			try
-			{
-				mCustomWidgetsUI.DrawConfigOptions();
-			}
-			finally
-			{
-				ImGui.PopID();
-			}
-
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-
-			ImGui.Separator();
-
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-			ImGui.Spacing();
-
-			ImGui.PushID( "CustomArcOptions" );
-			try
-			{
-				mCustomArcsUI.DrawConfigOptions();
-			}
-			finally
-			{
-				ImGui.PopID();
-			}
-
-			if( ImGui.Button( Loc.Localize( "Button: Save", "Save" ) + "###Save Button" ) )
-			{
-				mConfiguration.Save();
-			}
-			ImGui.SameLine();
-			if( ImGui.Button( Loc.Localize( "Button: Save and Close", "Save and Close" ) + "###Save and Close Button" ) )
-			{
-				mConfiguration.Save();
-				SettingsWindowVisible = false;
 			}
 		}
 
@@ -319,7 +176,7 @@ public sealed class PluginUI : IDisposable
 			ImGui.Spacing();
 			ImGui.Spacing();
 			ImGui.Spacing();
-							
+
 			ImGui.Text( "Nameplate Text Flags:" );
 			ImGui.Checkbox( "Auto Adjust Size", ref DEBUG_TextFlags_AutoAdjustNodeSize );
 			ImGui.Checkbox( "Bold", ref DEBUG_TextFlags_Bold );
@@ -502,10 +359,10 @@ public sealed class PluginUI : IDisposable
 		ImGuiHelpers.ForceNextWindowMainViewport();
 		ImGui.SetNextWindowPos( ImGui.GetMainViewport().Pos );
 		ImGui.SetNextWindowSize( ImGui.GetMainViewport().Size );
-		if( ImGui.Begin( "##AggroDistanceIndicatorWindow", ImGuiUtils.OverlayWindowFlags ) )
+		if( ImGui.Begin( "###DistanceArcsOverlayWindow", ImGuiUtils.OverlayWindowFlags ) )
 		{
-			mAggroArcsUI.DrawOnOverlay();
-			mCustomArcsUI.DrawOnOverlay();
+			AggroArcsUI.DrawOnOverlay();
+			CustomArcsUI.DrawOnOverlay();
 		}
 
 		ImGui.End();
@@ -663,7 +520,7 @@ public sealed class PluginUI : IDisposable
 			string unitString = mConfiguration.ShowUnitsOnAggroDistance ? "y" : "";
 			str = $"Aggro in {distance.ToString( $"F{mConfiguration.AggroDistanceDecimalPrecision}" )}{unitString}";
 
-			if( distance < mConfiguration.AggroWarningDistance_Yalms)
+			if( distance < mConfiguration.AggroWarningDistance_Yalms )
 			{
 				color = mConfiguration.AggroDistanceWarningTextColor;
 				edgeColor = mConfiguration.AggroDistanceWarningTextEdgeColor;
@@ -822,10 +679,11 @@ public sealed class PluginUI : IDisposable
 	private readonly DalamudPluginInterface mPluginInterface;
 	private readonly Configuration mConfiguration;
 
-	private readonly PluginUI_AggroArcs mAggroArcsUI;
-	private readonly PluginUI_CustomWidgets mCustomWidgetsUI;
-	private readonly PluginUI_CustomArcs mCustomArcsUI;
-	private readonly PluginUI_Nameplates mNameplatesUI;
+	internal readonly PluginUI_AggroArcs AggroArcsUI;
+	internal readonly PluginUI_CustomWidgets CustomWidgetsUI;
+	internal readonly PluginUI_CustomArcs CustomArcsUI;
+	internal readonly PluginUI_GeneralSettings GeneralSettingsUI;
+	internal readonly PluginUI_Nameplates NameplatesUI;
 
 	//	Need a real backing field on the following properties for use with ImGui.
 	private bool mSettingsWindowVisible = false;

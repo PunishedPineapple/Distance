@@ -2,6 +2,8 @@
 using System.Numerics;
 using System.Runtime.Serialization;
 
+using Dalamud.Utility;
+
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 using Newtonsoft.Json;
@@ -10,6 +12,8 @@ namespace Distance;
 
 public class DistanceWidgetConfig
 {
+	internal string DisplayedWidgetName => WidgetName.IsNullOrWhitespace() ? ApplicableTargetType.GetTranslatedName() : WidgetName;
+
 	public string WidgetName = "";
 	public bool Enabled = true;
 	public Vector2 TextPosition = new( -AtkNodeHelpers.DefaultTextNodeWidth, 30f );

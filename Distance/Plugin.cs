@@ -52,7 +52,7 @@ public sealed class Plugin : IDalamudPlugin
 			if( mConfiguration.AutoUpdateAggroData )
 			{
 				UInt64 highestLocalVersion = UInt64.Max( aggroFile_Assembly.FileVersion, aggroFile_Config.FileVersion );
-				var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" ), highestLocalVersion );
+				var downloadedFile = await BNpcAggroInfoDownloader.DownloadUpdatedAggroDataAsync( AggroDataPath, highestLocalVersion );
 				aggroFile_Config = downloadedFile ?? aggroFile_Config;
 			}
 			
@@ -397,6 +397,8 @@ public sealed class Plugin : IDalamudPlugin
 
 	public static string Name => "Distance";
 	private const string mTextCommandName = "/pdistance";
+
+	internal string AggroDataPath => Path.Join( mPluginInterface.GetPluginConfigDirectory(), "AggroDistances.dat" );
 
 	private readonly DistanceInfo[] mCurrentDistanceInfoArray = new DistanceInfo[Enum.GetNames(typeof(TargetType)).Length];
 	private readonly DalamudPluginInterface mPluginInterface;

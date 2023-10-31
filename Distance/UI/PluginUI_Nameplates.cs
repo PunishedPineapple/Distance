@@ -168,5 +168,4 @@ internal sealed class PluginUI_Nameplates : IDisposable
 	private readonly Plugin mPlugin;
 	private readonly PluginUI mUI;
 	private readonly Configuration mConfiguration;
-	private int mWidgetIndexWantToDelete = -1;
 }

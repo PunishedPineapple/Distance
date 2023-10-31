@@ -1,9 +1,15 @@
 ﻿using System.Numerics;
 
+using Dalamud.Utility;
+
 namespace Distance;
 
 public class DistanceArcConfig
 {
+	internal string DisplayedArcName => ArcName.IsNullOrWhitespace() ?
+										ApplicableTargetCategory == TargetCategory.Targets ? ApplicableTargetType.GetTranslatedName() : ApplicableTargetCategory.GetTranslatedName() :
+										ArcName;
+
 	internal bool WithinDisplayRangeOfArc( float distanceFromArc_Yalms )
 	{
 		return	distanceFromArc_Yalms > -( FadeoutThresholdInner_Yalms + FadeoutIntervalInner_Yalms ) &&
