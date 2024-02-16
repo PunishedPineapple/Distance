@@ -287,11 +287,13 @@ internal static unsafe class NameplateHandler
 			drawData.Alignment = textAlignment;
 			drawData.Font = mConfiguration.NameplateDistancesConfig.DistanceFontHeavy ? FontType.MiedingerMed : FontType.Axis;
 
-			float distance = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
-			SetDistanceBasedColor( ref drawData, distance, mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].TargetKind );
+			float distance_Yalms = mConfiguration.NameplateDistancesConfig.DistanceIsToRing ? mNameplateDistanceInfoArray[i].DistanceFromTargetRing_Yalms : mNameplateDistanceInfoArray[i].DistanceFromTarget_Yalms;
+			distance_Yalms -= GetDistanceOffset_Yalms( mNameplateDistanceInfoArray[i].TargetKind );
+			SetDistanceBasedColor( ref drawData, distance_Yalms, mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].TargetKind );
+			SetDistanceBasedAlpha( ref drawData, distance_Yalms, mNameplateDistanceInfoArray[i].ObjectID, mNameplateDistanceInfoArray[i].TargetKind );
 
-			float displayDistance = mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ? distance : Math.Max( 0, distance );
-			string distanceText = displayDistance.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
+			float displayDistance_Yalms = mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ? distance_Yalms : Math.Max( 0, distance_Yalms );
+			string distanceText = displayDistance_Yalms.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
 			if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
 
 			UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
@@ -301,7 +303,17 @@ internal static unsafe class NameplateHandler
 		mNodeUpdateTimer.Stop();
 	}
 
-	private static void SetDistanceBasedColor( ref TextNodeDrawData rDrawData, float distance, UInt32 objectID, Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+	private static float GetDistanceOffset_Yalms( Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+	{
+		return objectKind switch
+		{
+			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player => mConfiguration.NameplateDistancesConfig.DistanceOffset_Player_Yalms,
+			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc => mConfiguration.NameplateDistancesConfig.DistanceOffset_BNpc_Yalms,
+			_ => mConfiguration.NameplateDistancesConfig.DistanceOffset_Other_Yalms,
+		};
+	}
+
+	private static void SetDistanceBasedColor( ref TextNodeDrawData rDrawData, float distance_Yalms, UInt32 objectID, Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
 	{
 		bool setColor = false;
 		Vector4 textColorToUse = new();
@@ -311,13 +323,13 @@ internal static unsafe class NameplateHandler
 			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
 			PartyUtils.ObjectIsPartyMember( objectID ) )
 		{
-			if( distance > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms )
+			if( distance_Yalms > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms )
 			{
 				setColor = !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_Party;
 				textColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextColor_Party;
 				edgeColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_Party;
 			}
-			else if( distance > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_Party_Yalms )
+			else if( distance_Yalms > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_Party_Yalms )
 			{
 				setColor = !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_Party;
 				textColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextColor_Party;
@@ -333,13 +345,13 @@ internal static unsafe class NameplateHandler
 		else if(	mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_BNpc &&
 					objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
 		{
-			if( distance > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_BNpc_Yalms )
+			if( distance_Yalms > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_BNpc_Yalms )
 			{
 				setColor = !mConfiguration.NameplateDistancesConfig.FarRangeTextUseNameplateColor_BNpc;
 				textColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextColor_BNpc;
 				edgeColorToUse = mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_BNpc;
 			}
-			else if( distance > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_BNpc_Yalms )
+			else if( distance_Yalms > mConfiguration.NameplateDistancesConfig.NearThresholdDistance_BNpc_Yalms )
 			{
 				setColor = !mConfiguration.NameplateDistancesConfig.MidRangeTextUseNameplateColor_BNpc;
 				textColorToUse = mConfiguration.NameplateDistancesConfig.MidRangeTextColor_BNpc;
@@ -364,6 +376,68 @@ internal static unsafe class NameplateHandler
 			rDrawData.EdgeColorB = (byte)( edgeColorToUse.Z * 255f );
 			rDrawData.EdgeColorA = (byte)( edgeColorToUse.W * 255f );
 		}
+	}
+
+	private static void SetDistanceBasedAlpha( ref TextNodeDrawData rDrawData, float distance_Yalms, UInt32 objectID, Dalamud.Game.ClientState.Objects.Enums.ObjectKind objectKind )
+	{
+		float fadeAlphaGain = 1f;
+
+		if( mConfiguration.NameplateDistancesConfig.EnableFading_Party &&
+			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+			PartyUtils.ObjectIsPartyMember( objectID ) )
+		{
+			if( distance_Yalms < 0 )
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Party_Yalms - mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_Party_Yalms, 0f, -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Party_Yalms, 1f, distance_Yalms );
+			}
+			else
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Party_Yalms, 1f, mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Party_Yalms + mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_Party_Yalms, 0f, distance_Yalms );
+			}
+
+			if( mConfiguration.NameplateDistancesConfig.InvertFading_Party )
+			{
+				fadeAlphaGain = 1f - fadeAlphaGain;
+			}
+		}
+		else if( mConfiguration.NameplateDistancesConfig.EnableFading_BNpc &&
+				objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc )
+		{
+			if( distance_Yalms < 0 )
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_BNpc_Yalms - mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_BNpc_Yalms, 0f, -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_BNpc_Yalms, 1f, distance_Yalms );
+			}
+			else
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_BNpc_Yalms, 1f, mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_BNpc_Yalms + mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_BNpc_Yalms, 0f, distance_Yalms );
+			}
+
+			if( mConfiguration.NameplateDistancesConfig.InvertFading_BNpc )
+			{
+				fadeAlphaGain = 1f - fadeAlphaGain;
+			}
+		}
+		else if( mConfiguration.NameplateDistancesConfig.EnableFading_Other &&
+				objectKind != Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
+				!( objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+				PartyUtils.ObjectIsPartyMember( objectID ) ) )
+		{
+			if( distance_Yalms < 0 )
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Other_Yalms - mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_Other_Yalms, 0f, -mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Other_Yalms, 1f, distance_Yalms );
+			}
+			else
+			{
+				fadeAlphaGain = MathUtils.LinearInterpolation( mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Other_Yalms, 1f, mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Other_Yalms + mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_Other_Yalms, 0f, distance_Yalms );
+			}
+
+			if( mConfiguration.NameplateDistancesConfig.InvertFading_Other )
+			{
+				fadeAlphaGain = 1f - fadeAlphaGain;
+			}
+		}
+
+		rDrawData.Alpha = (byte)( (float)rDrawData.Alpha * fadeAlphaGain );
 	}
 
 	//***** TODO: It would be strongly preferable to pull the depth flag off of the nameplate node itself if we can find it, rather than maintaining this logic.
@@ -407,6 +481,7 @@ internal static unsafe class NameplateHandler
 				Height = pNameplateResNode->Height,
 				ScaleX = pNameplateTextNode->AtkResNode.ScaleX,
 				ScaleY = pNameplateTextNode->AtkResNode.ScaleY,
+				Alpha = pNameplateTextNode->AtkResNode.Color.A,
 				TextColorA = pNameplateTextNode->TextColor.A,
 				TextColorR = pNameplateTextNode->TextColor.R,
 				TextColorG = pNameplateTextNode->TextColor.G,
@@ -539,12 +614,15 @@ internal static unsafe class NameplateHandler
 		var pNode = mDistanceTextNodes[i];
 		if( pNode != null )
 		{
-			pNode->AtkResNode.ToggleVisibility( show && drawData.Show );
-			if( show && drawData.Show )
+			bool visible = show && drawData.Show && drawData.Alpha > 0;
+			pNode->AtkResNode.ToggleVisibility( visible );
+			if( visible )
 			{
 				pNode->AtkResNode.SetPositionShort( drawData.PositionX, drawData.PositionY );
 				pNode->AtkResNode.SetUseDepthBasedPriority( drawData.UseDepth );
 				pNode->AtkResNode.SetScale( drawData.ScaleX, drawData.ScaleY );
+
+				pNode->AtkResNode.Color.A = drawData.Alpha;
 
 				pNode->TextColor.A = drawData.TextColorA;
 				pNode->TextColor.R = drawData.TextColorR;

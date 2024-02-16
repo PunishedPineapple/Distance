@@ -215,6 +215,27 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 				}
 				ImGui.TreePop();
 			}
+
+			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Fading", "Fading" ) + "###DistanceWidgetFadingHeader" ) )
+			{
+				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Enable Fading", "Enable Distance-based fading." ), ref config.EnableFading );
+				if( config.EnableFading )
+				{
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading (y):" ) );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Inside Fade Distance", "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above." ) );
+					ImGui.DragFloat( "###DistanceTextInnerFadeThresholdSlider", ref config.FadeoutThresholdInner_Yalms, 0.5f, 1f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over (y):" ) );
+					ImGui.DragFloat( "###DistanceTextInnerFadeIntervalSlider", ref config.FadeoutIntervalInner_Yalms, 0.5f, 0f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading (y):" ) );
+					ImGui.DragFloat( "###DistanceTextOuterFadeThresholdSlider", ref config.FadeoutThresholdOuter_Yalms, 0.5f, 1f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
+					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over (y):" ) );
+					ImGui.DragFloat( "###DistanceTextOuterFadeIntervalSlider", ref config.FadeoutIntervalOuter_Yalms, 0.5f, 0f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
+					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox", ref config.InvertFading );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Invert Fading", "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );
+				}
+
+				ImGui.TreePop();
+			}
 		}
 		finally
 		{

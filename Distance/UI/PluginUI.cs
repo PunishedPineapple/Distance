@@ -393,28 +393,47 @@ public sealed class PluginUI : IDisposable
 		byte nodeAlphaToUse = 255;
 		Vector4 textColorToUse = config.TextColor;
 		Vector4 edgeColorToUse = config.TextEdgeColor;
+		float fadeAlphaGain = 1f;
 
 		if( distanceInfo.IsValid )
 		{
-			float distance = config.DistanceIsToRing ? distanceInfo.DistanceFromTargetRing_Yalms : distanceInfo.DistanceFromTarget_Yalms;
-			distance -= config.DistanceOffset_Yalms;
-			float displayDistance = config.AllowNegativeDistances ? distance : Math.Max( 0, distance );
+			float distance_Yalms = config.DistanceIsToRing ? distanceInfo.DistanceFromTargetRing_Yalms : distanceInfo.DistanceFromTarget_Yalms;
+			distance_Yalms -= config.DistanceOffset_Yalms;
+			float displayDistance = config.AllowNegativeDistances ? distance_Yalms : Math.Max( 0, distance_Yalms );
 			string unitString = config.ShowUnits ? "y" : "";
 			string distanceTypeSymbol = "";
 			if( config.ShowDistanceModeMarker ) distanceTypeSymbol = config.DistanceIsToRing ? "◯ " : "· ";
 			str = $"{distanceTypeSymbol}{displayDistance.ToString( $"F{config.DecimalPrecision}" )}{unitString}";
 
+			//***** TODO: Add options to use the UI color for each threshold like we have for nameplates.
 			if( config.UseDistanceBasedColor )
 			{
-				if( distance > config.FarThresholdDistance_Yalms )
+				if( distance_Yalms > config.FarThresholdDistance_Yalms )
 				{
 					textColorToUse = config.FarThresholdTextColor;
 					edgeColorToUse = config.FarThresholdTextEdgeColor;
 				}
-				else if( distance > config.NearThresholdDistance_Yalms )
+				else if( distance_Yalms > config.NearThresholdDistance_Yalms )
 				{
 					textColorToUse = config.NearThresholdTextColor;
 					edgeColorToUse = config.NearThresholdTextEdgeColor;
+				}
+			}
+
+			if( config.EnableFading )
+			{
+				if( distance_Yalms < 0 )
+				{
+					fadeAlphaGain = MathUtils.LinearInterpolation( -config.FadeoutThresholdInner_Yalms - config.FadeoutIntervalInner_Yalms, 0f, -config.FadeoutThresholdInner_Yalms, 1f, distance_Yalms );
+				}
+				else
+				{
+					fadeAlphaGain = MathUtils.LinearInterpolation( config.FadeoutThresholdOuter_Yalms, 1f, config.FadeoutThresholdOuter_Yalms + config.FadeoutIntervalOuter_Yalms, 0f, distance_Yalms );
+				}
+
+				if( config.InvertFading )
+				{
+					fadeAlphaGain = 1f - fadeAlphaGain;
 				}
 			}
 		}
@@ -488,7 +507,7 @@ public sealed class PluginUI : IDisposable
 		{
 			PositionX = (short)( config.TextPosition.X + mouseoverOffset.X ),
 			PositionY = (short)( config.TextPosition.Y + mouseoverOffset.Y ),
-			Alpha = nodeAlphaToUse,
+			Alpha = (byte)( (float)nodeAlphaToUse * fadeAlphaGain ),
 			TextColorA = (byte)( textColorToUse.W * 255f ),
 			TextColorR = (byte)( textColorToUse.X * 255f ),
 			TextColorG = (byte)( textColorToUse.Y * 255f ),
@@ -595,7 +614,7 @@ public sealed class PluginUI : IDisposable
 			//	If we have our node, set the colors, size, and text from settings.
 			if( pNode != null )
 			{
-				bool visible = show && !ShouldHideUIOverlays();
+				bool visible = show && !ShouldHideUIOverlays() && drawData.Alpha > 0;
 				( (AtkResNode*)pNode )->ToggleVisibility( visible );
 				if( visible )
 				{

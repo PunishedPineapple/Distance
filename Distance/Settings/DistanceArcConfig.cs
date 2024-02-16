@@ -60,6 +60,11 @@ public class DistanceArcConfig
 		{
 			fadeAlphaGain = MathUtils.LinearInterpolation( FadeoutThresholdOuter_Yalms, 1f, FadeoutThresholdOuter_Yalms + FadeoutIntervalOuter_Yalms, 0f, distanceFromArc_Yalms );
 		}
+
+		if( InvertFading )
+		{
+			fadeAlphaGain = 1f - fadeAlphaGain;
+		}
 		
 		color.W *= fadeAlphaGain; ;
 		edgeColor.W *= fadeAlphaGain;
@@ -83,6 +88,7 @@ public class DistanceArcConfig
 	public float FadeoutIntervalInner_Yalms = 3f;
 	public float FadeoutThresholdOuter_Yalms = 10f;
 	public float FadeoutIntervalOuter_Yalms = 5f;
+	public bool InvertFading = false;
 	public bool ShowPip = true;
 	public float ArcLength = 2f;
 	public bool ArcLengthIsYalms = true;

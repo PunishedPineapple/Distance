@@ -191,8 +191,9 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				}
 
 				ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Use distance to target ring, not target center." ) + "###ArcDistanceIsToRingCheckbox", ref config.DistanceIsToRing );
+				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance is to Ring", "You will generally want this box checked unless the arc is centered on yourself, but specific use cases will vary." ) );
 				ImGui.Text( Loc.Localize( "Config Option: Arc Radius", "The radius of the arc (y):" ) );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Radius", "This distance is relative to either the object's center, or to its hitring, as configured above." ) );
+				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Radius", "This distance is relative to either the object's center, or to its hitring, as configured above.  Max melee is effectively 3.5 yalms." ) );
 				ImGui.DragFloat( "###ArcDistanceSlider", ref config.ArcRadius_Yalms, 0.1f, -30f, 30f );
 				ImGui.TreePop();
 			}
@@ -225,15 +226,6 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				if( ImGui.RadioButton( Loc.Localize( "Unit String: Yalms Lower", "yalms" ), config.ArcLengthIsYalms ) ) config.ArcLengthIsYalms = true;
 				ImGui.SliderFloat( "###ArcLengthSlider", ref config.ArcLength, 0, 30 );
 
-				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Fade Distance", "Distance inside the arc to start fading (y):" ) );
-				ImGui.DragFloat( "###ArcDistanceInnerFadeThresholdSlider", ref config.FadeoutThresholdInner_Yalms, 0.5f, 1f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Fade Interval", "Fade over (y):" ) );
-				ImGui.DragFloat( "###ArcDistanceInnerFadeIntervalSlider", ref config.FadeoutIntervalInner_Yalms, 0.5f, 0f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Fade Distance", "Distance outside the arc to start fading (y):" ) );
-				ImGui.DragFloat( "###ArcDistanceOuterFadeThresholdSlider", ref config.FadeoutThresholdOuter_Yalms, 0.5f, 1f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Fade Interval", "Fade over (y):" ) );
-				ImGui.DragFloat( "###ArcDistanceOuterFadeIntervalSlider", ref config.FadeoutIntervalOuter_Yalms, 0.5f, 0f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
-
 				ImGui.TreePop();
 			}
 
@@ -242,10 +234,10 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				if( config.ApplicableTargetCategory != TargetCategory.Self )
 				{
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Arc Use Distance-based Colors", "Use distance-based arc colors." ) + "###DistanceArcUseDistanceBasedColors", ref config.UseDistanceBasedColor );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Arc Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" colors if past that distance, otherwise the \"Near\" colors if past that distance, otherwise uses the base color specified above." ) );
 				}
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Arc Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" colors if past that distance, otherwise the \"Near\" colors if past that distance, otherwise uses the base color specified above." ) );
-				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color", "Distance text color" ) + "###ArcColorPicker", ref config.Color, ImGuiColorEditFlags.NoInputs );
-				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color", "Distance text glow color" ) + "###ArcEdgeColorPicker", ref config.EdgeColor, ImGuiColorEditFlags.NoInputs );
+				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color", "Arc color" ) + "###ArcColorPicker", ref config.Color, ImGuiColorEditFlags.NoInputs );
+				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color", "Arc glow color" ) + "###ArcEdgeColorPicker", ref config.EdgeColor, ImGuiColorEditFlags.NoInputs );
 				if( config.UseDistanceBasedColor && config.ApplicableTargetCategory != TargetCategory.Self )
 				{
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside near)" ) + "###ArcColorPickerInnerNear", ref config.InnerNearThresholdColor, ImGuiColorEditFlags.NoInputs );
@@ -266,6 +258,23 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 					ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Far Range", "Distance \"outside far\" range (y):" ) );
 					ImGui.DragFloat( "###ArcDistanceFarOutsideRangeSlider", ref config.OuterFarThresholdDistance_Yalms, 0.5f, 0f, 30f );
 				}
+				ImGui.TreePop();
+			}
+
+			if( config.ApplicableTargetCategory != TargetCategory.Self &&
+				ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Arc Fading", "Fading" ) + "###DistanceArcFadingHeader" ) )
+			{
+				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Fade Distance", "Distance inside the arc to start fading (y):" ) );
+				ImGui.DragFloat( "###ArcDistanceInnerFadeThresholdSlider", ref config.FadeoutThresholdInner_Yalms, 0.5f, 1f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
+				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Fade Interval", "Fade over (y):" ) );
+				ImGui.DragFloat( "###ArcDistanceInnerFadeIntervalSlider", ref config.FadeoutIntervalInner_Yalms, 0.5f, 0f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
+				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Fade Distance", "Distance outside the arc to start fading (y):" ) );
+				ImGui.DragFloat( "###ArcDistanceOuterFadeThresholdSlider", ref config.FadeoutThresholdOuter_Yalms, 0.5f, 1f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
+				ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Fade Interval", "Fade over (y):" ) );
+				ImGui.DragFloat( "###ArcDistanceOuterFadeIntervalSlider", ref config.FadeoutIntervalOuter_Yalms, 0.5f, 0f, 30f, "%g", ImGuiSliderFlags.AlwaysClamp );
+				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Arc Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox", ref config.InvertFading );
+				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Arc Invert Fading", "Instead of showing the arc within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );
+
 				ImGui.TreePop();
 			}
 		}

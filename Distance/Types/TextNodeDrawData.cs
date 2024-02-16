@@ -17,7 +17,7 @@ public struct TextNodeDrawData
 
 	public bool UseDepth;	//Nameplate only
 
-	public byte Alpha;      //Nameplate only
+	public byte Alpha;
 
 	public byte TextColorA;
 	public byte TextColorR;

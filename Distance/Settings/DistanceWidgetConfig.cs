@@ -25,6 +25,12 @@ public class DistanceWidgetConfig
 	public bool AllowNegativeDistances = false;
 	public int FontSize = 14;
 	public bool FontHeavy = false;
+	public bool EnableFading = false;
+	public bool InvertFading = false;
+	public float FadeoutThresholdInner_Yalms = 10f;
+	public float FadeoutIntervalInner_Yalms = 3f;
+	public float FadeoutThresholdOuter_Yalms = 30f;
+	public float FadeoutIntervalOuter_Yalms = 5f;
 	public Vector4 TextColor = new( (float)0xFF / 255f, (float)0xF8 / 255f, (float)0xB0 / 255f, (float)0xFF / 255f );
 	public Vector4 TextEdgeColor = new( (float)0x63 / 255f, (float)0x4F / 255f, (float)0x00 / 255f, (float)0xFF / 255f );
 	public bool TrackTargetBarTextColor = true;
