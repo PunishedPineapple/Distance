@@ -46,6 +46,8 @@ Misc:
 	-Melee autos appear to be 3.1y, not 3?
 	-Striking dummies are really weird; targeted skills work at stated range, aoe skills and autos act like their hitring is 0.5y.
 		-This only appears to apply to some dummies (Level 50 one at house was like this (BNpc ID 541), level 80 ones at Ondo Cups worked like normal enemies).
+		-This actually appears to potentially be due to these striking dummies having the object be raised up off of the ground, so your ground distance is within hit
+			hit range, but AoE skills might use actual distance, not the projected distance?  That makes things a mess if so.
 
 
 
