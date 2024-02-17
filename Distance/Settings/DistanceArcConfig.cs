@@ -12,8 +12,21 @@ public class DistanceArcConfig
 
 	internal bool WithinDisplayRangeOfArc( float distanceFromArc_Yalms )
 	{
-		return	distanceFromArc_Yalms > -( FadeoutThresholdInner_Yalms + FadeoutIntervalInner_Yalms ) &&
-				distanceFromArc_Yalms < FadeoutThresholdOuter_Yalms + FadeoutIntervalOuter_Yalms;
+		bool inRange;
+
+		if( InvertFading )
+		{
+			inRange =	distanceFromArc_Yalms < -FadeoutThresholdInner_Yalms ||
+						distanceFromArc_Yalms > FadeoutThresholdOuter_Yalms;
+		}
+		else
+		{
+
+			inRange =	distanceFromArc_Yalms > -( FadeoutThresholdInner_Yalms + FadeoutIntervalInner_Yalms ) &&
+						distanceFromArc_Yalms < FadeoutThresholdOuter_Yalms + FadeoutIntervalOuter_Yalms;
+		}
+
+		return inRange;
 	}
 
 	internal (Vector4,Vector4) GetColors( float distanceFromArc_Yalms )
