@@ -32,8 +32,13 @@ internal struct DistanceInfo
 
 	internal float DistanceFromTarget_Yalms => PlayerPosition.DistanceTo_XZ( TargetPosition );
 	internal float DistanceFromTargetRing_Yalms => DistanceFromTarget_Yalms - TargetRadius_Yalms;
-	internal float EffectiveRangeFromTarget_Yalms => DistanceFromTarget_Yalms - TargetRadius_Yalms - PlayerHitRingRadius;
 	internal float DistanceFromTargetAggro_Yalms => DistanceFromTargetRing_Yalms - AggroRange_Yalms;
+
+	internal float HeightAboveTarget_Yalms => PlayerPosition.Y - TargetPosition.Y;
+
+	internal float DistanceFromTarget3D_Yalms => (PlayerPosition - TargetPosition ).Length();
+	internal float DistanceFromTargetRing3D_Yalms => DistanceFromTarget3D_Yalms - TargetRadius_Yalms;
+	internal float DistanceFromTargetAggro3D_Yalms => DistanceFromTargetRing3D_Yalms - AggroRange_Yalms;
 
 	public override string ToString()
 	{
@@ -50,9 +55,12 @@ internal struct DistanceInfo
 		str += $"Target Radius (y): {TargetRadius_Yalms:F3}\r\n";
 		str += $"Distance To Target (y): {DistanceFromTarget_Yalms:F3}\r\n";
 		str += $"Distance To Ring (y): {DistanceFromTargetRing_Yalms:F3}\r\n";
-		str += $"Effective Targeted Range (y): {EffectiveRangeFromTarget_Yalms:F3}\r\n";
-		str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms:F3} " : "No Data" )}";
-		
+		str += $"Distance To Aggro (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro_Yalms:F3} " : "No Data" )}\r\n";
+		str += $"Height Above Target (y): {HeightAboveTarget_Yalms:F3}\r\n";
+		str += $"Distance To Target (3D) (y): {DistanceFromTarget3D_Yalms:F3}\r\n";
+		str += $"Distance To Ring (3D) (y): {DistanceFromTargetRing3D_Yalms:F3}\r\n";
+		str += $"Distance To Aggro (3D) (y): {( HasAggroRangeData ? $"{DistanceFromTargetAggro3D_Yalms:F3} " : "No Data" )}\r\n";
+
 		return str;
 	}
 

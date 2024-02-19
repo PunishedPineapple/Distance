@@ -15,13 +15,23 @@ Arbitrary Arcs:
 
 
 Priority:
+
+	-Add fading for aggro text/arc, but realistically, wait until aggro arcs overhaul.
+	-Make the aggro distance arc have a deg/yalm option like for custom arcs.
+	-Go over distance-based coloring options for non-arc things and make sure that they are sane.
+		-Add options to track UI element color and transparency (two options) for each stage of distance-based color.
+		-Add an option to track only UI element transparancy? (fading is always handled separately)
+	-Try to find out how to project the arc coordinates onto the ground, even without in-world drawing.  This will make them a bit less awkward when there is any height variation or jumping.
 	-Add text commands for arcs.
 	-Improve aggressive/unaggressive detection.
 	-Rate limit download attempts.
 		-Github does this for us, no?
-	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., striking dummy).
+	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., certain striking dummies).
+		-See RE notes for investigation so far.
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 	-Show distances on party list?
+		-If we do this, maybe just color code name instead of having a readout (at least as an option.
+			-For color coding, allow using different distance thresholds when party member is untargeted vs. mouseover/soft/regular targeted.
 	-Add distances to enemy list?
 	-Improve the data file format and updater:
 		-Make the datafile a CSV or similar so that additional columns can be added easily (i.e., aggro type, sight cone information, etc.)
@@ -37,6 +47,7 @@ Cleanup:
 		-Implemented; just needs testing.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
 	-Change BNpcID to BNpcNameID to be more accurate.
+	-When we have better aggressive flags, make enemy list a separate option?
 
 
 Misc:
@@ -44,7 +55,12 @@ Misc:
 
 
 Maybe:
+	-Add custom position/coordinate readout widgets.
+	-Radius option for arc pip.
+	-Thickness options for pip and arc?
 	-Add an option to export and import widget/arc configs, but the config options might not be the most stable things ever, so how much of a mess could this end up being?
+	-Use job icons instead of abbreviations in the classjob filters config?
+	-Revisit making distance-based colors optionally gradients.
 	-Add icon/text nodes to nameplates to show aggro type(s) and ranges (when available).
 	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
 		-Could also have other neat icons like the auto attack one (ui/uld/TargetCursor_hr1.tex) that people could attach.
@@ -73,23 +89,3 @@ Rejected:
 	-ImGui cursor position seems to lag the game's cursor position, making a mouseover widget get wiggly sometimes.
 		-This actually seems to happen with the game's cursor itself and game UI windows.
 		-Problem fixed if using software cursor in options, so not our problem really.
-
-
-A Note on Skill Ranges (stick on wiki and link or something):
-	The game uses a few different metrics when determining distances at which skills can be used and hit entities, so please consider the
-	following when taking or using distance measurements:
-		- For all targeted skills, the skill's range is from the edge of the character's hitring (0.5y from character
-			center) to the edge of the enemy's/ally's hitring.  This means that, for example, max melee range from an enemy's hitring is actually 3.5y
-			as measured by this plugin, not the 3y stated on the tooltip.  The reason that distances reported by the plugin do not automatically
-			take this into account is because it would then incorrectly report distances in terms of AoE skills.
-		- For AoE skills that have a radius, the radius is measured from the center of the target.  The target can be yourself (skills like Standard Step, Medica, etc.),
-			an enemy (Flare, Akh Morn, etc.), or another player (Cure III).  For an AoE skill to hit an enemy, the edge of their hitring must be within the specific skill's
-			radius of the skill target's center.  This is the distance that the plugin measures by default (player center to target hitring).
-		-For a beneficial AoE skill to hit another player, their center must be within the specific skill's radius of the target's center.  This means
-			that, for example, a party member must be within 14.5y as measured by this plugin to be hit by medica, not the 15y stated on the tooltip.
-		-Accordingly, depending on your usage of the plugin, you may or may not wish to apply an offset to measured distances in the plugin settings; however,
-			remember that offsetting to make targeted skill ranges match tooltips will make AoE radius off by another half yalm, and vise versa if offsetting
-			for AoE healing skills.  This can also be partially aleviated by creating mutliple widgets with different object type filters and ring settings.
-
-		-tl;dr: With default settings, you will be able to hit enemies with single-target skills 0.5y further away than your tooltips say, and will have to be 0.5y closer
-				than your tooltips say to AoE heal or buff a party member.

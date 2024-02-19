@@ -43,12 +43,37 @@ Player to EventObjects:
 
 
 Misc:
-	-Melee autos appear to be 3.1y, not 3?
 	-Striking dummies are really weird; targeted skills work at stated range, aoe skills and autos act like their hitring is 0.5y.
 		-This only appears to apply to some dummies (Level 50 one at house was like this (BNpc ID 541), level 80 ones at Ondo Cups worked like normal enemies).
 		-This actually appears to potentially be due to these striking dummies having the object be raised up off of the ground, so your ground distance is within hit
 			hit range, but AoE skills might use actual distance, not the projected distance?  That makes things a mess if so.
+			-After some testing, it is not the 3D distance difference either; it appears to be based on ring distance without a height influence.
+			-Furthermore, after repositioning the dummy on the lawn made it no longer have the object raised, even going back to the same spot.  Idk what was going on.
+				-Placing it back up against the slanted pillar and then going into an instance and leaving again has the object raised again with the model sitting
+					on the ground.  Collision hitbox of the dummy might be doing strange things on the fence slant.
+			-Overall, back to square one of their hitrings just being 0.5y for AoE/autos, but 1.5y for single target (and visually).
 
+
+Autos:
+	-Melee autos appear to be 3.1y, not 3y?  Ranged are also 25.1y, not 25y.  They are exactly 3y and 25y vertically, though.
+	-Ranged autos do not appear to be affected by line of sight obstructions, at least in the vertical direction (testing from roof of house).
+	-As with all other skills, autos ignore target radius for height (there is no "ring" in the Y axis).
+
+
+Height:
+	-AoE attacks (those with a radius, but no range) appear to take effect only within 5y vertically (both above and below).  This applies regardless of shape (circle, cone, line).
+		-AoE attacks that originate from you, but require a target, will hit that target when within the range vertically, but no other enemies will be hit outside of +-5y.
+			-This applies regardless of shape, but is only currently relevant for cones and lines, such as DRG line skills, MCH targeted cone skills, and SAM targeted cone skills.
+		-AoE attacks that target an enemy and produce a radius around it (i.e., Flare) will hit when within the cast range vertically, but adjacent enemies must be within +-5y of the target to also be hit.
+		-It is very difficult to test targeted actions that also have a radius, but they *appear* to hit within their range vertically, at least for the enemy targeted.
+	-Ranged autos/skills used the 2D distance to ring until above the skill range's height.
+		-Throwing Dagger and Raiton went out of range greater than 20y above the target (total distance was 25.6y)
+			-Error message was "Target is not in range", but the skill on the hotbar did not have a red X until horizontal distance was beyond skill range (+0.5y).
+		-DNC and WHM skills worked the same for their respective ranges.
+		-WAR melee skills worked the same for their respective ranges.
+		-Melee autos worked at exactly 3y above the target.
+	-AoE healing effects (at least from fairy) are also restricted to +-5y.
+	-Fairy height difference for casting was inconsistent.  Unsure if pet logic issue or distance issue.
 
 
 Aggro:
