@@ -30,7 +30,7 @@ internal sealed class PluginUI_Nameplates : IDisposable
 		{
 			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Distance Rules", "Distance Rules" ) + $"###Nameplate Distance Rules Header." ) )
 			{
-				ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + $"###Distance is to ring (nameplates).", ref mConfiguration.NameplateDistancesConfig.DistanceIsToRing );
+				ImGui.Checkbox( Loc.Localize("Config Option: Distance is to Ring for nameplates", "Show distance to target ring, not target center." ) + $"###Distance is to ring (nameplates).", ref mConfiguration.NameplateDistancesConfig.DistanceIsToRing );
 				ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show All", "Show distance on all nameplates." ) + $"###Show distance to all nameplates.", ref mConfiguration.NameplateDistancesConfig.ShowAll );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show All", "Shows distance on all nameplates for any objects that match the object type filters in the next section.  If this is unchecked, additional options will appear below." ) );
 				if( !mConfiguration.NameplateDistancesConfig.ShowAll )
@@ -61,7 +61,7 @@ internal sealed class PluginUI_Nameplates : IDisposable
 				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (BNpc)", "Amount to offset the distance readout for combatant NPCs (y):" ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.DistanceOffset_BNpc_Yalms, 0.1f, -30f, 30f );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (Player)", "Amount to offset the distance readout for all other entities (y):" ) );
+				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (Other)", "Amount to offset the distance readout for all other entities (y):" ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider_Other", ref mConfiguration.NameplateDistancesConfig.DistanceOffset_Other_Yalms, 0.1f, -30f, 30f );
 				ImGui.TreePop();
@@ -73,7 +73,7 @@ internal sealed class PluginUI_Nameplates : IDisposable
 				ImGui.TreePop();
 			}
 
-			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Classjobs", "Condition Filters" ) + "###NameplateConditionsHeader" ) )
+			if( ImGui.TreeNode( Loc.Localize("Config Section Header: Distance Nameplate Condition", "Condition Filters" ) + "###NameplateConditionsHeader" ) )
 			{
 				mConfiguration.NameplateDistancesConfig.Filters.DrawConditionOptions();
 				ImGui.TreePop();

@@ -156,7 +156,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				if( config.ApplicableTargetCategory == TargetCategory.Targets )
 				{
 					ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this Arc will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Arc Applicable Target Type", "The type of target for which this Arc will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
 					if( ImGui.BeginCombo( "###ArcTargetTypeDropdown", config.ApplicableTargetType.GetTranslatedName() ) )
 					{
 						foreach( var item in PluginUI.TargetDropdownMenuItems )
@@ -205,7 +205,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				ImGui.TreePop();
 			}
 
-			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Classjobs", "Condition Filters" ) + "###DistanceArcConditionsHeader" ) )
+			if( ImGui.TreeNode( Loc.Localize("Config Section Header: Distance Arc Condition", "Condition Filters" ) + "###DistanceArcConditionsHeader" ) )
 			{
 				config.Filters.DrawConditionOptions();
 				ImGui.TreePop();
@@ -240,8 +240,8 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color", "Arc glow color" ) + "###ArcEdgeColorPicker", ref config.EdgeColor, ImGuiColorEditFlags.NoInputs );
 				if( config.UseDistanceBasedColor && config.ApplicableTargetCategory != TargetCategory.Self )
 				{
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside near)" ) + "###ArcColorPickerInnerNear", ref config.InnerNearThresholdColor, ImGuiColorEditFlags.NoInputs );
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Far", "Arc glow color (inside near)" ) + "###ArcEdgeColorPickerInnerNear", ref config.InnerNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Near", "Arc color (inside near)" ) + "###ArcColorPickerInnerNear", ref config.InnerNearThresholdColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Near", "Arc glow color (inside near)" ) + "###ArcEdgeColorPickerInnerNear", ref config.InnerNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Inside Far", "Arc color (inside far)" ) + "###ArcColorPickerInnerFar", ref config.InnerFarThresholdColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Inside Far", "Arc glow color (inside far)" ) + "###ArcEdgeColorPickerInnerFar", ref config.InnerFarThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Near Range", "Distance \"inside near\" range (y):" ) );
@@ -249,8 +249,8 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 					ImGui.Text( Loc.Localize( "Config Option: Distance Arc Inside Far Range", "Distance \"inside far\" range (y):" ) );
 					ImGui.DragFloat( "###ArcDistanceFarInsideRangeSlider", ref config.InnerFarThresholdDistance_Yalms, 0.5f, 0f, 30f );
 
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Outside Far", "Arc color (outside near)" ) + "###ArcColorPickerOuterNear", ref config.OuterNearThresholdColor, ImGuiColorEditFlags.NoInputs );
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Outside Far", "Arc glow color (outside near)" ) + "###ArcEdgeColorPickerOuterNear", ref config.OuterNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Outside Near", "Arc color (outside near)" ) + "###ArcColorPickerOuterNear", ref config.OuterNearThresholdColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Outside Near", "Arc glow color (outside near)" ) + "###ArcEdgeColorPickerOuterNear", ref config.OuterNearThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Color Outside Far", "Arc color (outside far)" ) + "###ArcColorPickerOuterFar", ref config.OuterFarThresholdColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Arc Glow Color Outside Far", "Arc glow color (outside far)" ) + "###ArcEdgeColorPickerOuterFar", ref config.OuterFarThresholdEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.Text( Loc.Localize( "Config Option: Distance Arc Outside Near Range", "Distance \"outside near\" range (y):" ) );

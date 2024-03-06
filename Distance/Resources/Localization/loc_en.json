@@ -1,0 +1,990 @@
+{
+  "Download Status Message: None": {
+    "message": "Ready",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Downloading": {
+    "message": "Downloading...",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Failed Download": {
+    "message": "Download failed!",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Failed File Load": {
+    "message": "The downloaded file was invalid!",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Failed File Write": {
+    "message": "The downloaded file could not be saved to disk; any updates will be lost upon reloading.",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Out of Date File": {
+    "message": "The downloaded file was not newer than the current data, and has been discarded.",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Completed": {
+    "message": "Update Completed",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Download Status Message: Canceled": {
+    "message": "The update operation was canceled!",
+    "description": "BNpcAggroInfoDownloader.GetDownloadStatusMessage"
+  },
+  "Plugin Text Command Description": {
+    "message": "Use {0} for a listing of available text commands.",
+    "description": "Plugin.OnLanguageChanged"
+  },
+  "Text Command Response: No Widget Name Provided": {
+    "message": "No widget name was specified!",
+    "description": "Plugin.ProcessTextCommand_Enable"
+  },
+  "Text Command Response: Enable - None Found": {
+    "message": "No widget(s) named \"{0}\" could be found.",
+    "description": "Plugin.ProcessTextCommand_Enable"
+  },
+  "Text Command Response: Enable - One Found": {
+    "message": "The widget named \"{0}\" was enabled.",
+    "description": "Plugin.ProcessTextCommand_Enable"
+  },
+  "Text Command Response: Enable - Multiple Found": {
+    "message": "All {0} widgets named \"{1}\" were enabled.",
+    "description": "Plugin.ProcessTextCommand_Enable"
+  },
+  "Text Command Response: Disable - None Found": {
+    "message": "No widget(s) named \"{0}\" could be found.",
+    "description": "Plugin.ProcessTextCommand_Disable"
+  },
+  "Text Command Response: Disable - One Found": {
+    "message": "The widget named \"{0}\" was disabled.",
+    "description": "Plugin.ProcessTextCommand_Disable"
+  },
+  "Text Command Response: Disable - Multiple Found": {
+    "message": "All {0} widgets named \"{1}\" were disabled.",
+    "description": "Plugin.ProcessTextCommand_Disable"
+  },
+  "Text Command Response: Toggle - None Found": {
+    "message": "No widget(s) named \"{0}\" could be found.",
+    "description": "Plugin.ProcessTextCommand_Toggle"
+  },
+  "Text Command Response: Toggle - One Found (enabled)": {
+    "message": "The widget named \"{0}\" was enabled.",
+    "description": "Plugin.ProcessTextCommand_Toggle"
+  },
+  "Text Command Response: Toggle - One Found (disabled)": {
+    "message": "The widget named \"{0}\" was disabled.",
+    "description": "Plugin.ProcessTextCommand_Toggle"
+  },
+  "Text Command Response: Toggle - Multiple Found": {
+    "message": "All {0} widgets named \"{1}\" were toggled.",
+    "description": "Plugin.ProcessTextCommand_Toggle"
+  },
+  "Help Message: Config Subcommand": {
+    "message": "Opens the settings window.",
+    "description": "Plugin.ProcessTextCommand_Help"
+  },
+  "Help Message: Enable Subcommand": {
+    "message": "Enables the specified distance widget.  Usage: \"{0} <widget name>\"",
+    "description": "Plugin.ProcessTextCommand_Help"
+  },
+  "Help Message: Disable Subcommand": {
+    "message": "Disables the specified distance widget.  Usage: \"{0} <widget name>\"",
+    "description": "Plugin.ProcessTextCommand_Help"
+  },
+  "Help Message: Toggle Subcommand": {
+    "message": "Toggles the specified distance widget on or off.  Usage: \"{0} <widget name>\"",
+    "description": "Plugin.ProcessTextCommand_Help"
+  },
+  "Help Message: Basic": {
+    "message": "Valid subcommands are {0}, {1}, {2}, and {3}.  Use \"{4} <subcommand>\" for more information on each subcommand.",
+    "description": "Plugin.ProcessTextCommand_Help"
+  },
+  "Config Option: Show Distance on Players": {
+    "message": "Show the distance to players.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on BattleNpc": {
+    "message": "Show the distance to combatant NPCs.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on EventNpc": {
+    "message": "Show the distance to non-combatant NPCs.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on Treasure": {
+    "message": "Show the distance to treasure chests.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on Aetheryte": {
+    "message": "Show the distance to aetherytes.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on Gathering Node": {
+    "message": "Show the distance to gathering nodes.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on EventObj": {
+    "message": "Show the distance to interactable objects.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on Companion": {
+    "message": "Show the distance to companions.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show Distance on Housing": {
+    "message": "Show the distance to housing items.",
+    "description": "DistanceWidgetFiltersConfig.DrawObjectKindOptions"
+  },
+  "Config Option: Show in Combat": {
+    "message": "Show in combat.",
+    "description": "DistanceWidgetFiltersConfig.DrawConditionOptions"
+  },
+  "Config Option: Show out of Combat": {
+    "message": "Show out of combat.",
+    "description": "DistanceWidgetFiltersConfig.DrawConditionOptions"
+  },
+  "Config Option: Show in Instance": {
+    "message": "Show in instance.",
+    "description": "DistanceWidgetFiltersConfig.DrawConditionOptions"
+  },
+  "Config Option: Show out of Instance": {
+    "message": "Show out of instance.",
+    "description": "DistanceWidgetFiltersConfig.DrawConditionOptions"
+  },
+  "Terminology: UI Attach Point - Auto": {
+    "message": "Automatic",
+    "description": "AddonAttachTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: UI Attach Point - Screen Text": {
+    "message": "Screen Space",
+    "description": "AddonAttachTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: UI Attach Point - Target": {
+    "message": "Target Bar",
+    "description": "AddonAttachTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: UI Attach Point - Focus Target": {
+    "message": "Focus Target Bar",
+    "description": "AddonAttachTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: UI Attach Point - Mouse Cursor": {
+    "message": "Mouse Cursor",
+    "description": "AddonAttachTypeExtensions.GetTranslatedName"
+  },
+  "Config Category: Aggro Widget": {
+    "message": "Aggro Widget Settings",
+    "description": "GeneralSettingsCategoryExtensions.GetTranslatedName"
+  },
+  "Config Category: Aggro Arcs": {
+    "message": "Aggro Arc Settings",
+    "description": "GeneralSettingsCategoryExtensions.GetTranslatedName"
+  },
+  "Config Category: Aggro Data": {
+    "message": "Aggro Distance Data",
+    "description": "GeneralSettingsCategoryExtensions.GetTranslatedName"
+  },
+  "Config Category: Nameplates": {
+    "message": "Nameplate Settings",
+    "description": "GeneralSettingsCategoryExtensions.GetTranslatedName"
+  },
+  "Config Category: Miscellaneous": {
+    "message": "Miscellaneous Settings",
+    "description": "GeneralSettingsCategoryExtensions.GetTranslatedName"
+  },
+  "Terminology: Nameplate Style - Match Game": {
+    "message": "Match Game",
+    "description": "NameplateStyleExtensions.GetTranslatedName"
+  },
+  "Terminology: Nameplate Style - Old": {
+    "message": "Old",
+    "description": "NameplateStyleExtensions.GetTranslatedName"
+  },
+  "Terminology: Nameplate Style": {
+    "message": "New",
+    "description": "NameplateStyleExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Category - Targets": {
+    "message": "Targets",
+    "description": "TargetCategoryExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Category - Self": {
+    "message": "Yourself",
+    "description": "TargetCategoryExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Category - All Enemies": {
+    "message": "All Enemies",
+    "description": "TargetCategoryExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Category - All Players": {
+    "message": "All Players",
+    "description": "TargetCategoryExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Target": {
+    "message": "Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Soft Target": {
+    "message": "Soft Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Focus Target": {
+    "message": "Focus Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Mouseover and UIMouseover Target": {
+    "message": "Mouseover Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Mouseover Target": {
+    "message": "Field Mouseover Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - UIMouseover Target": {
+    "message": "UI Mouseover Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Target and Soft Target": {
+    "message": "Target + Soft Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Terminology: Target Type - Target of Target": {
+    "message": "Target of Target",
+    "description": "TargetTypeExtensions.GetTranslatedName"
+  },
+  "Window Title: Config": {
+    "message": "Distance Settings",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Settings Tab: General": {
+    "message": "General Settings",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Settings Tab: Custom Widgets": {
+    "message": "Custom Widgets",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Settings Tab: Custom Arcs": {
+    "message": "Custom Arcs",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Button: Save": {
+    "message": "Save",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Button: Save and Close": {
+    "message": "Save and Close",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Config Text: Distance Information Link": {
+    "message": "About Distance Measurement in FFXIV",
+    "description": "PluginUI.DrawSettingsWindow"
+  },
+  "Window Title: Debug Data": {
+    "message": "Debug Data",
+    "description": "PluginUI.DrawDebugWindow"
+  },
+  "Window Title: Debug Aggro Entities": {
+    "message": "Debug: Known Aggro Distances",
+    "description": "PluginUI.DrawDebugAggroEntitiesWindow"
+  },
+  "Window Title: Nameplate Info": {
+    "message": "Debug: Nameplate Distance Info",
+    "description": "PluginUI.DrawDebugNameplateInfoWindow"
+  },
+  "Config Option: Show Aggro Arc": {
+    "message": "Show an arc indicating aggro range.",
+    "description": "PluginUI_AggroArcs.DrawConfigOptions"
+  },
+  "Help: Show Aggro Arc": {
+    "message": "This is a visual representation of the distance readout shown by the aggro widget.  If you wish to change colors or which target type is used, adjust those settings for the aggro widget, and they will apply to this arc.",
+    "description": "PluginUI_AggroArcs.DrawConfigOptions"
+  },
+  "Config Option: Aggro Arc Length": {
+    "message": "Length of the aggro arc (deg):",
+    "description": "PluginUI_AggroArcs.DrawConfigOptions"
+  },
+  "Config Text: Custom Arc Placeholder": {
+    "message": "No Custom Arcs (Click + To Add)",
+    "description": "PluginUI_CustomArcs.DrawSettingsTab"
+  },
+  "Button: Yes": {
+    "message": "Yes",
+    "description": "PluginUI_CustomArcs.DrawSettingsTab"
+  },
+  "Button: No": {
+    "message": "No",
+    "description": "PluginUI_CustomArcs.DrawSettingsTab"
+  },
+  "Config Text: No Arc Selected": {
+    "message": "No Arc Selected",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Arc Name": {
+    "message": "Arc Name:",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Arc Name": {
+    "message": "This is used to give a customized name to this Arc for use with certain text commands.  If you leave it blank, the type of target for this Arc will be used in the header above, but it will not have a name for use in text commands.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Arc Enabled": {
+    "message": "Enabled",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Rules": {
+    "message": "Distance Rules",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Object Type": {
+    "message": "Object Type:",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Applicable Object Type": {
+    "message": "The basic category of object(s) for which this Arc will show distance.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Target Type": {
+    "message": "Target Type:",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Arc Applicable Target Type": {
+    "message": "The type of target for which this Arc will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Arc Self Azimuth": {
+    "message": "Arc Centerpoint Azimuth:",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Arc Self Azimuth": {
+    "message": "Direction relative to your character to display the arc.  0 is in front, 90 is to the right, 180 is behind, 270 is to the left.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Camera-relative Self Arc": {
+    "message": "Camera Relative",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: All Enemies Aggressive": {
+    "message": "Show Aggressive",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: All Enemies Unaggressive": {
+    "message": "Show Unaggressive",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Show Dead Objects": {
+    "message": "Show Dead",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: All Players Party": {
+    "message": "Show Party Members",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: All Players Alliance": {
+    "message": "Show Alliance Members",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: All Players Other": {
+    "message": "Show Other Players",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance is to Ring": {
+    "message": "Use distance to target ring, not target center.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Distance is to Ring": {
+    "message": "You will generally want this box checked unless the arc is centered on yourself, but specific use cases will vary.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Arc Radius": {
+    "message": "The radius of the arc (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Arc Radius": {
+    "message": "This distance is relative to either the object's center, or to its hitring, as configured above.  Max melee is effectively 3.5 yalms.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Filters": {
+    "message": "Object Type Filters",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Condition": {
+    "message": "Condition Filters",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Classjobs": {
+    "message": "Job Filters",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Appearance": {
+    "message": "Appearance",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Show Arc Pip": {
+    "message": "Show Pip.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Arc Length": {
+    "message": "Length of the arc:",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Unit String: Degrees Short Lower": {
+    "message": "deg",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Unit String: Yalms Lower": {
+    "message": "yalms",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Colors": {
+    "message": "Colors",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Use Distance-based Colors": {
+    "message": "Use distance-based arc colors.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Distance Arc Use Distance-based Colors": {
+    "message": "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" colors if past that distance, otherwise the \"Near\" colors if past that distance, otherwise uses the base color specified above.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Color": {
+    "message": "Arc color",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Glow Color": {
+    "message": "Arc glow color",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Color Inside Near": {
+    "message": "Arc color (inside near)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Glow Color Inside Near": {
+    "message": "Arc glow color (inside near)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Color Inside Far": {
+    "message": "Arc color (inside far)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Glow Color Inside Far": {
+    "message": "Arc glow color (inside far)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Inside Near Range": {
+    "message": "Distance \"inside near\" range (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Inside Far Range": {
+    "message": "Distance \"inside far\" range (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Color Outside Near": {
+    "message": "Arc color (outside near)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Glow Color Outside Near": {
+    "message": "Arc glow color (outside near)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Color Outside Far": {
+    "message": "Arc color (outside far)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Glow Color Outside Far": {
+    "message": "Arc glow color (outside far)",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Outside Near Range": {
+    "message": "Distance \"outside near\" range (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Outside Far Range": {
+    "message": "Distance \"outside far\" range (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Arc Fading": {
+    "message": "Fading",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Inside Fade Distance": {
+    "message": "Distance inside the arc to start fading (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Inside Fade Interval": {
+    "message": "Fade over (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Outside Fade Distance": {
+    "message": "Distance outside the arc to start fading (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Outside Fade Interval": {
+    "message": "Fade over (y):",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Option: Distance Arc Invert Fading": {
+    "message": "Inverted fading.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Help: Distance Arc Invert Fading": {
+    "message": "Instead of showing the arc within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used.",
+    "description": "PluginUI_CustomArcs.DrawConfigOptions"
+  },
+  "Config Text: Custom Widget Placeholder": {
+    "message": "No Custom Widgets (Click + To Add)",
+    "description": "PluginUI_CustomWidgets.DrawSettingsTab"
+  },
+  "Config Text: No Widget Selected": {
+    "message": "No Widget Selected",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Widget Name": {
+    "message": "Widget Name:",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Widget Name": {
+    "message": "This is used to give a customized name to this widget for use with certain text commands.  If you leave it blank, the type of target for this widget will be used in the header above, but it will not have a name for use in text commands.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Widget Enabled": {
+    "message": "Enabled",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Rules": {
+    "message": "Distance Rules",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Widget Applicable Target Type": {
+    "message": "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Widget Distance is to Ring": {
+    "message": "Show distance to target ring, not target center.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Measurement Offset": {
+    "message": "Amount to offset the distance readout (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Readout Offset": {
+    "message": "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Filters": {
+    "message": "Object Type Filters",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Condition": {
+    "message": "Condition Filters",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Classjobs": {
+    "message": "Job Filters",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Appearance": {
+    "message": "Appearance",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: UI Attach Point": {
+    "message": "UI Binding:",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: UI Attach Point": {
+    "message": "This is the UI element to which you wish to attach this widget.  \"Automatic\" tries to infer the best choice based on the target type you've selected for this widget.  \"Screen Space\" does not attach to a specific UI element, but floats above everything.  The others should be self-explanatory.  Note: Attaching to the mouse cursor can look odd if you use the hardware cursor; switch to the software cursor in the game options if necessary.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Position": {
+    "message": "Position of the distance readout (X,Y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Text Position": {
+    "message": "This is an offset relative to the UI element if it is attached to one, or is an absolute position on the screen if not.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Use Heavy Font": {
+    "message": "Use heavy font for distance text.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Font Size": {
+    "message": "Distance text font size:",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Font Alignment": {
+    "message": "Text alignment:",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Show Distance Units": {
+    "message": "Show units on distance values.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Show Distance Mode Indicator": {
+    "message": "Show the distance mode indicator.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Allow Negative Distances": {
+    "message": "Allow negative distances.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Decimal Precision": {
+    "message": "Number of decimal places to show on distances:",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Colors": {
+    "message": "Colors",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Track Target Bar Color": {
+    "message": "Attempt to use target bar text color.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Text Track Target Bar Color": {
+    "message": "If the color of the target bar text (or focus target) can be determined, it will take precedence; otherwise the colors set below will be used.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Use Distance-based Colors": {
+    "message": "Use distance-based text colors.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Text Use Distance-based Colors": {
+    "message": "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, otherwise the \"Near\" color if beyond that distance, otherwise uses the base color specified above.  This setting is ignored if the checkbox to track the target bar color is ticked.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Color": {
+    "message": "Distance text color",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Glow Color": {
+    "message": "Distance text glow color",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Color Near": {
+    "message": "Distance text color (near)",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Glow Color Near": {
+    "message": "Distance text glow color (near)",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Color Far": {
+    "message": "Distancet text color (far)",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Glow Color Far": {
+    "message": "Distance text glow color (far)",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Near Range": {
+    "message": "Distance \"near\" range (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Far Range": {
+    "message": "Distance \"far\" range (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Widget Fading": {
+    "message": "Fading",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Enable Fading": {
+    "message": "Enable Distance-based fading.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Inside Fade Distance": {
+    "message": "Distance inside of the target to start fading (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Text Inside Fade Distance": {
+    "message": "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Inside Fade Interval": {
+    "message": "Fade over (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Outside Fade Distance": {
+    "message": "Distance away from the target to start fading (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Outside Fade Interval": {
+    "message": "Fade over (y):",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Invert Fading": {
+    "message": "Inverted fading.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Help: Distance Text Invert Fading": {
+    "message": "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used.",
+    "description": "PluginUI_CustomWidgets.DrawConfigOptions"
+  },
+  "Config Option: Show Aggro Distance": {
+    "message": "Show the remaining distance from the enemy before they will detect you.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Help: Show Aggro Distance": {
+    "message": "This distance will only be shown when it is known, and only on major bosses.  Additionally, it will only be shown until you enter combat.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Section Header: Aggro Widget Distance Rules": {
+    "message": "Distance Rules",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Help: Applicable Target Type": {
+    "message": "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Section Header: Aggro Widget Appearance": {
+    "message": "Appearance",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Position": {
+    "message": "Position of the aggro widget (X,Y):",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Use Heavy Font": {
+    "message": "Use heavy font for aggro widget.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Font Size": {
+    "message": "Aggro widget font size:",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Alignment": {
+    "message": "Text alignment:",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Help: Aggro Distance Precision": {
+    "message": "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Section Header: Aggro Widget Colors": {
+    "message": "Colors",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Color": {
+    "message": "Aggro widget text color",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Glow Color": {
+    "message": "Aggro widget text glow color",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Color Caution": {
+    "message": "Aggro widget text color (caution range)",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Glow Color Caution": {
+    "message": "Aggro widget text glow color (caution range)",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Color Warning": {
+    "message": "Aggro widget text color (warning range)",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Text Glow Color Warning": {
+    "message": "Aggro widget text glow color (warning range)",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Caution Range": {
+    "message": "Aggro distance \"caution\" range (y):",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Aggro Distance Warning Range": {
+    "message": "Aggro distance \"warning\" range (y):",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Auto Update Aggro Data": {
+    "message": "Try to automatically fetch the most recent aggro distance data on startup.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Button: Download Aggro Distances": {
+    "message": "Check for Updated Aggro Distances",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Text: Download Status Indicator": {
+    "message": "Status of most recent update attempt:",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Suppress Text Command Responses": {
+    "message": "Suppress text command responses.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Help: Suppress Text Command Responses": {
+    "message": "Selecting this prevents any text commands you use from printing responses to chat.  Responses to the help command will always be printed.",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Text: No Category Selected": {
+    "message": "No Category Selected",
+    "description": "PluginUI_GeneralSettings.DrawConfigOptions"
+  },
+  "Config Option: Show Nameplate Distances": {
+    "message": "Show distances on nameplates.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Distance Rules": {
+    "message": "Distance Rules",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance is to Ring for nameplates": {
+    "message": "Show distance to target ring, not target center.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Show All": {
+    "message": "Show distance on all nameplates.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Show All": {
+    "message": "Shows distance on all nameplates for any objects that match the object type filters in the next section.  If this is unchecked, additional options will appear below.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Show Distance on Target": {
+    "message": "Show distance on target.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Show Distance on Soft Target": {
+    "message": "Show distance on soft target.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Show Distance on Focus Target": {
+    "message": "Show distance on focus target.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Show Distance on Mouseover Target": {
+    "message": "Show distance on mouseover target.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Show Distance on Aggro": {
+    "message": "Show distance on enemies aggressive to you.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Show Distance on Aggro": {
+    "message": "This only applies to targets shown in the enemy list.  Distances for additional enemies aggressive to you will not be shown.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Show Distance on Party": {
+    "message": "Show distance on party members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Show Distance on Party": {
+    "message": "This does not apply to cross-world party members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Show Distance on Alliance": {
+    "message": "Show distance on alliance members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Show Distance on Alliance": {
+    "message": "This does not apply to cross-world alliance members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Filters are Exclusive": {
+    "message": "Filters are exclusive.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Filters are Exclusive": {
+    "message": "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Offsets": {
+    "message": "Distance Offsets",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Measurement Offset (Player)": {
+    "message": "Amount to offset the distance readout for players (y):",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Measurement Offset (BNpc)": {
+    "message": "Amount to offset the distance readout for combatant NPCs (y):",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Measurement Offset (Other)": {
+    "message": "Amount to offset the distance readout for all other entities (y):",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Filters": {
+    "message": "Object Type Filters",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Distance Nameplate Condition": {
+    "message": "Condition Filters",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Classjobs": {
+    "message": "Job Filters",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Appearance": {
+    "message": "Appearance",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Text Offset": {
+    "message": "Distance text position offset (X,Y):",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Automatic Alignment": {
+    "message": "Automatically position distance text.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplates - Automatic Alignment": {
+    "message": "If this is checked, the distance text will automatically right, center, or left align to the nameplate text (subject to the offset above).  If unchecked, the distance text will always be at a fixed location, regardless of name length.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplates - Place Below Name": {
+    "message": "Place distance below nameplate.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Colors": {
+    "message": "Colors",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplate Distance Text Use Distance-based Colors (Party)": {
+    "message": "Use distance-based text colors for party members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Help: Nameplate Distance Text Use Distance-based Colors": {
+    "message": "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, the \"Mid\" color if between far and near thresholds, and the \"Near\" color if within that distance.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplate Distance Text Use Nameplate Color Near": {
+    "message": "Use default nameplate color when near.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplate Distance Text Use Nameplate Color Mid": {
+    "message": "Use default nameplate color when mid.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Color Mid": {
+    "message": "Distance text color (mid)",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Glow Color Mid": {
+    "message": "Distance text glow color (mid)",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplate Distance Text Use Nameplate Color Far": {
+    "message": "Use default nameplate color when far.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Nameplate Distance Text Use Distance-based Colors (BNpc)": {
+    "message": "Use distance-based text colors for battle NPCs.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Section Header: Nameplate Fading": {
+    "message": "Fading",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Enable Fading (BNpc)": {
+    "message": "Enable Distance-based fading for battle NPCs.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Enable Fading (Party)": {
+    "message": "Enable Distance-based fading for party members.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  },
+  "Config Option: Distance Text Enable Fading (Other)": {
+    "message": "Enable Distance-based fading for other entities.",
+    "description": "PluginUI_Nameplates.DrawConfigOptions"
+  }
+}
