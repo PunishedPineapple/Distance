@@ -134,7 +134,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Rules", "Distance Rules" ) + "###DistanceWidgetRulesHeader" ) )
 			{
 				ImGui.Text( Loc.Localize( "Config Option: Target Type", "Target Type:" ) );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Applicable Target Type", "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
+				ImGuiUtils.HelpMarker( Loc.Localize("Help: Widget Applicable Target Type", "The type of target for which this widget will show distance.  \"Soft Target\" generally only matters for controller players and some two-handed keyboard players.  \"Field Mouseover\" is for when you mouseover an object in the world.  \"UI Mouseover\" is for when you mouseover the party list." ) );
 				if( ImGui.BeginCombo( "###DistanceTypeDropdown", config.ApplicableTargetType.GetTranslatedName() ) )
 				{
 					foreach( var item in PluginUI.TargetDropdownMenuItems )
@@ -146,7 +146,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 					}
 					ImGui.EndCombo();
 				}
-				ImGui.Checkbox( Loc.Localize( "Config Option: Distance is to Ring", "Show distance to target ring, not target center." ) + "###DistanceIsToRing", ref config.DistanceIsToRing );
+				ImGui.Checkbox( Loc.Localize("Config Option: Widget Distance is to Ring", "Show distance to target ring, not target center." ) + "###DistanceIsToRing", ref config.DistanceIsToRing );
 				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider", ref config.DistanceOffset_Yalms, 0.1f, -30f, 30f );
@@ -159,7 +159,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 				ImGui.TreePop();
 			}
 
-			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Distance Widget Classjobs", "Condition Filters" ) + "###DistanceWidgetConditionsHeader" ) )
+			if( ImGui.TreeNode( Loc.Localize("Config Section Header: Distance Widget Condition", "Condition Filters" ) + "###DistanceWidgetConditionsHeader" ) )
 			{
 				config.Filters.DrawConditionOptions();
 				ImGui.TreePop();
@@ -204,8 +204,8 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + "###DistanceTextEdgeColorPicker", ref config.TextEdgeColor, ImGuiColorEditFlags.NoInputs );
 				if( config.UseDistanceBasedColor )
 				{
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distance text color (near)" ) + "###DistanceTextColorPickerNear", ref config.NearThresholdTextColor, ImGuiColorEditFlags.NoInputs );
-					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (near)" ) + "###DistanceTextEdgeColorPickerNear", ref config.NearThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Near", "Distance text color (near)" ) + "###DistanceTextColorPickerNear", ref config.NearThresholdTextColor, ImGuiColorEditFlags.NoInputs );
+					ImGui.ColorEdit4( Loc.Localize("Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + "###DistanceTextEdgeColorPickerNear", ref config.NearThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + "###DistanceTextColorPickerFar", ref config.FarThresholdTextColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + "###DistanceTextEdgeColorPickerFar", ref config.FarThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
