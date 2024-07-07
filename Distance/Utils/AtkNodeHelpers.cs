@@ -11,7 +11,7 @@ internal static unsafe class AtkNodeHelpers
 		for( var i = 0; i < pAddon->UldManager.NodeListCount; ++i )
 		{
 			if( pAddon->UldManager.NodeList[i] == null ) continue;
-			if( pAddon->UldManager.NodeList[i]->NodeID == nodeID )
+			if( pAddon->UldManager.NodeList[i]->NodeId == nodeID )
 			{
 				return (AtkTextNode*)pAddon->UldManager.NodeList[i];
 			}
@@ -79,7 +79,7 @@ internal static unsafe class AtkNodeHelpers
 			pNewNode->TextFlags = (byte)textFlags;
 			pNewNode->TextFlags2 = (byte)textFlags2;
 
-			pNewNode->AtkResNode.NodeID = nodeID;
+			pNewNode->AtkResNode.NodeId = nodeID;
 
 			pNewNode->AtkResNode.Color.A = 0xFF;
 			pNewNode->AtkResNode.Color.R = 0xFF;

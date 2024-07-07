@@ -16,7 +16,7 @@ internal class ClassJobUtils
 			if( mClassJobDict == null )
 			{
 				mClassJobDict = new();
-				Lumina.Excel.ExcelSheet<ClassJob> classJobSheet_En = Service.DataManager.GetExcelSheet<ClassJob>( Dalamud.ClientLanguage.English );
+				Lumina.Excel.ExcelSheet<ClassJob> classJobSheet_En = Service.DataManager.GetExcelSheet<ClassJob>( Dalamud.Game.ClientLanguage.English );
 				Lumina.Excel.ExcelSheet<ClassJob> classJobSheet_Local = Service.DataManager.GetExcelSheet<ClassJob>();
 				for( int i = 0; i < classJobSheet_En.RowCount; ++i )
 				{
