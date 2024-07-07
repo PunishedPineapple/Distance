@@ -18,7 +18,7 @@ namespace Distance;
 
 public sealed class PluginUI : IDisposable
 {
-	public PluginUI( Plugin plugin, DalamudPluginInterface pluginInterface, Configuration configuration )
+	public PluginUI( Plugin plugin, IDalamudPluginInterface pluginInterface, Configuration configuration )
 	{
 		mPlugin = plugin;
 		mPluginInterface = pluginInterface;
@@ -29,9 +29,9 @@ public sealed class PluginUI : IDisposable
 		CustomArcsUI = new( plugin, this, configuration );
 		GeneralSettingsUI = new( plugin, this, configuration );
 		NameplatesUI = new( plugin, this, configuration );
-	}
+    }
 
-	public unsafe void Dispose()
+    public unsafe void Dispose()
 	{
 		//	This is just to make sure that no nodes get left visible after we stop managing them.  We should probably be properly removing and freeing the
 		//	nodes, but by checking for a node with the right id before constructing one, we should only ever have a one-time leak per node, which is probably fine.
@@ -695,7 +695,7 @@ public sealed class PluginUI : IDisposable
 	}
 
 	private readonly Plugin mPlugin;
-	private readonly DalamudPluginInterface mPluginInterface;
+	private readonly IDalamudPluginInterface mPluginInterface;
 	private readonly Configuration mConfiguration;
 
 	internal readonly PluginUI_AggroArcs AggroArcsUI;

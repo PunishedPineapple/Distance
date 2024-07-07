@@ -14,7 +14,7 @@ public sealed class Configuration : IPluginConfiguration
 {
 	#region Interface
 
-	public void Initialize( DalamudPluginInterface pluginInterface )
+	public void Initialize( IDalamudPluginInterface pluginInterface )
 	{
 		mPluginInterface = pluginInterface;
 	}
@@ -26,7 +26,7 @@ public sealed class Configuration : IPluginConfiguration
 	public int Version { get; set; } = 0;
 
 	[NonSerialized]
-	private DalamudPluginInterface mPluginInterface;
+	private IDalamudPluginInterface mPluginInterface;
 
 	#endregion
 

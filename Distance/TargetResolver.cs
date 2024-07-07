@@ -9,7 +9,7 @@ internal static unsafe class TargetResolver
 {
 	internal static void Init()
 	{
-		IntPtr fpUIMouseover = Service.SigScanner.ScanText( "E8 ?? ?? ?? ?? 48 8B 5C 24 40 4C 8B 74 24 58 83 FD 02" );
+		IntPtr fpUIMouseover = Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 8B 7C 24 ?? 4C 8B 74 24 ?? 83 FD 02");
 		if( fpUIMouseover != IntPtr.Zero )
 		{
 			Service.PluginLog.Information( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
@@ -29,7 +29,7 @@ internal static unsafe class TargetResolver
 		mUIMouseoverHook = null;
 	}
 
-	internal static GameObject GetTarget( TargetType targetType )
+	internal static IGameObject GetTarget( TargetType targetType )
 	{
 		return targetType switch
 		{
@@ -45,7 +45,7 @@ internal static unsafe class TargetResolver
 		};
 	}
 
-	private static GameObject GetTargetOfTarget()
+	private static IGameObject GetTargetOfTarget()
 	{
 		var target = Service.TargetManager.SoftTarget ?? Service.TargetManager.Target;
 		if( target != null && target.TargetObjectId != 0xE000000 )
@@ -74,5 +74,5 @@ internal static unsafe class TargetResolver
 
 	private delegate void UIMouseoverDelegate( IntPtr pThis, IntPtr pActor );
 	private static Hook<UIMouseoverDelegate> mUIMouseoverHook;
-	private static GameObject mUIMouseoverTarget = null;
+	private static IGameObject mUIMouseoverTarget = null;
 }

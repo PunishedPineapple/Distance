@@ -9,10 +9,10 @@ internal static class GameObjectUtils
 		if( objectID is 0 or 0xE0000000 ) return false;
 
 		if( FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance() != null &&
-			FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule() != null &&
-			FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule() != null )
+			FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule() != null &&
+			FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetRaptureAtkModule() != null )
 		{
-			var atkArrayDataHolder = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUiModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder;
+			var atkArrayDataHolder = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder;
 			if( atkArrayDataHolder.NumberArrayCount >= 22 )
 			{
 				var pEnmityListArray = atkArrayDataHolder.NumberArrays[21];

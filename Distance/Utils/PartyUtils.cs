@@ -17,7 +17,7 @@ internal static unsafe class PartyUtils
 		if( objectID is 0 or 0xE0000000 ) return false;
 		if( GroupManager.Instance() == null ) return false;
 		//if( !GroupManager.Instance()->IsAlliance ) return false;	//***** TODO: IsAlliance always returns false; why?
-		if( GroupManager.Instance()->IsObjectIDInParty( objectID ) ) return false;
-		return GroupManager.Instance()->IsObjectIDInAlliance( objectID );
+		if( GroupManager.Instance()->MainGroup.IsEntityIdInParty( objectID ) ) return false;
+		return GroupManager.Instance()->MainGroup.IsEntityIdInAlliance( objectID );
 	}
 }
