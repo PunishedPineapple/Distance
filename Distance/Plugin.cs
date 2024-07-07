@@ -66,7 +66,7 @@ public sealed class Plugin : IDalamudPlugin
 		//	UI Initialization
 		mUI = new PluginUI( this, mPluginInterface, mConfiguration );
 		mPluginInterface.UiBuilder.Draw += DrawUI;
-        mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
+		mPluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
 		mUI.Initialize();
 		NameplateHandler.Init( mConfiguration );
 
@@ -85,7 +85,7 @@ public sealed class Plugin : IDalamudPlugin
 		Service.Framework.Update -= OnGameFrameworkUpdate;
 		Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
 		mPluginInterface.UiBuilder.Draw -= DrawUI;
-        mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
+		mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 		mPluginInterface.LanguageChanged -= OnLanguageChanged;
 		Service.CommandManager.RemoveHandler( mTextCommandName );
 		mUI.Dispose();
@@ -308,6 +308,9 @@ public sealed class Plugin : IDalamudPlugin
 	private void OnGameFrameworkUpdate( IFramework framework )
 	{
 		UpdateTargetDistanceData();
+
+		if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances ) NameplateHandler.EnableNameplateDistances();
+		else NameplateHandler.DisableNameplateDistances();
 	}
 
 	private void OnTerritoryChanged( UInt16 ID )

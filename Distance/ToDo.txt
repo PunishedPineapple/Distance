@@ -15,7 +15,7 @@ Arbitrary Arcs:
 
 
 Priority:
-
+	-New nameplate difference feels like it might mostly just actually be the "Glare" flag on the text node.  Do more testing.  It might be the other new flag(s) too, but only when fading in from distance?
 	-Add fading for aggro text/arc, but realistically, wait until aggro arcs overhaul.
 	-Make the aggro distance arc have a deg/yalm option like for custom arcs.
 	-Go over distance-based coloring options for non-arc things and make sure that they are sane.
@@ -39,6 +39,7 @@ Priority:
 			-JSON, etc. out because duplicating the schema for every row is stupid.
 		-Make it two files: a data file, and a version file that contains only the version number and a hash of the data file for verification.
 			-Allows for only a very small file that's downloaded every time to check version, even if data size balloons.
+	-Investigate whether the 0.5x font scaling in nameplates is due to the high-res UI option, and account for that if necessary.
 
 
 Cleanup:
@@ -58,6 +59,7 @@ Maybe:
 	-Add custom position/coordinate readout widgets.
 	-Radius option for arc pip.
 	-Thickness options for pip and arc?
+	-Raycast and have result as a coloring option for self-centered arcs (i.e., turn an arc red if it would put you off the edge).
 	-Add an option to export and import widget/arc configs, but the config options might not be the most stable things ever, so how much of a mess could this end up being?
 	-Use job icons instead of abbreviations in the classjob filters config?
 	-Revisit making distance-based colors optionally gradients.

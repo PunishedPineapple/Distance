@@ -18,20 +18,68 @@ internal static unsafe class NameplateHandler
 		//	It's kinda jank to init a static class with an instance's data, but it'll never matter here, and the
 		//	plugin service effectively already crosses this bridge this anyway, so it's not worth worrying about.
 		mConfiguration = configuration;
-		Service.AddonLifecycle.RegisterListener(AddonEvent.PostDraw, "NamePlate", NameplateDrawDetour);
+
+		if( mConfiguration.NameplateDistancesConfig.ShowNameplateDistances )
+		{
+			EnableNameplateDistances();
+		}
     }
 
-    internal static void Uninit()
+	internal static void Uninit()
 	{
-        Service.AddonLifecycle.UnregisterListener(NameplateDrawDetour);
+        DisableNameplateDistances();
 
-        DestroyNameplateDistanceNodes();
+		DestroyNameplateDistanceNodes();
 
 		mNodeUpdateTimer.Reset();
 		mDistanceUpdateTimer.Reset();
 
 		mpNameplateAddon = null;
 		mConfiguration = null;
+	}
+
+	internal static void EnableNameplateDistances()
+	{
+		if( !mEnabled )
+		{
+			try
+			{
+				Service.AddonLifecycle.RegisterListener( AddonEvent.PostDraw, "NamePlate", NameplateDrawDetour );
+				mEnabled = true;
+			}
+			catch( Exception e )
+			{
+				Service.PluginLog.Error( $"Unknown error while trying to enable nameplate distances:\r\n{e}" );
+				DisableNameplateDistances();
+			}
+		}
+	}
+
+	internal static void DisableNameplateDistances()
+	{
+		if( mEnabled )
+		{
+			try
+			{
+				Service.AddonLifecycle.UnregisterListener( NameplateDrawDetour );
+			}
+			catch( Exception e )
+			{
+				Service.PluginLog.Error( $"Unknown error while unregistering nameplate listener:\r\n{e}" );
+			}
+
+			try
+			{
+				mEnabled = false;
+				mNodeUpdateTimer.Reset();
+				mDistanceUpdateTimer.Reset();
+				HideAllNameplateDistanceNodes();
+			}
+			catch( Exception e )
+			{
+				Service.PluginLog.Error( $"Unknown error while trying to disable nameplate distances:\r\n{e}" );
+			}
+		}
 	}
 
 	internal unsafe static void UpdateNameplateEntityDistanceData()
@@ -140,17 +188,18 @@ internal static unsafe class NameplateHandler
 		}
 	}
 
-	private static void NameplateDrawDetour(AddonEvent type, AddonArgs args )
+	private static void NameplateDrawDetour( AddonEvent type, AddonArgs args )
 	{
-		var pThis = (AddonNamePlate*)args.Addon;
+		var pNameplateAddon = (AddonNamePlate*)args.Addon;
+
 		try
 		{
-			if( mpNameplateAddon != pThis )
+			if( mpNameplateAddon != pNameplateAddon )
 			{
-				Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{(IntPtr)mpNameplateAddon:X} -> 0x{(IntPtr)pThis:X}" );
+				Service.PluginLog.Debug( $"Nameplate draw detour pointer mismatch: 0x{(IntPtr)mpNameplateAddon:X} -> 0x{(IntPtr)pNameplateAddon:X}" );
 				//	I don't know how to safely clean up our own nodes when the addon reloads.  The addon might take care of our inserted nodes when it cleans itself up anyway.
 				for( int i = 0; i < mDistanceTextNodes.Length; ++i ) mDistanceTextNodes[i] = null;
-				mpNameplateAddon = pThis;
+				mpNameplateAddon = pNameplateAddon;
 				if( mpNameplateAddon != null ) CreateNameplateDistanceNodes();
 			}
 
@@ -161,6 +210,7 @@ internal static unsafe class NameplateHandler
 		{
 			Service.PluginLog.Error( $"Unknown error in nameplate draw hook.  Disabling nameplate distances.\r\n{e}" );
 			mConfiguration.NameplateDistancesConfig.ShowNameplateDistances = false;
+			DisableNameplateDistances();
 		}
 	}
 
@@ -177,6 +227,9 @@ internal static unsafe class NameplateHandler
 	//	same, but it also won't make sense to the user to have font sizes for nameplates not match font sizes elsewhere,
 	//	so we also multiply the configured font size by the inverse of the node scale to get the real font size.  This
 	//	scaling also affects alignment calculations, so beware.
+
+	//***** TODO: This probably actually depends on whether the game is set to use high res UI (under graphics settings).  Test this and account for it if necessary.
+
 	private static void UpdateNameplateDistanceNodes()
 	{
 		mNodeUpdateTimer.Restart();
@@ -598,10 +651,11 @@ internal static unsafe class NameplateHandler
 	internal static int DEBUG_mNameplateTextFlags2 = 0;
 
 	//	Delgates and Hooks
-	private delegate void NameplateDrawFuncDelegate(AddonEvent type, AddonArgs args);
+	private delegate void NameplateDrawFuncDelegate( AddonEvent type, AddonArgs args );
 	private static readonly NameplateDrawFuncDelegate mdNameplateDraw = new( NameplateDrawDetour );
 
 	//	Members
+	private static bool mEnabled = false;
 	private static readonly DistanceInfo[] mNameplateDistanceInfoArray = new DistanceInfo[AddonNamePlate.NumNamePlateObjects];
 	private static readonly bool[] mShouldDrawDistanceInfoArray = new bool[AddonNamePlate.NumNamePlateObjects];
 	private static Configuration mConfiguration = null;

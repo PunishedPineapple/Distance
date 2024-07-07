@@ -1,7 +1,8 @@
 ﻿using System;
 
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Hooking;
+
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace Distance;
 
@@ -9,24 +10,10 @@ internal static unsafe class TargetResolver
 {
 	internal static void Init()
 	{
-		IntPtr fpUIMouseover = Service.SigScanner.ScanText("E8 ?? ?? ?? ?? 48 8B 7C 24 ?? 4C 8B 74 24 ?? 83 FD 02");
-		if( fpUIMouseover != IntPtr.Zero )
-		{
-			Service.PluginLog.Information( $"UIMouseover function signature found at 0x{fpUIMouseover:X}." );
-			mUIMouseoverHook = Service.GameInteropProvider.HookFromAddress<UIMouseoverDelegate>(fpUIMouseover, UIMouseoverDetour);
-			mUIMouseoverHook.Enable();
-		}
-		else
-		{
-			throw new Exception( "Unable to find the specified function signature for UI mouseover." );
-		}
 	}
 
 	internal static void Uninit()
 	{
-		mUIMouseoverHook?.Disable();
-		mUIMouseoverHook?.Dispose();
-		mUIMouseoverHook = null;
 	}
 
 	internal static IGameObject GetTarget( TargetType targetType )
@@ -35,11 +22,11 @@ internal static unsafe class TargetResolver
 		{
 			TargetType.Target_And_Soft_Target => Service.TargetManager.SoftTarget ?? Service.TargetManager.Target,
 			TargetType.FocusTarget => Service.TargetManager.FocusTarget,
-			TargetType.MouseOver_And_UIMouseOver_Target => mUIMouseoverTarget ?? Service.TargetManager.MouseOverTarget,
+			TargetType.MouseOver_And_UIMouseOver_Target => GetUIMouseoverTarget() ?? Service.TargetManager.MouseOverTarget,
 			TargetType.Target => Service.TargetManager.Target,
 			TargetType.SoftTarget => Service.TargetManager.SoftTarget,
 			TargetType.MouseOverTarget => Service.TargetManager.MouseOverTarget,
-			TargetType.UIMouseOverTarget => mUIMouseoverTarget,
+			TargetType.UIMouseOverTarget => GetUIMouseoverTarget(),
 			TargetType.TargetOfTarget => GetTargetOfTarget(),
 			_ => throw new Exception( $"Request to resolve unknown target type: \"{targetType}\"." ),
 		};
@@ -58,21 +45,17 @@ internal static unsafe class TargetResolver
 		}
 	}
 
-	private static void UIMouseoverDetour( IntPtr pThis, IntPtr pActor )
+	private static IGameObject GetUIMouseoverTarget()
 	{
-		mUIMouseoverHook.Original( pThis, pActor );
+		if( PronounModule.Instance() != null )
+		{
+			var pActor = (IntPtr)PronounModule.Instance()->UiMouseOverTarget;
+			if( pActor != IntPtr.Zero )
+			{
+				return Service.ObjectTable.CreateObjectReference( (IntPtr)pActor );
+			}
+		}
 
-		if( pActor != IntPtr.Zero )
-		{
-			mUIMouseoverTarget = pActor != IntPtr.Zero ? Service.ObjectTable.CreateObjectReference( pActor ) : null;
-		}
-		else
-		{
-			mUIMouseoverTarget = null;
-		}
+		return null;
 	}
-
-	private delegate void UIMouseoverDelegate( IntPtr pThis, IntPtr pActor );
-	private static Hook<UIMouseoverDelegate> mUIMouseoverHook;
-	private static IGameObject mUIMouseoverTarget = null;
 }

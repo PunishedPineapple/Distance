@@ -43,9 +43,9 @@ internal sealed class PluginUI_Nameplates : IDisposable
 					ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Aggro", "Show distance on enemies aggressive to you." ) + $"###Show distance to aggro (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowAggressive );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Aggro", "This only applies to targets shown in the enemy list.  Distances for additional enemies aggressive to you will not be shown." ) );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Party", "Show distance on party members." ) + $"###Show distance to party (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowPartyMembers );
-					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Party", "This does not apply to cross-world party members." ) );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Party", "This does not apply to cross-world party members until you have entered an instanced duty." ) );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Nameplates - Show Distance on Alliance", "Show distance on alliance members." ) + $"###Show distance to alliance (nameplates).", ref mConfiguration.NameplateDistancesConfig.ShowAllianceMembers );
-					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Alliance", "This does not apply to cross-world alliance members." ) );
+					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Show Distance on Alliance", "This does not apply to cross-world alliance members until you have entered an instanced duty." ) );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Filters are Exclusive", "Filters are exclusive." ) + $"###Filters are exclusive (nameplates).", ref mConfiguration.NameplateDistancesConfig.FiltersAreExclusive );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Nameplates - Filters are Exclusive", "If this is checked, distances will be shown only when an object meets both the criteria above AND the filters below.  If it is unchecked, distances will be shown for objects that meet EITHER criteria." ) );
 					ImGui.Unindent();
