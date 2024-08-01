@@ -283,7 +283,7 @@ internal static unsafe class NameplateHandler
 
 			float displayDistance_Yalms = mConfiguration.NameplateDistancesConfig.AllowNegativeDistances ? distance_Yalms : Math.Max( 0, distance_Yalms );
 			string distanceText = displayDistance_Yalms.ToString( $"F{mConfiguration.NameplateDistancesConfig.DistanceDecimalPrecision}" );
-			if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += "y";
+			if( mConfiguration.NameplateDistancesConfig.ShowUnitsOnDistance ) distanceText += LocalizationHelpers.DistanceUnitShort;
 
 			UpdateNameplateDistanceTextNode( i, distanceText, drawData, mShouldDrawDistanceInfoArray[i] );
 		}

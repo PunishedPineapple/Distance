@@ -147,7 +147,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 					ImGui.EndCombo();
 				}
 				ImGui.Checkbox( Loc.Localize("Config Option: Widget Distance is to Ring", "Show distance to target ring, not target center." ) + "###DistanceIsToRing", ref config.DistanceIsToRing );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout (y):" ) );
+				ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Measurement Offset", "Amount to offset the distance readout ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider", ref config.DistanceOffset_Yalms, 0.1f, -30f, 30f );
 				ImGui.TreePop();
@@ -199,7 +199,7 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Track Target Bar Color", "Attempt to use target bar text color." ) + "###DistanceTextUseTargetBarColor", ref config.TrackTargetBarTextColor );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Track Target Bar Color", "If the color of the target bar text (or focus target) can be determined, it will take precedence; otherwise the colors set below will be used." ) );
 				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Use Distance-based Colors", "Use distance-based text colors." ) + "###DistanceTextUseDistanceBasedColors", ref config.UseDistanceBasedColor );
-				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, otherwise the \"Near\" color if beyond that distance, otherwise uses the base color specified above.  This setting is ignored if the checkbox to track the target bar color is ticked." ) );
+				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Use Distance-based Colors", "Allows you to set different colors for different distance thresholds.  Uses the \"Far\" color if beyond that distance, otherwise the \"Near\" color if beyond that distance, otherwise uses the base color specified below.  This setting is ignored if the checkbox to track the target bar color is ticked." ) );
 				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color", "Distance text color" ) + "###DistanceTextColorPicker", ref config.TextColor, ImGuiColorEditFlags.NoInputs );
 				ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color", "Distance text glow color" ) + "###DistanceTextEdgeColorPicker", ref config.TextEdgeColor, ImGuiColorEditFlags.NoInputs );
 				if( config.UseDistanceBasedColor )
@@ -208,9 +208,9 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 					ImGui.ColorEdit4( Loc.Localize("Config Option: Distance Text Glow Color Near", "Distance text glow color (near)" ) + "###DistanceTextEdgeColorPickerNear", ref config.NearThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + "###DistanceTextColorPickerFar", ref config.FarThresholdTextColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + "###DistanceTextEdgeColorPickerFar", ref config.FarThresholdTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceNearRangeSlider", ref config.NearThresholdDistance_Yalms, 0.5f, -30f, 30f );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceFarRangeSlider", ref config.FarThresholdDistance_Yalms, 0.5f, -30f, 30f );
 				}
 				ImGui.TreePop();
@@ -221,14 +221,14 @@ internal sealed class PluginUI_CustomWidgets : IDisposable
 				ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Enable Fading", "Enable Distance-based fading." ), ref config.EnableFading );
 				if( config.EnableFading )
 				{
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Inside Fade Distance", "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above." ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeThresholdSlider", ref config.FadeoutThresholdInner_Yalms, 0.5f, 1f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeIntervalSlider", ref config.FadeoutIntervalInner_Yalms, 0.5f, 0f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeThresholdSlider", ref config.FadeoutThresholdOuter_Yalms, 0.5f, 1f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeIntervalSlider", ref config.FadeoutIntervalOuter_Yalms, 0.5f, 0f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox", ref config.InvertFading );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Invert Fading", "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );

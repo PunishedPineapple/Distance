@@ -1,6 +1,7 @@
 ﻿Distance:
+	-Game appears to use meters and yalms interchangably, depending on client language.  Both units appear to be treated as equal in length for this game.
 	-Boss radius needs to take into account BNpc scale, but Dalamud handles this for us.
-	-Player hitring is 0.5y radius.  This varies when mounted, but the specific radius when mounted does not seem to actually affect anything.
+	-Player hitring is 0.5y radius.  This varies when mounted, but the specific visual radius when mounted does not seem to actually be used for any distance-based calculations.
 
 
 Player to Enemy Ranges:

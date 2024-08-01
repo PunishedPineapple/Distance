@@ -107,7 +107,7 @@ internal sealed class PluginUI_GeneralSettings : IDisposable
 					ImGui.SliderInt( "###AggroDistanceTextFontAlignmentSlider", ref mConfiguration.mAggroDistanceFontAlignment, 6, 8, "", ImGuiSliderFlags.NoInput );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Show Distance Units", "Show units on distance values." ) + "###Show aggro distance units.", ref mConfiguration.ShowUnitsOnAggroDistance );
 					ImGui.Text( Loc.Localize( "Config Option: Decimal Precision", "Number of decimal places to show on distances:" ) );
-					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05 yalms, so please be wary when using more than one decimal point of precision." ) );
+					ImGuiUtils.HelpMarker( String.Format( Loc.Localize( "Help: Aggro Distance Precision", "Aggro ranges are only accurate to within ~0.05{0}, so please be wary when using more than one decimal point of precision." ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.SliderInt( "###AggroDistancePrecisionSlider", ref mConfiguration.AggroDistanceDecimalPrecision, 0, 3 );
 					ImGui.TreePop();
 				}
@@ -120,9 +120,9 @@ internal sealed class PluginUI_GeneralSettings : IDisposable
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Caution", "Aggro widget text glow color (caution range)" ) + "###AggroDistanceCautionTextEdgeColorPicker", ref mConfiguration.AggroDistanceCautionTextEdgeColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Color Warning", "Aggro widget text color (warning range)" ) + "###AggroDistanceWarningTextColorPicker", ref mConfiguration.AggroDistanceWarningTextColor, ImGuiColorEditFlags.NoInputs );
 					ImGui.ColorEdit4( Loc.Localize( "Config Option: Aggro Distance Text Glow Color Warning", "Aggro widget text glow color (warning range)" ) + "###AggroDistanceWarningTextEdgeColorPicker", ref mConfiguration.AggroDistanceWarningTextEdgeColor, ImGuiColorEditFlags.NoInputs );
-					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Aggro Distance Caution Range", "Aggro distance \"caution\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.SliderFloat( "###AggroDistanceCautionRangeSlider", ref mConfiguration.AggroCautionDistance_Yalms, 0, 30 );
-					ImGui.Text( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Aggro Distance Warning Range", "Aggro distance \"warning\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.SliderFloat( "###AggroDistanceWarningRangeSlider", ref mConfiguration.AggroWarningDistance_Yalms, 0, 30 );
 					ImGui.TreePop();
 				}

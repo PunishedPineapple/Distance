@@ -55,13 +55,13 @@ internal sealed class PluginUI_Nameplates : IDisposable
 
 			if( ImGui.TreeNode( Loc.Localize( "Config Section Header: Nameplate Offsets", "Distance Offsets" ) + $"###NameplateOffsetsHeader." ) )
 			{
-				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (Player)", "Amount to offset the distance readout for players (y):" ) );
+				ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Measurement Offset (Player)", "Amount to offset the distance readout for players ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider_Player", ref mConfiguration.NameplateDistancesConfig.DistanceOffset_Player_Yalms, 0.1f, -30f, 30f );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (BNpc)", "Amount to offset the distance readout for combatant NPCs (y):" ) );
+				ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Measurement Offset (BNpc)", "Amount to offset the distance readout for combatant NPCs ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.DistanceOffset_BNpc_Yalms, 0.1f, -30f, 30f );
-				ImGui.Text( Loc.Localize( "Config Option: Distance Measurement Offset (Other)", "Amount to offset the distance readout for all other entities (y):" ) );
+				ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Measurement Offset (Other)", "Amount to offset the distance readout for all other entities ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 				ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Readout Offset", "This value is subtracted from the real distance to determine the displayed distance.  This can be used to get the widget to show the distance from being able to hit the boss with a skill, for example." ) );
 				ImGui.DragFloat( "###DistanceOffsetSlider_Other", ref mConfiguration.NameplateDistancesConfig.DistanceOffset_Other_Yalms, 0.1f, -30f, 30f );
 				ImGui.TreePop();
@@ -138,9 +138,9 @@ internal sealed class PluginUI_Nameplates : IDisposable
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextColor_Party, ImGuiColorEditFlags.NoInputs );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_Party, ImGuiColorEditFlags.NoInputs );
 					}
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.NearThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - Party)", ref mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms, 0.5f, -30f, 30f );
 					ImGui.Unindent();
 					ImGui.Spacing();
@@ -169,9 +169,9 @@ internal sealed class PluginUI_Nameplates : IDisposable
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Color Far", "Distancet text color (far)" ) + $"###DistanceTextColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextColor_BNpc, ImGuiColorEditFlags.NoInputs );
 						ImGui.ColorEdit4( Loc.Localize( "Config Option: Distance Text Glow Color Far", "Distance text glow color (far)" ) + $"###DistanceTextEdgeColorPicker Far (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarRangeTextEdgeColor_BNpc, ImGuiColorEditFlags.NoInputs );
 					}
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Near Range", "Distance \"near\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( $"###DistanceNearRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.NearThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Far Range", "Distance \"far\" range ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( $"###DistanceFarRangeSlider (Nameplates - BNpc)", ref mConfiguration.NameplateDistancesConfig.FarThresholdDistance_BNpc_Yalms, 0.5f, -30f, 30f );
 					ImGui.Unindent();
 				}
@@ -184,14 +184,14 @@ internal sealed class PluginUI_Nameplates : IDisposable
 				if( mConfiguration.NameplateDistancesConfig.EnableFading_BNpc )
 				{
 					ImGui.Indent();
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Inside Fade Distance", "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above." ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeThresholdSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_BNpc_Yalms, 0.5f, 1f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeIntervalSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_BNpc_Yalms, 0.5f, 0f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeThresholdSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_BNpc_Yalms, 0.5f, 1f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeIntervalSlider_BNpc", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_BNpc_Yalms, 0.5f, 0f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox_BNpc", ref mConfiguration.NameplateDistancesConfig.InvertFading_BNpc );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Invert Fading", "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );
@@ -202,14 +202,14 @@ internal sealed class PluginUI_Nameplates : IDisposable
 				if( mConfiguration.NameplateDistancesConfig.EnableFading_Party )
 				{
 					ImGui.Indent();
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Inside Fade Distance", "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above." ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeThresholdSlider_Party", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Party_Yalms, 0.5f, 1f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeIntervalSlider_Party", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_Party_Yalms, 0.5f, 0f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeThresholdSlider_Party", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Party_Yalms, 0.5f, 1f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeIntervalSlider_Party", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_Party_Yalms, 0.5f, 0f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox_Party", ref mConfiguration.NameplateDistancesConfig.InvertFading_Party );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Invert Fading", "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );
@@ -220,14 +220,14 @@ internal sealed class PluginUI_Nameplates : IDisposable
 				if( mConfiguration.NameplateDistancesConfig.EnableFading_Other )
 				{
 					ImGui.Indent();
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Distance", "Distance inside of the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Inside Fade Distance", "If you use the distance from center instead of distance from target ring, the inner fade settings will only ever have an effect if you configured a positive distance offset above." ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeThresholdSlider_Other", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdInner_Other_Yalms, 0.5f, 1f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Inside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextInnerFadeIntervalSlider_Other", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalInner_Other_Yalms, 0.5f, 0f, 50f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Distance", "Distance away from the target to start fading ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeThresholdSlider_Other", ref mConfiguration.NameplateDistancesConfig.FadeoutThresholdOuter_Other_Yalms, 0.5f, 1f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
-					ImGui.Text( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over (y):" ) );
+					ImGui.Text( String.Format( Loc.Localize( "Config Option: Distance Text Outside Fade Interval", "Fade over ({0}):" ), LocalizationHelpers.DistanceUnitShort ) );
 					ImGui.DragFloat( "###DistanceTextOuterFadeIntervalSlider_Other", ref mConfiguration.NameplateDistancesConfig.FadeoutIntervalOuter_Other_Yalms, 0.5f, 0f, 100f, "%g", ImGuiSliderFlags.AlwaysClamp );
 					ImGui.Checkbox( Loc.Localize( "Config Option: Distance Text Invert Fading", "Inverted fading." ) + "###InvertedFadingCheckbox_Other", ref mConfiguration.NameplateDistancesConfig.InvertFading_Other );
 					ImGuiUtils.HelpMarker( Loc.Localize( "Help: Distance Text Invert Fading", "Instead of showing the distance text within the range defined above, show it only outside of the defined range instead.  The fadeout interval is added to the configured threshold distance when this option is used." ) );
