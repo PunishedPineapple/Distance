@@ -346,7 +346,7 @@ public sealed class Plugin : IDalamudPlugin
 		if( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].ObjectID == Service.ClientState.LocalPlayer?.EntityId ) return false;
 
 		return	config.Filters.ShowDistanceForObjectKind( mCurrentDistanceInfoArray[(int)config.ApplicableTargetType].TargetKind ) &&
-				config.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 ) &&
+				config.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.RowId ?? 0 ) &&
 				config.Filters.ShowDistanceForConditions( Service.Condition[ConditionFlag.InCombat], Service.Condition[ConditionFlag.BoundByDuty] );
 	}
 
