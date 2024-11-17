@@ -148,7 +148,7 @@ internal static unsafe class NameplateHandler
 		if( distanceInfo.ObjectID == Service.ClientState.LocalPlayer?.EntityId ) return false;
 
 		bool filtersPermitShowing = mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForObjectKind( distanceInfo.TargetKind ) &&
-									mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.Id ?? 0 );
+									mConfiguration.NameplateDistancesConfig.Filters.ShowDistanceForClassJob( Service.ClientState.LocalPlayer?.ClassJob.RowId ?? 0 );
 
 		if( mConfiguration.NameplateDistancesConfig.ShowAll )
 		{
