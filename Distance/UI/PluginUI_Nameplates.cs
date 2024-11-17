@@ -3,9 +3,6 @@ using System.Numerics;
 
 using CheapLoc;
 
-using Dalamud.Interface.Utility;
-using Dalamud.Utility;
-
 using ImGuiNET;
 
 namespace Distance;

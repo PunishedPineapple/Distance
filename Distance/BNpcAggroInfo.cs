@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
 
 using Lumina.Excel;
+using Lumina.Excel.Sheets;
 
 namespace Distance;
 
@@ -48,21 +49,21 @@ internal static class BNpcAggroInfo
 			Service.PluginLog.Information( $"Loaded BNpc aggro range data version {GetCurrentFileVersionAsString()} ({GetCurrentFileVersion()})" );
 
 			//	Verify entries against the english name in the sheet as a sanity check.  Remove those that no longer match, or have invalid TerritoryType.
-			ExcelSheet<Lumina.Excel.Sheets.TerritoryType> territorySheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.TerritoryType>();
-			ExcelSheet<Lumina.Excel.Sheets.BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<Lumina.Excel.Sheets.BNpcName>( Dalamud.Game.ClientLanguage.English );
+			ExcelSheet<TerritoryType> territorySheet = dataManager.GetExcelSheet<TerritoryType>();
+			ExcelSheet<BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<BNpcName>( Dalamud.Game.ClientLanguage.English );
 			for( int i = mKnownAggroEntities.Count - 1; i >= 0; i-- )
 			{
-				if( mKnownAggroEntities[i].TerritoryType < 1)
+				if( mKnownAggroEntities[i].TerritoryType < 1 )
 				{
 					Service.PluginLog.Debug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 					mKnownAggroEntities.RemoveAt( i );
 				}
-				else if( mKnownAggroEntities[i].BNpcID < 1)
+				else if( mKnownAggroEntities[i].BNpcID < 1 )
 				{
 					Service.PluginLog.Debug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 					mKnownAggroEntities.RemoveAt( i );
 				}
-                else if (!string.Equals(mKnownAggroEntities[i].EnglishName, BNpcNameSheet.GetRow(mKnownAggroEntities[i].BNpcID).Singular.ToString(), StringComparison.InvariantCultureIgnoreCase))
+				else if( !string.Equals( mKnownAggroEntities[i].EnglishName, BNpcNameSheet.GetRow( mKnownAggroEntities[i].BNpcID ).Singular.ToString(), StringComparison.InvariantCultureIgnoreCase ) )
 				{
 					//	Ignore BNpc name mismatch if it's an RSV value.  There's probably not a reliable way to handle RSV'd names without shipping
 					//	manual mappings, and doing that has some issues unless they were included with Dalamud itself.  It's already extremly unlikely

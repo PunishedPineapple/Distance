@@ -7,7 +7,6 @@ using CheapLoc;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface;
-using Dalamud.Utility;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
