@@ -53,12 +53,12 @@ internal static class BNpcAggroInfo
 			ExcelSheet<BNpcName> BNpcNameSheet = dataManager.GetExcelSheet<BNpcName>( Dalamud.Game.ClientLanguage.English );
 			for( int i = mKnownAggroEntities.Count - 1; i >= 0; i-- )
 			{
-				if( mKnownAggroEntities[i].TerritoryType < 1 )
+				if( mKnownAggroEntities[i].TerritoryType < 1 || !territorySheet.HasRow( mKnownAggroEntities[i].TerritoryType ) )
 				{
 					Service.PluginLog.Debug( $"Aggro data entry removed because no such TerritoryType ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 					mKnownAggroEntities.RemoveAt( i );
 				}
-				else if( mKnownAggroEntities[i].BNpcID < 1 )
+				else if( mKnownAggroEntities[i].BNpcID < 1 || !BNpcNameSheet.HasRow( mKnownAggroEntities[i].BNpcID ) )
 				{
 					Service.PluginLog.Debug( $"Aggro data entry removed because no such BNpcName ID exists: {mKnownAggroEntities[i].TerritoryType}, {mKnownAggroEntities[i].BNpcID}, {mKnownAggroEntities[i].EnglishName}" );
 					mKnownAggroEntities.RemoveAt( i );
