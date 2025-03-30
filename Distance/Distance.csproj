@@ -1,23 +1,24 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Dalamud.NET.Sdk/12.0.2">
 	<PropertyGroup>
-		<TargetFramework>net8.0-windows</TargetFramework>
-		<Platforms>AnyCPU</Platforms>
-		<Version>1.1.3.1</Version>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<Platforms>x64</Platforms>
+		<Version>1.1.3.2</Version>
 		<Authors>PunishedPineapple</Authors>
 		<Product />
-		<Copyright>Copyright © PunishedPineapple 2022-2024</Copyright>
+		<Copyright>Copyright © PunishedPineapple 2022-2025</Copyright>
 		<PackageProjectUrl>https://github.com/PunishedPineapple/Distance</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/PunishedPineapple/Distance</RepositoryUrl>
+		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>full</DebugType>
 		<NoWarn>1701;1702;CA1416</NoWarn>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DebugSymbols>true</DebugSymbols>
 		<DebugType>full</DebugType>
@@ -25,42 +26,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DalamudPackager" Version="11.0.0" />
-	</ItemGroup>
-
-	<PropertyGroup>
-		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<Reference Include="Dalamud">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-		</Reference>
-		<Reference Include="ImGui.NET">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-		</Reference>
 		<Reference Include="ImGuiScene">
 			<Private>false</Private>
 			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-		</Reference>
-		<Reference Include="Lumina">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-		</Reference>
-		<Reference Include="Lumina.Excel">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-		</Reference>
-		<Reference Include="FFXIVClientStructs">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
 		</Reference>
 		<Reference Include="CheapLoc">
 			<Private>false</Private>

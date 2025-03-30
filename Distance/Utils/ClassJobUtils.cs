@@ -16,7 +16,7 @@ internal class ClassJobUtils
 			if( mClassJobDict == null )
 			{
 				mClassJobDict = new();
-				ExcelSheet<ClassJob> classJobSheet_En = Service.DataManager.GetExcelSheet<ClassJob>(Dalamud.Game.ClientLanguage.English);
+				ExcelSheet<ClassJob> classJobSheet_En = Service.DataManager.GetExcelSheet<ClassJob>( Dalamud.Game.ClientLanguage.English );
 				ExcelSheet<ClassJob> classJobSheet_Local = Service.DataManager.GetExcelSheet<ClassJob>();
 				foreach( var row in classJobSheet_En )
 				{
@@ -36,7 +36,7 @@ internal class ClassJobUtils
 					mClassJobDict.TryAdd( (int)row.RowId,
 						new ClassJobData
 						{
-							Abbreviation = classJobSheet_Local.GetRow( row.RowId ).Abbreviation.ToString() ?? "",
+							Abbreviation = classJobSheet_Local.TryGetRow( row.RowId, out var rowLocal ) ? rowLocal.Abbreviation.ToString() : abbreviation_En,
 							Abbreviation_En = abbreviation_En,
 							DefaultSelected = row.DohDolJobIndex < 0,
 							SortCategory = sortCategory,
