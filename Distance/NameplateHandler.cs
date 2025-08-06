@@ -190,7 +190,7 @@ internal static unsafe class NameplateHandler
 
 	private static void NameplateDrawDetour( AddonEvent type, AddonArgs args )
 	{
-		var pNameplateAddon = (AddonNamePlate*)args.Addon;
+		var pNameplateAddon = (AddonNamePlate*)args.Addon.Address;
 
 		try
 		{
@@ -558,7 +558,7 @@ internal static unsafe class NameplateHandler
 	{
 		//	If the addon has moved since disabling the hook, it's impossible to know whether our
 		//	node pointers are valid anymore, so we have to just let them leak in that case.
-		var pCurrentNameplateAddon = (AddonNamePlate*)Service.GameGui.GetAddonByName( "NamePlate", 1 );
+		var pCurrentNameplateAddon = (AddonNamePlate*)Service.GameGui.GetAddonByName( "NamePlate", 1 ).Address;
 		if( mpNameplateAddon == null || mpNameplateAddon != pCurrentNameplateAddon )
 		{
 			Service.PluginLog.Warning( $"Unable to cleanup nameplate nodes due to addon address mismatch during unload (Cached: 0x{(IntPtr)mpNameplateAddon:X}, Current: 0x{(IntPtr)pCurrentNameplateAddon})." );
@@ -631,8 +631,7 @@ internal static unsafe class NameplateHandler
 
 				if( DEBUG_mSetTextFlags )
 				{
-					pNode->TextFlags = (byte)DEBUG_mNameplateTextFlags;
-					pNode->TextFlags2 = (byte)DEBUG_mNameplateTextFlags2;
+					pNode->TextFlags = (TextFlags)DEBUG_mNameplateTextFlags;
 				}
 
 				pNode->SetText( str );

@@ -10,7 +10,7 @@ using Dalamud.Interface;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Distance;
 

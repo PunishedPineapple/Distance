@@ -12,7 +12,7 @@ using Dalamud.Plugin;
 
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Distance;
 
@@ -442,9 +442,9 @@ public sealed class PluginUI : IDisposable
 		{
 			AtkUnitBase* pTargetAddonToUse = null;
 			UInt16 targetBarNameNodeIndex = 0;
-			var pTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo", 1 );
-			var pTargetAddonSplit = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
-			var pFocusTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo", 1 );
+			var pTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
+			var pTargetAddonSplit = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
+			var pFocusTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
 			if( config.ApplicableTargetType == TargetType.FocusTarget && pFocusTargetAddon != null && pFocusTargetAddon->IsVisible )
 			{
 				pTargetAddonToUse = pFocusTargetAddon;
@@ -589,10 +589,10 @@ public sealed class PluginUI : IDisposable
 		AtkTextNode* pNode = null;
 		AtkUnitBase* pAddon = null;
 
-		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo", 1 );
-		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
-		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo", 1 );
-		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_ScreenText", 1 );
+		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
+		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
+		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
+		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ScreenText", 1).Address;
 		if( addonToUse == GameAddonEnum.TargetBar )
 		{
 			pAddon = pSplitTargetBarAddon == null || !pSplitTargetBarAddon->IsVisible ? pNormalTargetBarAddon : pSplitTargetBarAddon;
@@ -658,10 +658,10 @@ public sealed class PluginUI : IDisposable
 	internal static unsafe void HideTextNode( uint nodeID )
 	{
 		//	Get the possible addons we could be using.
-		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo", 1 );
-		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
-		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo", 1 );
-		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_ScreenText", 1 );
+		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
+		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
+		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
+		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ScreenText", 1).Address;
 
 		//	Hide the node(s) with the specified ID in any of those addons.
 		if( pScreenTextAddon != null ) AtkNodeHelpers.HideNode( pScreenTextAddon, nodeID );
@@ -675,11 +675,11 @@ public sealed class PluginUI : IDisposable
 		switch( addon )
 		{
 			case GameAddonEnum.TargetBar:
-				var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo", 1 );
-				var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget", 1 );
+				var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
+				var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
 				return ( pNormalTargetBarAddon != null && pNormalTargetBarAddon->IsVisible ) || ( pSplitTargetBarAddon != null && pSplitTargetBarAddon->IsVisible );
 			case GameAddonEnum.FocusTargetBar:
-				var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo", 1 );
+				var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
 				return pFocusTargetBarAddon != null && pFocusTargetBarAddon->IsVisible;
 			default:
 				return false;

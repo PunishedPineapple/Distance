@@ -1,4 +1,4 @@
-﻿<Project Sdk="Dalamud.NET.Sdk/12.0.2">
+﻿<Project Sdk="Dalamud.NET.Sdk/13.0.0">
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<Platforms>x64</Platforms>
@@ -26,10 +26,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Reference Include="ImGuiScene">
-			<Private>false</Private>
-			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-		</Reference>
 		<Reference Include="CheapLoc">
 			<Private>false</Private>
 			<HintPath>$(DalamudLibPath)CheapLoc.dll</HintPath>
