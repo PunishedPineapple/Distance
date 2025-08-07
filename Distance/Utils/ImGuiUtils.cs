@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Numerics;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Distance;
 

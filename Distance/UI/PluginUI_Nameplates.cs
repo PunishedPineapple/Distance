@@ -3,7 +3,7 @@ using System.Numerics;
 
 using CheapLoc;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Distance;
 

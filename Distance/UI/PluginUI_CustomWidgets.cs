@@ -6,7 +6,7 @@ using CheapLoc;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Distance;
 
