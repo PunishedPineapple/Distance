@@ -187,37 +187,37 @@ public sealed class PluginUI : IDisposable
 			ImGui.Checkbox( "Word Wrap", ref DEBUG_TextFlags_WordWrap );
 			ImGui.Checkbox( "Multi-line", ref DEBUG_TextFlags_MultiLine );
 
-			ImGui.Text( "Nameplate Text Flags 2:" );
-			ImGui.Checkbox( "Unknown 1", ref DEBUG_TextFlags2_Unknown1 );
-			ImGui.Checkbox( "Unknown 2", ref DEBUG_TextFlags2_Unknown2 );
-			ImGui.Checkbox( "Ellipsis", ref DEBUG_TextFlags2_Ellipsis );
-			ImGui.Checkbox( "Unknown 8", ref DEBUG_TextFlags2_Unknown8 );
-			ImGui.Checkbox( "Unknown 16 (New Nameplates)", ref DEBUG_TextFlags2_Unknown16 );
-			ImGui.Checkbox( "Unknown 32", ref DEBUG_TextFlags2_Unknown32 );
-			ImGui.Checkbox( "Unknown 64 (New Nameplates)", ref DEBUG_TextFlags2_Unknown64 );
-			ImGui.Checkbox( "Unknown 128", ref DEBUG_TextFlags2_Unknown128 );
+			ImGui.Text( "Nameplate Text Flags (Contd.):" );
+			ImGui.Checkbox( "Unknown 0x100", ref DEBUG_TextFlags_Unknown_0x100 );
+			ImGui.Checkbox( "Fixed Font Resolution", ref DEBUG_TextFlags_FixedFontResolution );
+			ImGui.Checkbox( "Ellipsis", ref DEBUG_TextFlags_Ellipsis );
+			ImGui.Checkbox( "Unknown 0x800", ref DEBUG_TextFlags_Unknown_0x800 );
+			ImGui.Checkbox( "Unknown 0x1000 (New Nameplates)", ref DEBUG_TextFlags_Unknown_0x1000 );
+			ImGui.Checkbox( "Unknown 0x2000", ref DEBUG_TextFlags_Unknown_0x2000 );
+			ImGui.Checkbox( "Unknown 0x4000 (New Nameplates)", ref DEBUG_TextFlags_Unknown_0x4000 );
+			ImGui.Checkbox( "Unknown 0x8000", ref DEBUG_TextFlags_Unknown_0x8000 );
 
 			if( ImGui.Button( "Set Nameplate Text Flags" ) ) NameplateHandler.DEBUG_mSetTextFlags = true;
 
+			//***** TODO: Double check this before reinvestigating the fixed resolution font issue since ClientStructs changed TextFlags slightly.
 			NameplateHandler.DEBUG_mNameplateTextFlags = 0;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_AutoAdjustNodeSize ? 1 : 0 ) << 0;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_Bold ? 1 : 0 ) << 1;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_Italic ? 1 : 0 ) << 2;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_Edge ? 1 : 0 ) << 3;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_Glare ? 1 : 0 ) << 4;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_Emboss ? 1 : 0 ) << 5;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_WordWrap ? 1 : 0 ) << 6;
-			NameplateHandler.DEBUG_mNameplateTextFlags += ( DEBUG_TextFlags_MultiLine ? 1 : 0 ) << 7;
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_AutoAdjustNodeSize ? 1 : 0 ) << 0 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Bold ? 1 : 0 ) << 1 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Italic ? 1 : 0 ) << 2 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Edge ? 1 : 0 ) << 3 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Glare ? 1 : 0 ) << 4 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Emboss ? 1 : 0 ) << 5 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_WordWrap ? 1 : 0 ) << 6 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_MultiLine ? 1 : 0 ) << 7 );
 
-			NameplateHandler.DEBUG_mNameplateTextFlags2 = 0;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown1 ? 1 : 0 ) << 0;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown2 ? 1 : 0 ) << 1;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Ellipsis ? 1 : 0 ) << 2;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown8 ? 1 : 0 ) << 3;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown16 ? 1 : 0 ) << 4;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown32 ? 1 : 0 ) << 5;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown64 ? 1 : 0 ) << 6;
-			NameplateHandler.DEBUG_mNameplateTextFlags2 += ( DEBUG_TextFlags2_Unknown128 ? 1 : 0 ) << 7;
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x100 ? 1 : 0 ) << 8 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_FixedFontResolution ? 1 : 0 ) << 9 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Ellipsis ? 1 : 0 ) << 10 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x800 ? 1 : 0 ) << 11 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x1000 ? 1 : 0 ) << 12 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x2000 ? 1 : 0 ) << 13 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x4000 ? 1 : 0 ) << 14 );
+			NameplateHandler.DEBUG_mNameplateTextFlags |= (TextFlags)( ( DEBUG_TextFlags_Unknown_0x8000 ? 1 : 0 ) << 15 );
 
 			ImGui.Spacing();
 			ImGui.Spacing();
@@ -442,9 +442,9 @@ public sealed class PluginUI : IDisposable
 		{
 			AtkUnitBase* pTargetAddonToUse = null;
 			UInt16 targetBarNameNodeIndex = 0;
-			var pTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
-			var pTargetAddonSplit = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
-			var pFocusTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
+			var pTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo" ).Address;
+			var pTargetAddonSplit = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget" ).Address;
+			var pFocusTargetAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo" ).Address;
 			if( config.ApplicableTargetType == TargetType.FocusTarget && pFocusTargetAddon != null && pFocusTargetAddon->IsVisible )
 			{
 				pTargetAddonToUse = pFocusTargetAddon;
@@ -589,10 +589,10 @@ public sealed class PluginUI : IDisposable
 		AtkTextNode* pNode = null;
 		AtkUnitBase* pAddon = null;
 
-		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
-		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
-		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
-		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ScreenText", 1).Address;
+		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo" ).Address;
+		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget" ).Address;
+		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo" ).Address;
+		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_ScreenText" ).Address;
 		if( addonToUse == GameAddonEnum.TargetBar )
 		{
 			pAddon = pSplitTargetBarAddon == null || !pSplitTargetBarAddon->IsVisible ? pNormalTargetBarAddon : pSplitTargetBarAddon;
@@ -658,10 +658,10 @@ public sealed class PluginUI : IDisposable
 	internal static unsafe void HideTextNode( uint nodeID )
 	{
 		//	Get the possible addons we could be using.
-		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
-		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
-		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
-		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_ScreenText", 1).Address;
+		var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo" ).Address;
+		var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget" ).Address;
+		var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo" ).Address;
+		var pScreenTextAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_ScreenText" ).Address;
 
 		//	Hide the node(s) with the specified ID in any of those addons.
 		if( pScreenTextAddon != null ) AtkNodeHelpers.HideNode( pScreenTextAddon, nodeID );
@@ -675,11 +675,11 @@ public sealed class PluginUI : IDisposable
 		switch( addon )
 		{
 			case GameAddonEnum.TargetBar:
-				var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfo", 1).Address;
-				var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_TargetInfoMainTarget", 1).Address;
+				var pNormalTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfo" ).Address;
+				var pSplitTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_TargetInfoMainTarget" ).Address;
 				return ( pNormalTargetBarAddon != null && pNormalTargetBarAddon->IsVisible ) || ( pSplitTargetBarAddon != null && pSplitTargetBarAddon->IsVisible );
 			case GameAddonEnum.FocusTargetBar:
-				var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName("_FocusTargetInfo", 1).Address;
+				var pFocusTargetBarAddon = (AtkUnitBase*)Service.GameGui.GetAddonByName( "_FocusTargetInfo" ).Address;
 				return pFocusTargetBarAddon != null && pFocusTargetBarAddon->IsVisible;
 			default:
 				return false;
@@ -742,14 +742,14 @@ public sealed class PluginUI : IDisposable
 	private bool DEBUG_TextFlags_WordWrap = false;
 	private bool DEBUG_TextFlags_MultiLine = false;
 
-	private bool DEBUG_TextFlags2_Unknown1 = false;
-	private bool DEBUG_TextFlags2_Unknown2 = false;
-	private bool DEBUG_TextFlags2_Ellipsis = false;
-	private bool DEBUG_TextFlags2_Unknown8 = false;
-	private bool DEBUG_TextFlags2_Unknown16 = false;
-	private bool DEBUG_TextFlags2_Unknown32 = false;
-	private bool DEBUG_TextFlags2_Unknown64 = false;
-	private bool DEBUG_TextFlags2_Unknown128 = false;
+	private bool DEBUG_TextFlags_Unknown_0x100 = false;
+	private bool DEBUG_TextFlags_FixedFontResolution = false;
+	private bool DEBUG_TextFlags_Ellipsis = false;
+	private bool DEBUG_TextFlags_Unknown_0x800 = false;
+	private bool DEBUG_TextFlags_Unknown_0x1000 = false;
+	private bool DEBUG_TextFlags_Unknown_0x2000 = false;
+	private bool DEBUG_TextFlags_Unknown_0x4000 = false;
+	private bool DEBUG_TextFlags_Unknown_0x8000 = false;
 
 	//	Do this to control the order of dropdown items.
 	internal static readonly TargetType[] TargetDropdownMenuItems =

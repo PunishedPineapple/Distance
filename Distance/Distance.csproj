@@ -1,30 +1,27 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+
+	<!-- Compiler Settings -->
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
 		<Platforms>x64</Platforms>
-		<Version>1.1.3.2</Version>
+		<Nullable>disable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<NoWarn>1701;1702</NoWarn>
+	</PropertyGroup>
+
+	<!-- Project Information -->
+	<PropertyGroup>
+		<Version>1.1.3.3</Version>
 		<Authors>PunishedPineapple</Authors>
 		<Product />
 		<Copyright>Copyright © PunishedPineapple 2022-2025</Copyright>
 		<PackageProjectUrl>https://github.com/PunishedPineapple/Distance</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/PunishedPineapple/Distance</RepositoryUrl>
-		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DebugSymbols>true</DebugSymbols>
-		<DebugType>full</DebugType>
-		<NoWarn>1701;1702;CA1416</NoWarn>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DebugSymbols>true</DebugSymbols>
-		<DebugType>full</DebugType>
-		<NoWarn>1701;1702;CA1416</NoWarn>
-	</PropertyGroup>
-
+	<!-- Dependencies -->
 	<ItemGroup>
 		<Reference Include="CheapLoc">
 			<Private>false</Private>
@@ -32,7 +29,20 @@
 		</Reference>
 	</ItemGroup>
 
+	<!-- Bundled Resource Files -->
 	<ItemGroup>
 		<Content Include="Resources\**" DestinationFolder="Resources\$(RecursiveDir)" CopyToOutputDirectory="Always" />
 	</ItemGroup>
+
+	<!-- Dalamud Plugin Packaging -->
+	<ItemGroup>
+		<Content Include="$(ProjectName).json" />
+		<None Include="DalamudPackager.targets" />
+	</ItemGroup>
+
+	<!-- Other files -->
+	<ItemGroup>
+		<Content Include="Docs\**" />
+	</ItemGroup>
+
 </Project>

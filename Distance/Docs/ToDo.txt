@@ -4,6 +4,7 @@
 		-Maybe make the trigger be boss hp <100%, or ideally just boss unaggro'd and not dead if we can find that.
 		-This is more complicated than it looks for wipes, and probably requires director info to get it really right.
 		-As-is, this can probably only happen with ReAction automatically restoring your focus target, so it's a pretty low priority bug.
+		-Check the addon draw flags.  There is probably one for this curtain; there is for stuff like the start menu hiding certain addons.
 	-Make sure that nameplate nodes use thin text when nameplates use thin text.
 	-Try to fix nameplate node initial positions so that they do not jump on first use.
 
@@ -24,21 +25,21 @@ Priority:
 	-Try to find out how to project the arc coordinates onto the ground, even without in-world drawing.  This will make them a bit less awkward when there is any height variation or jumping.
 	-Add text commands for arcs.
 	-Improve aggressive/unaggressive detection.
-	-Rate limit download attempts.
-		-Github does this for us, no?
 	-Figure out why aoe tooltip distances are inaccurate on some enemies (i.e., certain striking dummies).
 		-See RE notes for investigation so far.
 	-Fix how we decide to set whether to use depth.  Surely there's a way to just get it from the nameplate's text node.
 	-Show distances on party list?
-		-If we do this, maybe just color code name instead of having a readout (at least as an option.
+		-If we do this, maybe just color code name instead of having a readout (at least as an option).
 			-For color coding, allow using different distance thresholds when party member is untargeted vs. mouseover/soft/regular targeted.
 	-Add distances to enemy list?
 	-Improve the data file format and updater:
 		-Make the datafile a CSV or similar so that additional columns can be added easily (i.e., aggro type, sight cone information, etc.)
 			-Does .net CSV parser work on Linux/Mac?
+				-No longer an issue; just use custom CSV parser from other project.
 			-JSON, etc. out because duplicating the schema for every row is stupid.
 		-Make it two files: a data file, and a version file that contains only the version number and a hash of the data file for verification.
 			-Allows for only a very small file that's downloaded every time to check version, even if data size balloons.
+			-Beware any newline shenanigans.
 	-Investigate whether the 0.5x font scaling in nameplates is due to the high-res UI option, and account for that if necessary.
 
 
@@ -47,7 +48,7 @@ Cleanup:
 	-Make nameplate sig(s) optional.
 		-Implemented; just needs testing.
 	-Skip some node draw setup (like color, position, whatever calculations) if just hiding the node.  Probably doesn't matter that much, but this plugin's gotten a bit heavy.
-	-Change BNpcID to BNpcNameID to be more accurate.
+	-Finish changing BNpcID to BNpcNameID to be more accurate.
 	-When we have better aggressive flags, make enemy list a separate option?
 
 
@@ -64,10 +65,8 @@ Maybe:
 	-Use job icons instead of abbreviations in the classjob filters config?
 	-Revisit making distance-based colors optionally gradients.
 	-Add icon/text nodes to nameplates to show aggro type(s) and ranges (when available).
-	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with heavy text mode.
+	-Add icon nodes for the range type and boss aggro prefix?  Text versions look a bit ugly/busy, and partially don't work with some fonts.
 		-Could also have other neat icons like the auto attack one (ui/uld/TargetCursor_hr1.tex) that people could attach.
-	-Have an alternate drawing method that uses ImGui instead of game UI elements in case people want to hide stuff from capture.
-		-Supporting stuff like font options is going to suck; maybe just add it with absolutely minimal support.
 	-Provide IPC for others to get aggro data?
 		-Also maybe to get the aggro point on line from an enemy.
 	-Option to lock aggro widget to the screen-space projection of the aggro point?
@@ -78,6 +77,9 @@ Maybe:
 	-Add friends/fc member conditions for nameplates?
 	-Add option to recolor target/focus target/soft target cursors based on distance.
 	-Could maybe experiment with using depth-enabled UI nodes to draw arc beneath character?
+	-Have nodes attached to cursor use nameplate font colors instead of the target bar color (with backup estimating from object type and flags when too far or too many objects on screen to be assigned a nameplate.)
+		-Actually, we now have enough information from object flags to just determine it ourselves, so maybe skip looking at the nameplates.  The only thing that might be awkward is claim color for the one tag type.
+	-Consider auto-resizing fixed nodes for things like the target bars so that alignment makes more sense to users.
 
 
 Rejected:

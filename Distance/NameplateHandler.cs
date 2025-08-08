@@ -631,7 +631,7 @@ internal static unsafe class NameplateHandler
 
 				if( DEBUG_mSetTextFlags )
 				{
-					pNode->TextFlags = (TextFlags)DEBUG_mNameplateTextFlags;
+					pNode->TextFlags = DEBUG_mNameplateTextFlags;
 				}
 
 				pNode->SetText( str );
@@ -646,8 +646,7 @@ internal static unsafe class NameplateHandler
 	internal static ReadOnlySpan<DistanceInfo> DEBUG_NameplateDistanceInfo => new( mNameplateDistanceInfoArray );
 	internal static ReadOnlySpan<bool> DEBUG_ShouldDrawDistanceInfo => new( mShouldDrawDistanceInfoArray );
 	internal static bool DEBUG_mSetTextFlags = false;
-	internal static int DEBUG_mNameplateTextFlags = (int)( TextFlags.Edge | TextFlags.Glare );
-	internal static int DEBUG_mNameplateTextFlags2 = 0;
+	internal static TextFlags DEBUG_mNameplateTextFlags = TextFlags.Edge | TextFlags.Glare;
 
 	//	Delgates and Hooks
 	private delegate void NameplateDrawFuncDelegate( AddonEvent type, AddonArgs args );
