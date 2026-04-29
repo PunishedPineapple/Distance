@@ -77,15 +77,15 @@ public sealed class Plugin : IDalamudPlugin
 		//	Event Subscription
 		mPluginInterface.LanguageChanged += OnLanguageChanged;
 		Service.Framework.Update += OnGameFrameworkUpdate;
-		Service.ClientState.TerritoryChanged += (id) => OnTerritoryChanged((ushort)id);
-	}
+		Service.ClientState.TerritoryChanged += OnTerritoryChanged;
+    }
 
 	//	Cleanup
 	public void Dispose()
 	{
 		Service.Framework.Update -= OnGameFrameworkUpdate;
-		Service.ClientState.TerritoryChanged -= (id) => OnTerritoryChanged((ushort)id);
-		mPluginInterface.UiBuilder.Draw -= DrawUI;
+		Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
+        mPluginInterface.UiBuilder.Draw -= DrawUI;
 		mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 		mPluginInterface.LanguageChanged -= OnLanguageChanged;
 		Service.CommandManager.RemoveHandler( mTextCommandName );
@@ -314,7 +314,7 @@ public sealed class Plugin : IDalamudPlugin
 		else NameplateHandler.DisableNameplateDistances();
 	}
 
-	private void OnTerritoryChanged( UInt16 ID )
+	private void OnTerritoryChanged( uint ID )
 	{
 		//	Pre-filter when we enter a zone so that we have a lower chance of stutters once we're actually in.
 		BNpcAggroInfo.FilterAggroEntities( ID );
