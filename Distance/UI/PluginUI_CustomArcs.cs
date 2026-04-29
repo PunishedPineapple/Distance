@@ -373,7 +373,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 		var relevantBNpcs = Service.ObjectTable.Where( x =>
 										x != null &&
 										x.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
-										x.SubKind == (byte)BattleNpcSubKind.Enemy &&
+										x.SubKind == (byte)BattleNpcSubKind.Combatant &&
 										x.IsTargetable &&
 										( !x.IsDead || config.ShowDeadObjects ) &&
 										x.Position.DistanceTo_XZ( Service.ObjectTable.LocalPlayer.Position ) < 50f &&
@@ -406,7 +406,7 @@ internal sealed class PluginUI_CustomArcs : IDisposable
 	{
 		var relevantBNpcs = Service.ObjectTable.Where( x =>
 										x != null &&
-										x.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player && (
+										x.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc && (
 											x.IsPartyMember() && config.AllPlayersShowParty ||
 											x.IsAllianceMember() && config.AllPlayersShowAlliance ||
 											!x.IsPartyMember() && !x.IsAllianceMember() && config.AllPlayersShowOthers ) &&

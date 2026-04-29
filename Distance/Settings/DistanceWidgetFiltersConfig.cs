@@ -17,7 +17,7 @@ public class DistanceWidgetFiltersConfig
 	{
 		return objectKind switch
 		{
-			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player => ShowDistanceOnPlayers,
+			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc => ShowDistanceOnPlayers,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc => ShowDistanceOnBattleNpc,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc => ShowDistanceOnEventNpc,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure => ShowDistanceOnTreasure,
@@ -25,7 +25,7 @@ public class DistanceWidgetFiltersConfig
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.GatheringPoint => ShowDistanceOnGatheringNode,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj => ShowDistanceOnEventObj,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Companion => ShowDistanceOnCompanion,
-			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Housing => ShowDistanceOnHousing,
+			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.HousingEventObject => ShowDistanceOnHousing,
 			_ => false,
 		};
 	}

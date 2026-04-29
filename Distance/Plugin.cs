@@ -77,14 +77,14 @@ public sealed class Plugin : IDalamudPlugin
 		//	Event Subscription
 		mPluginInterface.LanguageChanged += OnLanguageChanged;
 		Service.Framework.Update += OnGameFrameworkUpdate;
-		Service.ClientState.TerritoryChanged += OnTerritoryChanged;
+		Service.ClientState.TerritoryChanged += (id) => OnTerritoryChanged((ushort)id);
 	}
 
 	//	Cleanup
 	public void Dispose()
 	{
 		Service.Framework.Update -= OnGameFrameworkUpdate;
-		Service.ClientState.TerritoryChanged -= OnTerritoryChanged;
+		Service.ClientState.TerritoryChanged -= (id) => OnTerritoryChanged((ushort)id);
 		mPluginInterface.UiBuilder.Draw -= DrawUI;
 		mPluginInterface.UiBuilder.OpenConfigUi -= DrawConfigUI;
 		mPluginInterface.LanguageChanged -= OnLanguageChanged;

@@ -178,10 +178,10 @@ internal static unsafe class NameplateHandler
 				distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
 				GameObjectUtils.ObjectIsAggressive( distanceInfo.ObjectID ) ) return true;
 			if( mConfiguration.NameplateDistancesConfig.ShowPartyMembers &&
-				distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+				distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc &&
 				PartyUtils.ObjectIsPartyMember( distanceInfo.ObjectID ) ) return true;
 			if( mConfiguration.NameplateDistancesConfig.ShowAllianceMembers &&
-				distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+				distanceInfo.TargetKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc &&
 				PartyUtils.ObjectIsAllianceMember( distanceInfo.ObjectID ) ) return true;	//	Make sure this comes after party check, because alliance check is exclusive of party members.
 
 			return false;
@@ -296,7 +296,7 @@ internal static unsafe class NameplateHandler
 	{
 		return objectKind switch
 		{
-			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player => mConfiguration.NameplateDistancesConfig.DistanceOffset_Player_Yalms,
+			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc => mConfiguration.NameplateDistancesConfig.DistanceOffset_Player_Yalms,
 			Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc => mConfiguration.NameplateDistancesConfig.DistanceOffset_BNpc_Yalms,
 			_ => mConfiguration.NameplateDistancesConfig.DistanceOffset_Other_Yalms,
 		};
@@ -309,7 +309,7 @@ internal static unsafe class NameplateHandler
 		Vector4 edgeColorToUse = new();
 
 		if( mConfiguration.NameplateDistancesConfig.UseDistanceBasedColor_Party &&
-			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc &&
 			PartyUtils.ObjectIsPartyMember( objectID ) )
 		{
 			if( distance_Yalms > mConfiguration.NameplateDistancesConfig.FarThresholdDistance_Party_Yalms )
@@ -372,7 +372,7 @@ internal static unsafe class NameplateHandler
 		float fadeAlphaGain = 1f;
 
 		if( mConfiguration.NameplateDistancesConfig.EnableFading_Party &&
-			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+			objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc &&
 			PartyUtils.ObjectIsPartyMember( objectID ) )
 		{
 			if( distance_Yalms < 0 )
@@ -408,7 +408,7 @@ internal static unsafe class NameplateHandler
 		}
 		else if( mConfiguration.NameplateDistancesConfig.EnableFading_Other &&
 				objectKind != Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc &&
-				!( objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player &&
+				!( objectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc &&
 				PartyUtils.ObjectIsPartyMember( objectID ) ) )
 		{
 			if( distance_Yalms < 0 )
